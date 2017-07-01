@@ -5,7 +5,7 @@
 Quick Setup
 ===========
 
-Suppose a EMQ X Cluster with two Linux nodes deployed on a cloud VPC network or a private network:
+Suppose an EMQ X Cluster with two Linux nodes deployed on a cloud VPC network or a private network:
 
 +---------------------+---------------------+
 | Node name           |    IP               |
@@ -24,7 +24,7 @@ Deployed under Linux, EMQ X allows 100k concurrent connections by default. To ac
 System-Wide File Handles
 ------------------------
 
-Maximun file handles:
+Maximum file handles:
 
 .. code-block:: console
 
@@ -66,7 +66,7 @@ Note: Under Ubuntu, '/etc/systemd/system.conf' is to be modified:
 EMQ X Node Name
 ---------------
 
-Set the node name and cookies(communicating between nodes)
+Set the node name and cookies (communicating between nodes)
 
 '/etc/emqx/emqx.conf' on emqx1::
 
@@ -94,7 +94,7 @@ if EMQ X is installed using zip package::
 Clustering the EMQ X Nodes
 --------------------------
 
-Start the two nodes, on the emqx1@192.168.0.10 run:: 
+Start the two nodes, then on the emqx1@192.168.0.10 run:: 
 
     $ ./bin/emqx_ctl cluster join emqx2@192.168.0.20
 
