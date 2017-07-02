@@ -57,7 +57,7 @@ Response:
         ]
     }
 
-Retrive a Node's Info
+Retrieve a Node's Info
 ----------------------
 
 Definition::
@@ -117,7 +117,7 @@ Response:
         ]
     }
 
-Retrive a node's statistics
+Retrieve a node's statistics
 ---------------------------
 
 Definition::
@@ -155,12 +155,12 @@ Response:
 Clients
 -------
 
-List Clients on a Node
-----------------------
+List all Clients on a Node
+--------------------------
 
 Definition::
 
-    GET api/v2/nodes/{node_name}/clients?curr_page=1&page_size=20
+    GET api/v2/nodes/{node_name}/clients?curr_page={page_no}&page_size={page_size}
 
 Example Request::
 
@@ -194,7 +194,7 @@ Response:
         }
     }
 
-Retrive a Client on a Node
+Retrieve a Client on a Node
 --------------------------
 
 Definition::
@@ -230,7 +230,7 @@ Response:
         }
     }
 
-Retrive a Client in the Cluster
+Retrieve a Client in the Cluster
 -------------------------------
 
 Definition::
@@ -271,8 +271,8 @@ Response:
 Sessions
 --------
 
-List Sessions on a Node
------------------------
+List all Sessions on a Node
+---------------------------
 
 Definition::
 
@@ -312,7 +312,7 @@ Response:
         }
     }
     
-Retrive a Session on a Node
+Retrieve a Session on a Node
 ---------------------------
 
 Definition::
@@ -349,7 +349,7 @@ Response:
         }
     }
 
-Retrive a Session in the Cluster
+Retrieve a Session in the Cluster
 --------------------------------
 
 Definition::
@@ -480,11 +480,7 @@ List all Routes in the Cluster
 
 Definition::
 
-    GET api/v2/nodes/{node_name}/routes
-
-Example Request::
-
-    GET api/v2/nodes/emqx@127.0.0.1/routes
+    GET api/v2/routes
 
 Response:
 
@@ -508,16 +504,16 @@ Response:
         }
     }
 
-Retrive a Route in the Cluster
+Retrieve a Route in the Cluster
 ------------------------------
 
 Definition::
 
-    GET api/v2/nodes/{node_name}/routes/topics/{topic}
+    GET api/v2/routes/{topic}
 
 Example Request::
 
-    GET api/v2/nodes/{node_name}/routes/topic/{topic}
+    GET api/v2/routes/topic
 
 Response:
 
@@ -530,7 +526,7 @@ Response:
             "objects":
             [
                 {
-                    "topic": "$client/C_1492145414740",
+                    "topic": "topic",
                     "node": "emqx@127.0.0.1"
                 }
             ]
@@ -548,7 +544,7 @@ Definition::
 
     POST /api/v2/auth
 
-Request Parameters:
+Request parameters:
     
 .. code-block:: json
 
@@ -573,7 +569,7 @@ Definition::
 
     POST /api/v2/users/
 
-Request Parameters:
+Request parameters:
 
 .. code-block:: json
     
@@ -594,8 +590,8 @@ Response:
         "result": []
     }
     
-Retrive a User
---------------
+Retrieve a User
+---------------
 
 Definition::
 

@@ -5,15 +5,14 @@
 MQTT Protocol
 =============
 
---------------------------------------------------------
-MQTT - Light Weight Publish/Subscribe Messaging Protocol
---------------------------------------------------------
+------------------------------------------------------
+MQTT - Light Weight Pub/Sub Messaging Protocol for IoT
+------------------------------------------------------
 
 Introduction
 ------------
 
-MQTT is a light weight client server publish/subscribe messaging transport protocol. It is ideal for use in many situations, including constrained environments such as for communication in Machine to Machine (M2M) and Internet of Things context where a small code footprint is required and/or network bandwidth is at a premium. 
------ OASIS MQTT Version 3.1.1
+MQTT is a light weight client server publish/subscribe messaging transport protocol. It is ideal for use in many situations, including constrained environments such as for communication in Machine to Machine (M2M) and Internet of Things context where a small code footprint is required and/or network bandwidth is at a premium.
 
 MQTT Web site: http://mqtt.org
 
@@ -24,16 +23,16 @@ Features
 
 1. Open messaging transport protocol, easy to implement.
 
-2. Use of publish/subscribe message pattern, which provides one to many message distribution
+2. Use of publish/subscribe message pattern, which supports many-to-many communication.
 
-3. Can base on TCP/IP network connection
+3. Based on TCP/IP network connection.
 
 4. 1 byte Fixed header, 2bytes KeepAlive packet. Compact packet structure.
 
 5. Support QoS, reliable transmission. 
 
-Application
------------
+Applications
+------------
 
 MQTT protocol is widely used in Internet of Things, Mobile Internet, smart hardware, automobile, energy and other industry. 
 
@@ -54,7 +53,7 @@ MQTT protocol is widely used in Internet of Things, Mobile Internet, smart hardw
 .. _mqtt_topic:
 
 ---------------------------------
-MQTT Topic Based Message Routing
+MQTT Topic-based Message Routing
 ---------------------------------
 
 MQTT protocol uses topic to route message. Topic is a hierarchical structured string, like::
