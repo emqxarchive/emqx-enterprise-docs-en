@@ -1,37 +1,172 @@
-.. _rest:
+
+.. _rest_api:
 
 ========
 REST API
 ========
 
+The REST API allows you to query MQTT clients, sessions, subscriptions, and routes. You can also query and monitor the metrics and statistics of the broker.
+
 --------
-Data API
+Base URL
 --------
 
-Client::
+All REST APIs in the documentation have the following base URL::
 
-    GET  api/v2/node/{node_name}/clients?curr_page=1&page_size=20
+    http(s)://host:8080/api/v2/
 
-Session::
+--------------------
+Basic Authentication
+--------------------
 
-    GET  api/v2/node/{node_name}/sessions?curr_page=1&page_size=20
-
-Route::
-   
-    GET  api/v2/node/{node_name}/routers?curr_page=1&page_size=20
-
-Subscription::
-
-    GET  api/v2/node/{node_name}/subscriptions?curr_page=1&page_size=20
-
-Clients on a Node
------------------
+The HTTP requests to the REST API are protected with HTTP Basic authentication, For example:
 
 .. code-block:: bash
 
+    curl -v --basic -u <user>:<passwd> -k http://localhost:8080/api/v2/nodes/emqx@127.0.0.1/clients
+
+
+-----
+Nodes
+-----
+
+List all Nodes in the Cluster
+-----------------------------
+
+Definition::
+
+    GET api/v2/management/nodes
+
+Response:
+
+.. code-block:: json
+
+    {
+        "code": 0,
+        "result":
+        [
+            {
+                "name": "emqx@127.0.0.1",
+                "version": "2.1.1",
+                "sysdescr": "EMQ X",
+                "uptime": "1 hours, 17 minutes, 1 seconds",
+                "datetime": "2017-04-14 14 (tel:2017041414):11:38",
+                "otp_release": "R19/8.3",
+                "node_status": "Running"
+            }
+        ]
+    }
+
+Retrieve a Node's Info
+----------------------
+
+Definition::
+
+    GET api/v2/management/nodes/{node_name}
+
+Example Request::
+
+    GET api/v2/management/nodes/emqx@127.0.0.1
+ 
+Response:
+
+.. code-block:: json
+
+    {
+        "code": 0,
+        "result":
+        {
+            "version": "2.1.1",
+            "sysdescr": "EMQ X",
+            "uptime": "1 hours, 17 minutes, 18 seconds",
+            "datetime": "2017-04-14 14 (tel:2017041414):11:55",
+            "otp_release": "R19/8.3",
+            "node_status": "Running"
+        }
+    }
+
+List all Nodes'statistics in the Cluster
+----------------------------------------
+
+Definition::
+
+    GET api/v2/monitoring/nodes
+
+Response:
+
+.. code-block:: json
+
+    {
+        "code": 0,
+        "result":
+        [
+            {
+                "name": "emqx@127.0.0.1",
+                "otp_release": "R19/8.3",
+                "memory_total": "69.19M",
+                "memory_used": "49.28M",
+                "process_available": 262144,
+                "process_used": 303,
+                "max_fds": 256,
+                "clients": 1,
+                "node_status": "Running",
+                "load1": "1.93",
+                "load5": "1.93",
+                "load15": "1.89"
+            }
+        ]
+    }
+
+Retrieve a node's statistics
+---------------------------
+
+Definition::
+
+    GET api/v2/monitoring/nodes/{node_name}
+
+Example Request::
+
+    GET api/v2/monitoring/nodes/emqx@127.0.0.1
+
+Response:
+
+.. code-block:: json
+
+    {
+        "code": 0,
+        "result":
+        {
+            "name": "emqx@127.0.0.1",
+            "otp_release": "R19/8.3",
+            "memory_total": "69.19M",
+            "memory_used": "49.24M",
+            "process_available": 262144,
+            "process_used": 303,
+            "max_fds": 256,
+            "clients": 1,
+            "node_status": "Running",
+            "load1": "2.21",
+            "load5": "2.00",
+            "load15": "1.92"
+        }
+    }
+
+-------
+Clients
+-------
+
+List all Clients on a Node
+--------------------------
+
+Definition::
+
+    GET api/v2/nodes/{node_name}/clients?curr_page={page_no}&page_size={page_size}
+
+Example Request::
+
     GET api/v2/nodes/emqx@127.0.0.1/clients
 
-Response
+Response:
 
 .. code-block:: json
 
@@ -59,17 +194,18 @@ Response
         }
     }
 
+Retrieve a Client on a Node
+--------------------------
 
+Definition::
 
+    GET api/v2/nodes/{node_name}/clients/{client_id}
 
-Client on a Node
-----------------
-
-.. code-block:: bash
+Example Request::
 
     GET api/v2/nodes/emqx@127.0.0.1/clients/C_1492145414740
 
-Response
+Response:
 
 .. code-block:: json
 
@@ -93,16 +229,21 @@ Response
             ]
         }
     }
-    
 
-Client in a Cluster
--------------------
+Retrieve a Client in the Cluster
+-------------------------------
+
+Definition::
+
+    GET api/v2/clients/{client_id}
+
+Example Request::
 
 .. code-block:: bash
 
     GET api/v2/clients/C_1492145414740
 
-Response
+Response:
 
 .. code-block:: json
 
@@ -125,17 +266,23 @@ Response
             ]
         }
     }
-    
-    
 
-Sessions on a Node
-------------------
+--------
+Sessions
+--------
 
-.. code-block:: bash
+List all Sessions on a Node
+---------------------------
+
+Definition::
+
+    GET  api/v2/node/{node_name}/sessions?curr_page=1&page_size=20
+
+Example Request::
 
     GET api/v2/nodes/emqx@127.0.0.1/sessions
 
-Response
+Response:
 
 .. code-block:: json
 
@@ -165,14 +312,18 @@ Response
         }
     }
     
-A Session on a Node
--------------------
+Retrieve a Session on a Node
+---------------------------
 
-.. code-block:: bash
+Definition::
+
+    GET api/v2/nodes/{node_name}/sessions/{client_id}
+
+Example Request::
 
     GET api/v2/nodes/emqx@127.0.0.1/sessions/C_1492145414740
 
-Response
+Response:
 
 .. code-block:: json
 
@@ -197,16 +348,19 @@ Response
             ]
         }
     }
-    
 
-A Session in a Cluster
-----------------------
+Retrieve a Session in the Cluster
+--------------------------------
 
-.. code-block:: bash
+Definition::
+
+    GET api/v2/sessions/{client_id}
+
+Example Request::
 
     GET api/v2/sessions/C_1492145414740
 
-Response
+Response:
 
 .. code-block:: json
 
@@ -232,106 +386,22 @@ Response
         }
     }
     
+-------------
+Subscriptions
+-------------
 
+List all Subscriptions of a Node
+--------------------------------
 
+Definition::
 
-Routes in a Cluster
---------------------
+    GET api/v2/nodes/{node_name}/subscriptions?curr_page={page_no}&page_size={page_size}
 
-.. code-block:: bash
-
-    GET api/v2/nodes/emqx@127.0.0.1/routers
-
-Response
-
-.. code-block:: json
-
-    {
-        "code": 0,
-        "result":
-        {
-            "current_page": 1,
-            "page_size": 20,
-            "total_num": 1,
-            "total_page": 1,
-            "objects":
-            [
-                {
-                    "topic": "$client/C_1492145414740",
-                    "node": "emqx@127.0.0.1"
-                }
-            ]
-        }
-    }
-    
-
-
-
-A Route in a Cluster
---------------------
-
-.. code-block:: bash
-
-    GET api/v2/nodes/emqx@127.0.0.1/routers/$client/C_1492145414740
-
-Response
-
-.. code-block:: json
-
-    {
-        "code": 0,
-        "result":
-        {
-            "objects":
-            [
-                {
-                    "topic": "$client/C_1492145414740",
-                    "node": "emqx@127.0.0.1"
-                }
-            ]
-        }
-    }
-    
-
-
-
-A Client of a Router
---------------------
-
-.. code-block:: bash
-
-    GET api/v2/routers/$client/C_1492145414740
-
-Response
-
-.. code-block:: json
-
-    {
-        "code": 0,
-        "result":
-        {
-            "objects":
-            [
-                {
-                    "topic": "$client/C_1492145414740",
-                    "node": "emqx@127.0.0.1"
-                }
-            ]
-        }
-    }
-    
-
-
-
-
-Subscriptions of Nodes
-----------------------
-
-.. code-block:: bash
+Example Request::
 
     GET api/v2/nodes/emqx@127.0.0.1/subscriptions
 
-Response
+Response:
 
 .. code-block:: json
 
@@ -354,45 +424,18 @@ Response
         }
     }
     
+List Subscriptions of a Client
+------------------------------
 
+Definition::
 
+    GET api/v2/subscriptions/{cliet_id}
 
-Subscriptions of a Node
------------------------
-
-.. code-block:: bash
-
-    GET api/v2/nodes/emqx@127.0.0.1/subscriptions/C_1492145414740
-
-Response
-
-.. code-block:: json
-
-    {
-        "code": 0,
-        "result":
-        {
-            "objects":
-            [
-                {
-                    "client_id": "C_1492145414740",
-                    "topic": "$client/C_1492145414740",
-                    "qos": 1
-                }
-            ]
-        }
-    }
-    
-
-
-A Client's Subscriptions
-------------------------
-
-.. code-block:: bash
+Example Request::
 
     GET api/v2/subscriptions/C_1492145414740
 
-Response
+Response:
 
 .. code-block:: json
 
@@ -411,25 +454,98 @@ Response
         }
     }
 
+Create a Subscription
+----------------------
 
----------------    
-User Management
----------------
+Definition::
 
-Role
-----
+    POST api/v2/mqtt/subscribe
 
-Tag:
-    - administrator
-    - viewer
+Reqeust parameters:
 
-Login
+.. code-block:: json
+
+    {
+        "topic": "test",
+        "qos": 1,
+        "client_id": "C_1492145414740"
+    }
+
+------
+Routes
+------
+
+List all Routes in the Cluster
+-------------------------------
+
+Definition::
+
+    GET api/v2/routes
+
+Response:
+
+.. code-block:: json
+
+    {
+        "code": 0,
+        "result":
+        {
+            "current_page": 1,
+            "page_size": 20,
+            "total_num": 1,
+            "total_page": 1,
+            "objects":
+            [
+                {
+                    "topic": "$client/C_1492145414740",
+                    "node": "emqx@127.0.0.1"
+                }
+            ]
+        }
+    }
+
+Retrieve a Route in the Cluster
+------------------------------
+
+Definition::
+
+    GET api/v2/routes/{topic}
+
+Example Request::
+
+    GET api/v2/routes/topic
+
+Response:
+
+.. code-block:: json
+
+    {
+        "code": 0,
+        "result":
+        {
+            "objects":
+            [
+                {
+                    "topic": "topic",
+                    "node": "emqx@127.0.0.1"
+                }
+            ]
+        }
+    }
+
+-----
+Users
 -----
 
-.. code-block:: bash
-  
+User Login
+----------
+
+Definition::
+
     POST /api/v2/auth
 
+Request parameters:
+    
 .. code-block:: json
 
     {
@@ -437,7 +553,7 @@ Login
         "password": "public"
     }
 
-Response
+Response:
 
 .. code-block:: json
 
@@ -446,13 +562,14 @@ Response
         "result": []
     }
 
+Create a new User
+-----------------
 
-Add New User
-------------
-
-.. code-block:: bash
+Definition::
 
     POST /api/v2/users/
+
+Request parameters:
 
 .. code-block:: json
     
@@ -464,8 +581,7 @@ Add New User
         "remark": "123"
     }
     
-    
-Response
+Response:
 
 .. code-block:: json
 
@@ -474,16 +590,14 @@ Response
         "result": []
     }
     
+Retrieve a User
+---------------
 
-
-Query One User
---------------
-
-.. code-block:: bash
+Definition::
 
     GET /api/v2/users/{username}
 
-Response
+Response:
 
 .. code-block:: json
 
@@ -499,16 +613,14 @@ Response
         }
     }
 
+List all Users
+--------------
 
-
-Query Users
------------
-
-.. code-block:: bash
+Definition::
 
     GET /api/v2/users/
 
-Response
+Response:
 
 .. code-block:: json
 
@@ -532,17 +644,15 @@ Response
             }
         ]
     }
-    
-
 
 Update a User
 -------------
 
-.. code-block:: bash
+Definition::
 
     PUT /api/v2/users/{username}
 
-<Submit Type:json>
+Request parameters:
 
 .. code-block:: json
 
@@ -552,8 +662,7 @@ Update a User
         "remark": "123456"
     }
 
-
-Response
+Response:
 
 .. code-block:: bash
 
@@ -561,17 +670,15 @@ Response
         "code": 0,
         "result": []
     }
-    
 
+Delete a User (Except Admin)
+----------------------------
 
-Delete a User(Except Admin)
----------------------------
-
-.. code-block:: bash
+Definition::
 
     DELETE /api/v2/users/{username}
 
-Response
+Response:
 
 .. code-block:: json
 
@@ -579,18 +686,19 @@ Response
         "code": 0,
         "result": []
     }
-    
 
------------------
-Plugin Management
------------------
+-------
+Plugins
+-------
 
-Query Plugins
--------------
+List all Plugins of a Node
+--------------------------
 
-.. code-block:: bash
+Definition::
 
     GET /api/v2/nodes/{node_name}/plugins/
+
+Response:
 
 .. code-block:: json
 
@@ -726,23 +834,23 @@ Query Plugins
             }
         ]
     }
-    
 
 Start/Stop a Plugin
 -------------------
 
-.. code-block:: bash
+Definition::
 
     PUT /api/v2/nodes/plugins/{name}
+
+Request parameters:
 
 .. code-block:: json 
 
     {
         "active": true/false,
     }
-    
 
-Response
+Response:
 
 .. code-block:: json
 
@@ -751,94 +859,14 @@ Response
         "result": []
     }
 
----------------------------------------------------------------------------
-Cluster Node Information (Clients, Sessions, Topics, Routes, Subscriptions)
----------------------------------------------------------------------------
+List all Listeners
+------------------
 
-List pagination example::
+Definition::
 
-    GET /api/v2/node/{node_name}/clients?_page=1&_limit=10
+    GET api/v2/listeners
 
-Query data example::
-
-    GET /api/v2/node/{node_name}/subscriptions?_page=1&_limit=10&clientId_like=111
-
-Cluster Node Information
-------------------------
-
-.. code-block:: bash
-
-    GET api/v2/monitoring/nodes
-
-Response
-
-.. code-block:: json
-
-    {
-        "code": 0,
-        "result":
-        [
-            {
-                "name": "emqx@127.0.0.1",
-                "otp_release": "R19/8.3",
-                "memory_total": "69.19M",
-                "memory_used": "49.28M",
-                "process_available": 262144,
-                "process_used": 303,
-                "max_fds": 256,
-                "clients": 1,
-                "node_status": "Running",
-                "load1": "1.93",
-                "load5": "1.93",
-                "load15": "1.89"
-            }
-        ]
-    }
-    
-
-
-
-One Node Information
---------------------
-
-.. code-block:: bash
-
-    GET api/v2/monitoring/nodes/emqx@127.0.0.1
-
-
-Response
-    
-.. code-block:: json
-
-
-    {
-        "code": 0,
-        "result":
-        {
-            "name": "emqx@127.0.0.1",
-            "otp_release": "R19/8.3",
-            "memory_total": "69.19M",
-            "memory_used": "49.24M",
-            "process_available": 262144,
-            "process_used": 303,
-            "max_fds": 256,
-            "clients": 1,
-            "node_status": "Running",
-            "load1": "2.21",
-            "load5": "2.00",
-            "load15": "1.92"
-        }
-    }
-    
-
-All Listen Ports
-----------------
-
-.. code-block:: bash
-
-    GET api/v2/monitoring/listeners
-
-Response
+Response:
 
 .. code-block:: json
 
@@ -892,16 +920,18 @@ Response
         }
     }
     
+List listeners of a Node
+------------------------
 
+Definition::
 
-Listen Ports on a Node
------------------------
+    GET api/v2/listeners/{node_name}
 
-.. code-block:: bash
+Example Request::
 
-    GET api/v2/monitoring/listeners/emqx@127.0.0.1
+    GET api/v2/listeners/emqx@127.0.0.1
     
-Response
+Response:
 
 .. code-block:: json
 
@@ -952,73 +982,15 @@ Response
         ]
     }
 
+---------------------
+Publish MQTT Message
+---------------------
 
-
-
-Nodes Information for Management Panel
---------------------------------------
-
-.. code-block:: bash
-
-    GET api/v2/management/nodes
-    
-Response
-
-.. code-block:: json
-    
-    {
-        "code": 0,
-        "result":
-        [
-            {
-                "name": "emqx@127.0.0.1",
-                "version": "2.1.1",
-                "sysdescr": "EMQ X",
-                "uptime": "1 hours, 17 minutes, 1 seconds",
-                "datetime": "2017-04-14 14 (tel:2017041414):11:38",
-                "otp_release": "R19/8.3",
-                "node_status": "Running"
-            }
-        ]
-    }
-    
-    
-    
-One Node Information for Management Panel
------------------------------------------
-
-.. code-block:: bash
-
-    GET api/v2/management/nodes/emqx@127.0.0.1
-    
-Response
-
-.. code-block:: json
-
-    {
-        "code": 0,
-        "result":
-        {
-            "version": "2.1.1",
-            "sysdescr": "EMQ X",
-            "uptime": "1 hours, 17 minutes, 18 seconds",
-            "datetime": "2017-04-14 14 (tel:2017041414):11:55",
-            "otp_release": "R19/8.3",
-            "node_status": "Running"
-        }
-    }
-    
--------------       
-MQTT Protocol
--------------
-
-
-Publish Message
----------------
-
-.. code-block:: bash
+Definition::
 
     POST api/v2/mqtt/publish
+
+Request parameters:
 
 .. code-block:: json
 
@@ -1030,13 +1002,7 @@ Publish Message
         "client_id": "C_1492145414740"
     }
     
-- topic is mandatory, other parameters are optional
-- default payload is an empty string
-- default qos is 0
-- default retain is false
-- client_id is http string
-
-Response
+Response:
 
 .. code-block:: json
 
@@ -1044,26 +1010,6 @@ Response
         "code": 0,
         "result": []
     }
-    
-
-
-
-Subscription by Broker
-----------------------
-
-.. code-block:: bash
-
-    POST api/v2/mqtt/subscribe
-
-        
-.. code-block:: json
-
-    {
-        "topic": "test",
-        "qos": 1,
-        "client_id": "C_1492145414740"
-    }
-
 
 ----------
 Error Code
@@ -1096,3 +1042,4 @@ Error Code
 +-------+-----------------------------------------+
 | 111   | plugin has been unloaded                |
 +-------+-----------------------------------------+
+
