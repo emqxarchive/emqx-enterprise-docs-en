@@ -1079,10 +1079,10 @@ Create MongoDB DB & Collections
 
 .. NOTE:: DB name is free of choice
 
-MongoDB Client Connection Collection
-------------------------------------
+MongoDB MQTT Client Collection
+------------------------------
 
-*mqtt_client* stores client connection states:
+*mqtt_client* stores MQTT clients' connection states:
 
 .. code-block:: javascript
 
