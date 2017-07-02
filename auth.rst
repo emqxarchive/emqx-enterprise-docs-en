@@ -58,6 +58,9 @@ Default Access Control Configuration
 The default access control of EMQ X server is configured by the file acl.conf:
 
 .. code-block:: properties
+    
+    ## ACL nomatch
+    mqtt.acl_nomatch = allow
 
     ## Default ACL File
     mqtt.acl_file = etc/acl.conf
@@ -74,9 +77,6 @@ ACL is defined in ‘etc/acl.conf’, and is loaded when EMQ X starts:
 
     %% Deny clients to subscribe '$SYS#' and '#'
     {deny, all, subscribe, ["$SYS/#", {eq, "#"}]}.
-
-    %% Allow all by default
-    {allow, all}.
 
 If ACL is modified, it can be reloaded using CLI:
 
@@ -234,8 +234,6 @@ Setup the ACL URL and parameters:
     auth.http.acl_req.method = get
     auth.http.acl_req.params = access=%A,username=%u,clientid=%c,ipaddr=%a,topic=%t
 
-    auth.http.acl_nomatch = deny
-
 Design of HTTP Auth and ACL server API::
 
     If Auth/ACL sucesses, API returns 200
@@ -324,10 +322,10 @@ Configure MySQL Auth Query Statement
 
     ## Variables: %u = username, %c = clientid
 
-    ## Authentication Query: select password only
+    ## Authentication Query: select password or password,salt
     auth.mysql.auth_query = select password from mqtt_user where username = '%u' limit 1
 
-    ## Password hash: plain, md5, sha, sha256, pbkdf2
+    ## Password hash: plain, md5, sha, sha256, pbkdf2, bcrypt
     auth.mysql.password_hash = sha256
 
     ## sha256 with salt prefix
@@ -346,9 +344,6 @@ Configure MySQL ACL Query Statement
 
     ## ACL Query Command
     auth.mysql.acl_query = select allow, ipaddr, username, clientid, access, topic from mqtt_acl where ipaddr = '%a' or username = '%u' or username = '$all' or clientid = '%c'
-
-    ## ACL nomatch
-    auth.mysql.acl_nomatch = deny
 
 Load MySQL Auth Plugin
 -----------------------
@@ -429,10 +424,10 @@ Configure PostgreSQL Auth Query Statement
 
     ## Variables: %u = username, %c = clientid, %a = ipaddress
 
-    ## Authentication Query: select password only
+    ## Authentication Query: select password or password,salt
     auth.pgsql.auth_query = select password from mqtt_user where username = '%u' limit 1
 
-    ## Password hash: plain, md5, sha, sha256, pbkdf2
+    ## Password hash: plain, md5, sha, sha256, pbkdf2, bcrypt
     auth.pgsql.password_hash = sha256
 
     ## sha256 with salt prefix
@@ -451,9 +446,6 @@ Configure PostgreSQL ACL Query Statement
 
     ## ACL Query. Comment this query, the acl will be disabled.
     auth.pgsql.acl_query = select allow, ipaddr, username, clientid, access, topic from mqtt_acl where ipaddr = '%a' or username = '%u' or username = '$all' or clientid = '%c'
-
-    ## If no rules matched, return...
-    auth.pgsql.acl_nomatch = deny
 
 Load Postgre Auth Plugin
 ------------------------
@@ -493,9 +485,10 @@ Configure Auth Query Command
     ## Variables: %u = username, %c = clientid
 
     ## Authentication Query Command
+    ## HMGET mqtt_user:%u password or HMGET mqtt_user:%u password salt or HGET mqtt_user:%u password
     auth.redis.auth_cmd = HGET mqtt_user:%u password
 
-    ## Password hash: plain, md5, sha, sha256, pbkdf2
+    ## Password hash: plain, md5, sha, sha256, pbkdf2, bcrypt
     auth.redis.passwd.hash = sha256
 
     ## Superuser Query Command
@@ -508,9 +501,6 @@ Configure ACL Query Command
 
     ## ACL Query Command
     auth.redis.acl_cmd = HGETALL mqtt_acl:%u
-
-    ## ACL nomatch
-    auth.redis.acl_nomatch = deny
 
 Redis Authed Users Hash
 -----------------------
@@ -590,9 +580,6 @@ Configure Auth Query Collection
 
     auth.mongo.acl_query.selector = username=%u
 
-    ## acl_nomatch
-    auth.mongo.acl_nomatch = deny
-
 Configure ACL Query Collection
 ------------------------------
 
@@ -602,9 +589,6 @@ Configure ACL Query Collection
     auth.mongo.aclquery.collection = mqtt_acl
 
     auth.mongo.aclquery.selector = username=%u
-
-    ## acl_nomatch
-    auth.mongo.acl_nomatch = deny
 
 MongoDB Database
 ----------------

@@ -354,7 +354,7 @@ Config file: emqx_backend_mysql.conf
 Config MySQL Server
 --------------------
 
-Connection pool of multiple MySQL servers is supported::
+Connection pool of multiple MySQL servers is supported:
 
 .. code-block:: properties
 
@@ -372,6 +372,16 @@ Connection pool of multiple MySQL servers is supported::
 
     ## Mysql Database
     backend.mysql.pool1.database = mqtt
+
+    ## Max number of fetch offline messages. Without count limit if infinity
+    ## backend.mysql.max_returned_count = 500
+
+    ## Time Range. Without time limit if infinity
+    ## d - day
+    ## h - hour
+    ## m - minute
+    ## s - second
+    ## backend.mysql.time_range = 2h
 
 Config MySQL Persistence Hooks
 ------------------------------
@@ -713,7 +723,17 @@ Connection pool of multiple PostgreSQL servers is supported:
     backend.pgsql.pool1.database = mqtt
 
     ## Pgsql Ssl
-    backend.pgsql.pool1.ssl = false  
+    backend.pgsql.pool1.ssl = false
+
+    ## Max number of fetch offline messages. Without count limit if infinity
+    ## backend.pgsql.max_returned_count = 500
+
+    ## Time Range. Without time limit if infinity
+    ## d - day
+    ## h - hour
+    ## m - minute
+    ## s - second
+    ## backend.pgsql.time_range = 2h
 
 Config PostgreSQL Persistence Hooks
 -----------------------------------
@@ -1001,6 +1021,16 @@ Connection pool of multiple PostgreSQL servers is supported:
 
     ## MongoDB Database
     backend.mongo.pool1.database = mqtt
+
+    ## Max number of fetch offline messages. Without count limit if infinity
+    ## backend.mongo.max_returned_count = 500
+
+    ## Time Range. Without time limit if infinity
+    ## d - day
+    ## h - hour
+    ## m - minute
+    ## s - second
+    ## backend.mongo.time_range = 2h
 
 Config MongoDB Persistence Hooks
 --------------------------------
@@ -1290,6 +1320,16 @@ Multi node Cassandra cluster is supported:
 
     ## Cassandra Logger type
     backend.ecql.pool1.logger = info
+
+    ## Max number of fetch offline messages. Without count limit if infinity
+    ## backend.cassa.max_returned_count = 500
+
+    ## Time Range. Without time limit if infinity
+    ## d - day
+    ## h - hour
+    ## m - minute
+    ## s - second
+    ## backend.cassa.time_range = 2h
 
 Config Cassandra Persistence Hooks
 ----------------------------------
