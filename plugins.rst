@@ -14,11 +14,11 @@ EMQ X message broker can be extended by plugins. Ultilizing the module registrat
 +---------------------+-------------------------+----------------+---------------------------+
 | emqx_modules        | emqx_modules.conf       | Y              | Modules plugins           |
 +---------------------+-------------------------+----------------+---------------------------+
-| emq_retainer        | emqx_retainer.conf      | Y              | Retained message          |
+| emqx_retainer       | emqx_retainer.conf      | Y              | Retained message          |
 +---------------------+-------------------------+----------------+---------------------------+
-| emq_recon           | emqx_recon.conf         | Y              | Recon plugin              |
+| emqx_recon          | emqx_recon.conf         | Y              | Recon plugin              |
 +---------------------+-------------------------+----------------+---------------------------+
-| emq_reloader        | emqx_reloader.conf      | Y              | Reloader plugin           |
+| emqx_reloader       | emqx_reloader.conf      | Y              | Reloader plugin           |
 +---------------------+-------------------------+----------------+---------------------------+
 
 ----------------

@@ -230,6 +230,9 @@ Default ACL is based on 'acl.conf'. If other Auth plugin(s), e.g. MySQL and Post
 
 .. code-block:: properties
 
+    ## ACL nomatch
+    mqtt.acl_nomatch = allow
+
     ## Default ACL File
     mqtt.acl_file = etc/acl.conf
 
@@ -253,9 +256,6 @@ Setting default rules in 'acl.conf':
 
     %% Deny all user to subscribe to topic '$SYS#' and '#'
     {deny, all, subscribe, ["$SYS/#", {eq, "#"}]}.
-
-    %% When non of above hits, allow
-    {allow, all}.
 
 .. NOTE:: default rules allow only local user to subscribe to '$SYS/#' and '#'
 
