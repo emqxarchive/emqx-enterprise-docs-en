@@ -215,7 +215,7 @@ Session across Nodes
 
 The persistent MQTT sessions (clean session = false) are across nodes in the EMQ X cluster.
 
-Consider two load-balanced nodes in a cluster: node1 and node2. A MQTT client connects to node1 at the first place, node1 creates persistent session for the client, and then disconnects from node1. Later when this client tries to connect to node2, the connection is then created on node2, but the persistent session will be still on where it was (in this case node1)::
+Consider two load-balanced nodes in a cluster: node1 and node2. A MQTT client connects to node1 at the first place, node1 creates persistent session for the client, and then disconnects from node1. Later when this client tries to connect to node2, the connection is then created on node2, but the persistent session will be still on where it was (in this case node1):
 
 .. image:: _static/images/10_3.png
 

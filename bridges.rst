@@ -422,7 +422,7 @@ Delete the bridge:
 mosquitto Bridge
 ----------------
 
-Mosquitto can be bridged to EMQ X cluster using common MQTT connection::
+Mosquitto can be bridged to EMQ X cluster using common MQTT connection:
 
 .. image:: _static/images/8_4.png
 
