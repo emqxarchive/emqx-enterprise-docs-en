@@ -8,7 +8,7 @@ Backends
 MQTT Message Persistence
 ------------------------
 
-One to one message Persistence
+One-to-one message Persistence
 ------------------------------
 
 .. image:: ./_static/images/backend_queue.png
@@ -25,8 +25,8 @@ One to one message Persistence
 
 6. Once the SUB acknowledged / received the message, backend removes the message from DB.
 
-One to many message Persistence 
--------------------------------
+Many-to-many message Persistence
+--------------------------------
 
 .. image:: ./_static/images/backend_pubsub.png
 
