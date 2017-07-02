@@ -9,7 +9,7 @@ Configuration
 Config Files
 ------------
 
-Linux: If EMQ X is installed using RPM or DEB package, or cloud installation using Image, the config files are located in '/etc/emqx/':
+Linux: If EMQ X is installed through a RPM or DEB package, or through an cloud Image, the config files are located in '/etc/emqx/':
 
 +----------------------------+-----------------------------------------------------+
 | Config file                | Description                                         |
@@ -37,7 +37,7 @@ Linux: If EMQ X is installed using binary package, the config files are located 
 Environment Variables
 ---------------------
 
-EMQ X supports setting system parameters by using environment variables when it starts up:
+EMQ X allows setting system parameters by environment variables when it starts up:
 
 +--------------------+-------------------------------------------------+
 | EMQX_NODE_NAME     | Erlang node name, e.g. emqx@192.168.0.6         |
@@ -59,7 +59,7 @@ EMQ X supports setting system parameters by using environment variables when it 
 Node and Cookie
 ---------------
 
-The node name and cookie of EMQ X should be configured when clustering:
+The node name and cookie of EMQ X should be configured in a cluster setup:
 
 .. code-block:: properties
 
@@ -77,7 +77,7 @@ The node name and cookie of EMQ X should be configured when clustering:
 Erlang VM Parameters
 --------------------
 
-Erlang VM parameters, by default 100,000 concurrent connections allowed:
+Erlang VM parameters. By default 100,000 concurrent connections are allowed:
 
 .. code-block:: properties
 
@@ -296,7 +296,7 @@ Max Length of MQTT Packet
 MQTT Client Idle Timeout
 ------------------------
 
-Max time interval from Socket connection establishing to receiving CONNECT packet:
+Max time interval from Socket connection to arrival of CONNECT packet:
 
 .. code-block:: properties
 
@@ -384,11 +384,11 @@ EMQ X creates a session for each MQTT connection:
 MQTT Message Queue
 ------------------
 
-For every session EMQ X creates a message queue caching QoS1/2 messages:
+EMQ X creates a message queue to cache QoS1/2 messages in each session. Two types of messages are put into this queue:
 
 1. Offline messages for persistent session.
 
-2. Pending messages when inflight window is full.
+2. Messages which should be pended if inflight window is full.
 
 Queue Parameters:
 
