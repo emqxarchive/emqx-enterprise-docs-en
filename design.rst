@@ -8,33 +8,23 @@ Design
 .. _intro:
 
 ------------
-Intro
+Introduction
 ------------
 
-Upgraded from EMQ R1, EMQ X R 2.0 separated the Message Flow Plane and Monitor/Control Plane. This makes possible of sustaining million-level MQTT connections. Separating of Flow Plane and Monitor/Control Plane also makes the EMQ cluster more reliable and provides higher performance. The Architecture of EMQ X R2 is like following::
+Upgraded from EMQ R1, EMQ X R 2.0 separated the Message Flow Plane and Monitor/Control Plane. This makes possible of sustaining million-level MQTT connections. Separating of Flow Plane and Monitor/Control Plane also makes the EMQ cluster more reliable and provides higher performance. The Architecture of EMQ X R2 is like following:
 
-              Control Plane
-           --------------------
-              |            |
-  Frontend -> | Flow Plane | -> Backend
-              |            |
-            Session      Router
-           ---------------------
-               Monitor Plane
+.. image:: _static/images/11_1.png
 
-
-EMQ X supports MQTT message persistence to Redis, MySQL, PostgreSQL, MongoDB and Cassandra. It can bridge and forward MQTT messages to enterprise middle-ware like Kafka and RabbitMQ.
+EMQ X supports MQTT message persistence to Redis, MySQL, PostgreSQL, MongoDB and Cassandra. It can bridge and forward MQTT messages to enterprise middleware like Kafka and RabbitMQ.
 
 Full Asynchronous Architecture
 ------------------------------
 
-The full asynchronous architecture of EMQ message broker is based on Erlang/OTP platform: asynchronous TCP connection processing, asynchronous topic subscription, asynchronous message publishing.
+The full asynchronous architecture of EMQ message broker is based on Erlang/OTP platform: asynchronous TCP connection processing, asynchronous topic subscription, asynchronous message publishment.
 
-A MQTT message from Publisher to Subscriber, it is asynchronously processed in the emqx broker by a series of Erlang process::
+A MQTT message from Publisher to Subscriber, is asynchronously processed in the EMQ X broker by a series of Erlang processes:
 
-                      ----------          -----------          ----------
-    Publisher --Msg-->| Client | --Msg--> | Session | --Msg--> | Client | --Msg--> Subscriber
-                      ----------          -----------          ----------
+.. image:: _static/images/11_2.png
 
 Message Persistence
 -------------------
@@ -50,7 +40,7 @@ Architecture
 Concept 
 --------
 
-The EMQ X broker is more like a network Switch or Router, not a traditional enterprise message queue. Compared to a network router that routes packets based on IP or MPLS label, the EMQ broker routes MQTT messages based on topic trie.
+The EMQ X broker looks much like a network Switch or Router, not a traditional enterprise message queue. Compare with a network router that routes packets based on IP or MPLS label, the EMQ broker routes MQTT messages against topics.
 
 .. image:: ./_static/images/concept.png
 
@@ -59,20 +49,20 @@ Design Philosophy
 
 1. Focus on handling millions of MQTT connections and routing MQTT messages between clustered nodes.
 
-2. Embrace Erlang/OTP, The Soft-Realtime, Low-Latency, Concurrent and Fault-Tolerant Platform.
+2. Embrace Erlang/OTP, the soft-realtime, low-latency, concurrent and fault-tolerant platform.
 
 3. Layered Design: Connection, Session, PubSub and Router Layers.
 
-4. Separate the Message Flow Plane and the Control/Management Plane.
+4. Separate the message flow plane and the control/management plane.
 
-5. Stream MQTT messages to various backends including MQ or databases.
+5. Stream MQTT messages to variant backends including MQ or databases.
 
 System Layers
 --------------
 
 1. Connection Layer: Handle TCP and WebSocket connections, encode/decode MQTT packets.
 
-2. Session Layer: Process MQTT PUBLISH/SUBSCRIBE Packets received from client, and deliver MQTT messages to client.
+2. Session Layer: Process MQTT PUBLISH/SUBSCRIBE packets received from client, and deliver MQTT messages to client.
 
 3. Route Layer: Dispatch MQTT messages to subscribers in a node.
 
@@ -88,15 +78,15 @@ System Layers
 Connection Layer
 -----------------
 
-Connection Layer handles server side socket connection and MQTT protocol decoding:
+Connection Layer handles server socket connection and MQTT protocol decoding:
 
-1. Built on `eSockd`_ asynchronous TCP server side framework
-2. TCP Acceptor Pool and Asynchronous TCP Accept
+1. Built on `eSockd`_ asynchronous TCP server framework
+2. TCP acceptor pool and asynchronous TCP acceptor
 3. TCP/SSL, WebSocket/SSL
 4. Max connections management
-5. Access control on peer address or CIDR
+5. Access control against peer address or CIDR
 6. Flow control based Leaky Bucket algorithm
-7. MQTT protocol en/decode
+7. MQTT protocol encoder/decoder
 8. MQTT connection keepalive
 9. MQTT packet process
 
@@ -106,51 +96,43 @@ Connection Layer handles server side socket connection and MQTT protocol decodin
 Session Layer
 --------------
 
-Session layer processes Publish and Subscribe service of MQTT protocol:
+Session layer processes publish and subscribe service of MQTT protocol:
 
-1. It Stores the clients' subscription and finalize the QoS of subscriptions.
+1. Store clients' subscription and implement the QoS of subscriptions.
 
-2. It processes the publish and delivery of QoS1/2 messages, retransmits time-messages and retains offline messages.
+2. Process the publish and delivery of QoS1/2 messages, retransmit timeout messages and retain offline messages.
 
-3. It manages Inflight Window and controls the message delivery throughput and order of transmission.
+3. Manage inflight window and control the message delivery throughput and transmission order.
 
-4. It retains the sent to client but not acknowledged QoS1/2 messages.
+4. Retain QoS1/2 messages which has been sent but not acknowledged by client.
 
-5. It retains QoS2 messages from client to server, which has not yet received a responding PUBREL message.
+5. Retain QoS2 messages from client to server, which has not yet received a responding PUBREL message.
 
-6. It retains QoS1/2 offline message of a persistent session, when the client is disconnected.
+6. Retain QoS1/2 offline messages of a persistent session, when the client is disconnected.
 
 MQueue and Inflight Window
 --------------------------
 
-Concept of Message Queue and Inflight Window::
+Concept of Message Queue and Inflight Window:
 
-       |<----------------- Max Len ----------------->|
-       -----------------------------------------------
- IN -> |      Messages Queue   |  Inflight Window    | -> Out
-       -----------------------------------------------
-                               |<---   Win Size  --->|
+.. image:: _static/images/11_3.png
 
-
-1. Inflight Window to store the messages delivered and await for PUBACK.
+1. Inflight Window stores the delivered messages which is awaiting for PUBACK.
 
 2. Enqueue messages when the inflight window is full.
 
 3. If the queue is full, drop qos0 messages if store_qos0 is true, otherwise drop the oldest one.
 
-The larger the inflight window size is, the higher the throughput is. The smaller the window size is, the more strict the message order is.
+The larger the inflight window size is, the higher the throughput is. The smaller the window size is, the stricter the message order is.
 
 PacketId and MessageID
 ----------------------
 
-The 16-bit PacketId is defined by MQTT Protocol Specification, used by client/server to PUBLISH/PUBACK packets. A GUID(128-bit globally unique Id) will be generated by the broker and assigned to a MQTT message.
+The 16-bit packetId is defined by MQTT protocol specification, used by client/server to PUBLISH/PUBACK packets. A GUID(128-bit globally unique Id) will be generated by the broker and assigned to a MQTT message.
 
-Format of the globally unique message id::
+Format of the globally unique message id:
 
-        --------------------------------------------------------
-        |        Timestamp       |  NodeID + PID  |  Sequence  |
-        |<------- 64bits ------->|<--- 48bits --->|<- 16bits ->|
-        --------------------------------------------------------
+.. image:: _static/images/11_4.png
 
 1. Timestamp: erlang:system_time if Erlang >= R18, otherwise os:timestamp
 
@@ -160,15 +142,15 @@ Format of the globally unique message id::
 
 4. Sequence: 2 bytes sequence in one process
 
-The PacketId and MessageId in a End-to-End Message PubSub Sequence::
+The PacketId and MessageId in an End-to-End Message PubSub Sequence:
 
-    PktId <-- Session --> MsgId <-- Router --> MsgId <-- Session --> PktId
+.. image:: _static/images/11_5.png
 
 .. _route_layer:
 
--------------
-PuBSub Layer
--------------
+------------
+PubSub Layer
+------------
 
 The PubSub layer maintains a subscription table and is responsible to dispatch MQTT messages to subscribers.
 
@@ -184,20 +166,9 @@ Routing Layer
 
 The routing(distributed) layer maintains and replicates the global Topic Trie and Routing Table. The topic tire is composed of wildcard topics created by subscribers. The Routing Table maps a topic to nodes in the cluster.
 
-For example, if node1 subscribed ‘t/+/x’ and ‘t/+/y’, node2 subscribed ‘t/#’ and node3 subscribed ‘t/a’, there will be a topic trie and route table::
+For example, if node1 subscribed ‘t/+/x’ and ‘t/+/y’, node2 subscribed ‘t/#’ and node3 subscribed ‘t/a’, there will be a topic trie and route table:
 
-    -------------------------
-    |            t          |
-    |           / \         |
-    |          +   #        |
-    |        /  \           |
-    |      x      y         |
-    -------------------------
-    | t/+/x -> node1, node3 |
-    | t/+/y -> node1        |
-    | t/#   -> node2        |
-    | t/a   -> node3        |
-    -------------------------
+.. image:: _static/images/10_2.png
 
 The routing layer would route MQTT messages among clustered nodes by topic trie match and routing table lookup:
 
@@ -220,7 +191,7 @@ emqx_access_control provides APIs for registering and unregistering Auth or ACL 
 Authentication
 ---------------
 
-emqx_auth_mod defines the behaviour of a authentication module::
+emqx_auth_mod defines the behaviour of an authentication module::
 
     -module(emqx_auth_mod).
 
@@ -313,10 +284,10 @@ emqx_acl_internal implements the default access control based on 'etc/acl.conf' 
 Hooks
 --------------
 
-Defining Hook
+Define Hook
 --------------
 
-EMQ X broker utilizes  hooks when: a client is connected / disconnected, topic(s) subscribed / unsubscribed or a message published / delivered/ acknowledged.
+EMQ X broker triggers hooks when: a client is connected / disconnected, topics are subscribed / unsubscribed or messages are published / delivered / acknowledged.
 
 Following hooks are defined: 
 
@@ -353,7 +324,7 @@ EMQ X uses (`Chain-of-responsibility_pattern`_) to implement hook mechanism. The
   
 .. image:: ./_static/images/hooks_chain.jpg
 
-The input arguments for a callback function are depending on the types of hook. Clone the emqx_plugin_template project to check the argument in detail: 
+The input parameters for a callback function depend on the types of hook. Clone the emqx_plugin_template project to check the parameter in detail: 
 
 +-----------------+------------------------+
 | Return          | Description            |
@@ -508,9 +479,9 @@ Erlang Related
 
 2. Asynchronism in mind, asynchronous, asynchronous message, asynchronous message between layers. Synchronism is only for load protection.
 
-3. Avoiding of accumulation in Mailbox. Heavily loaded process uses gen_server2
+3. Prevent accumulation in Mailbox. Heavily loaded process uses gen_server2
 
-4. Messages flowing through Socket and session process must utilize hibernate mechanism. Binary handles are to recovered.
+4. Messages flowing through Socket and session process must utilize hibernate mechanism. Binary handles could be recovered.
 
 5. Using binary data, avoiding memory copying / cloning between processes.
 
@@ -522,9 +493,9 @@ Erlang Related
 
 9. Properly open ETS table{write_concurrency, true}
 
-10. Protecting Mnesia DB transaction reducing transaction number, avoiding transaction overload.
+10. Protect Mnesia DB transaction, reduce transaction number, avoid transaction overload.
 
-11. Avoidng Mnesia Table index, avoiding match and select on non-key fields
+11. Avoid Mnesia Table index, avoid matching and selecting on non-key fields
 
 .. _eSockd: https://github.com/emqtt/esockd
 .. _Chain-of-responsibility_pattern: https://en.wikipedia.org/wiki/Chain-of-responsibility_pattern
