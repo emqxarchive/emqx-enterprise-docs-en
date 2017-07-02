@@ -166,7 +166,9 @@ If EMQ X start normal, the output of console shall looks like:
     mqtt:wss listen on 0.0.0.0:8084 with 4 acceptors.
     emqx 2.1.0 is running now!
 
-CTRL+C to close console, start EMQ X as daemon:
+Press CTRL+C to close console.
+
+Start EMQ X as daemon:
 
 .. code-block:: bash
 
@@ -214,7 +216,7 @@ Install on Mac OS X
 
 Same procedure as Linux.
 
-When developing MQTT applications on Mac, modify the 'etc/emqx.conf' file as following to check the MQTT massages on the console: 
+Modify the 'etc/emqx.conf' file as following to check the MQTT massages on the console: 
 
 .. code-block:: properties
 

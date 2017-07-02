@@ -320,50 +320,50 @@ Traffic
 MQTT Packet Statistics
 ......................
 
-+--------------------------+----------------------------------------------------+
-| Topic                    | Description                                        |
-+--------------------------+----------------------------------------------------+
-| packets/received         | Accumulative count of received MQTT packets        |
-+--------------------------+----------------------------------------------------+
-| packets/sent             | Accumulative count of sent MQTT packets            |
-+--------------------------+----------------------------------------------------+
-| packets/connect          | Accumulative count of received CONNECT packets     |
-+--------------------------+----------------------------------------------------+
-| packets/connack          | Accumulative count of sent CONNECT packets         |
-+--------------------------+----------------------------------------------------+
-| packets/publish/received | Accumulative count of received PUBLISH packets     |
-+--------------------------+----------------------------------------------------+
-| packets/publish/sent     | Accumulative count of sent PUBLISH packets         |
-+--------------------------+----------------------------------------------------+
-| packets/subscribe        | Accumulative count of received SUBSCRIBE packets   |
-+--------------------------+----------------------------------------------------+
-| packets/suback           | Accumulative count of sent SUBACK packets          |
-+--------------------------+----------------------------------------------------+
-| packets/unsubscribe      | Accumulative count of received UNSUBSCRIBE packets |
-+--------------------------+----------------------------------------------------+
-| packets/unsuback         | Accumulative count of sent UNSUBACK packets        |
-+--------------------------+----------------------------------------------------+
-| packets/pingreq          | Accumulative count of received PINGREQ packets     |
-+--------------------------+----------------------------------------------------+
-| packets/pingresp         | Accumulative count of sent PINGRESP packets        |
-+--------------------------+----------------------------------------------------+
-| packets/disconnect       | Accumulative count of received DISCONNECT packets  |
-+--------------------------+----------------------------------------------------+
++--------------------------+---------------------------------------+
+| Topic                    | Description                           |
++--------------------------+---------------------------------------+
+| packets/received         | Count of received MQTT packets        |
++--------------------------+---------------------------------------+
+| packets/sent             | Count of sent MQTT packets            |
++--------------------------+---------------------------------------+
+| packets/connect          | Count of received CONNECT packets     |
++--------------------------+---------------------------------------+
+| packets/connack          | Count of sent CONNECT packets         |
++--------------------------+---------------------------------------+
+| packets/publish/received | Count of received PUBLISH packets     |
++--------------------------+---------------------------------------+
+| packets/publish/sent     | Count of sent PUBLISH packets         |
++--------------------------+---------------------------------------+
+| packets/subscribe        | Count of received SUBSCRIBE packets   |
++--------------------------+---------------------------------------+
+| packets/suback           | Count of sent SUBACK packets          |
++--------------------------+---------------------------------------+
+| packets/unsubscribe      | Count of received UNSUBSCRIBE packets |
++--------------------------+---------------------------------------+
+| packets/unsuback         | Count of sent UNSUBACK packets        |
++--------------------------+---------------------------------------+
+| packets/pingreq          | Count of received PINGREQ packets     |
++--------------------------+---------------------------------------+
+| packets/pingresp         | Count of sent PINGRESP packets        |
++--------------------------+---------------------------------------+
+| packets/disconnect       | Count of received DISCONNECT packets  |
++--------------------------+---------------------------------------+
 
 MQTT Message Statistic 
 ......................
 
-+--------------------------+---------------------------------------------+
-| Topic                    | Description                                 |
-+--------------------------+---------------------------------------------+
-| messages/received        | Accumulative count of  received messages    |
-+--------------------------+---------------------------------------------+
-| messages/sent            | Accumulative count of sent messages         |
-+--------------------------+---------------------------------------------+
-| messages/retained        | Accumulative count of retained messages     |
-+--------------------------+---------------------------------------------+
-| messages/dropped         | Accumulative count of dropped message       |
-+--------------------------+---------------------------------------------+
++--------------------------+--------------------------------+
+| Topic                    | Description                    |
++--------------------------+--------------------------------+
+| messages/received        | Count of received messages     |
++--------------------------+--------------------------------+
+| messages/sent            | Count of sent messages         |
++--------------------------+--------------------------------+
+| messages/retained        | Count of retained messages     |
++--------------------------+--------------------------------+
+| messages/dropped         | Count of dropped message       |
++--------------------------+--------------------------------+
 
 .. _sys_alarms:
 

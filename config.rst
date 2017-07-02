@@ -123,15 +123,19 @@ Erlang VM parameters. By default 100,000 concurrent connections are allowed:
 
 Description of most important parameters of Erlang VM:
 
-+-------------------------+------------------------------------------------------------------------------------------------------------+
-| node.process_limit      | Max Erlang VM processes. A MQTT connection consumes 2 processes. It should be larger than max_clients * 2. |
-+-------------------------+------------------------------------------------------------------------------------------------------------+
-| node.max_ports          | Max port number of a node. A MQTT connection consumes 1 port. It should be larger than max_clients.        |
-+-------------------------+------------------------------------------------------------------------------------------------------------+
-| node.dist_listen_min    | Min TCP port for nodes internal communication. If firewall presents, it should be configured accordingly.  |
-+-------------------------+------------------------------------------------------------------------------------------------------------+
-| node.dist_listen_max    | Max TCP port for nodes internal communication. If firewall presents, it should be configured accordingly.  |
-+-------------------------+------------------------------------------------------------------------------------------------------------+
++-------------------------+---------------------------------------------------------------------+
+| node.process_limit      | Max Erlang VM processes. A MQTT connection consumes 2 processes.    |
+|                         | It should be larger than max_clients * 2.                           |
++-------------------------+---------------------------------------------------------------------+
+| node.max_ports          | Max port number of a node. A MQTT connection consumes 1 port.       |
+|                         | It should be larger than max_clients.                               |
++-------------------------+---------------------------------------------------------------------+
+| node.dist_listen_min    | Min TCP port for nodes internal communication.                      |
+|                         | If firewall presents, it should be configured accordingly.          |
++-------------------------+---------------------------------------------------------------------+
+| node.dist_listen_max    | Max TCP port for nodes internal communication.                      |
+|                         | If firewall presents, it should be configured accordingly.          |
++-------------------------+---------------------------------------------------------------------+
 
 ---------------------
 Cluster Communication
@@ -230,6 +234,9 @@ Default ACL is based on 'acl.conf'. If other Auth plugin(s), e.g. MySQL and Post
 
 .. code-block:: properties
 
+    ## ACL nomatch
+    mqtt.acl_nomatch = allow
+
     ## Default ACL File
     mqtt.acl_file = etc/acl.conf
 
@@ -253,9 +260,6 @@ Setting default rules in 'acl.conf':
 
     %% Deny all user to subscribe to topic '$SYS#' and '#'
     {deny, all, subscribe, ["$SYS/#", {eq, "#"}]}.
-
-    %% When non of above hits, allow
-    {allow, all}.
 
 .. NOTE:: default rules allow only local user to subscribe to '$SYS/#' and '#'
 
@@ -361,24 +365,25 @@ EMQ X creates a session for each MQTT connection:
     ## s - second
     mqtt.session.expiry_interval = 2h
 
-+---------------------------+---------------------------------------------------------------------------------------------+
-| session.max_subscriptions | Maximum allowed subscriptions                                                               |
-+---------------------------+---------------------------------------------------------------------------------------------+
-| session.upgrade_qos       | Upgrade QoS according to subscription                                                       |
-+---------------------------+---------------------------------------------------------------------------------------------+
-| session.max_inflight      | Inflight window. Maximum allowed simultaneous QoS1/2 packet. 0 means unlimited. Higher      |
-|                           | value means higher throughput while lower value means stricter packet transmission order.   |        
-+---------------------------+---------------------------------------------------------------------------------------------+
-| session.retry_interval    | Retry interval between QoS1/2 messages and PUBACK messages                                  |
-+---------------------------+---------------------------------------------------------------------------------------------+
-| session.max_awaiting_rel  | Maximum number of packets awaiting PUBREL packet                                            |
-+---------------------------+---------------------------------------------------------------------------------------------+
-| session.await_rel_timeout | Timeout for awaiting PUBREL                                                                 |
-+---------------------------+---------------------------------------------------------------------------------------------+
-| session.enable_stats      | Enable session stats                                                                        |
-+---------------------------+---------------------------------------------------------------------------------------------+
-| session.expiry_interval   | Session expiry time. Start counting from disconnection of the client, in minutes.           |
-+---------------------------+---------------------------------------------------------------------------------------------+
++---------------------------+---------------------------------------------------------------+
+| session.max_subscriptions | Maximum allowed subscriptions                                 |
++---------------------------+---------------------------------------------------------------+
+| session.upgrade_qos       | Upgrade QoS according to subscription                         |
++---------------------------+---------------------------------------------------------------+
+| session.max_inflight      | Inflight window. Maximum allowed simultaneous QoS1/2 packet.  |
+|                           | 0 means unlimited. Higher value means higher throughput while |
+|                           | lower value means stricter packet transmission order.         |
++---------------------------+---------------------------------------------------------------+
+| session.retry_interval    | Retry interval between QoS1/2 messages and PUBACK messages    |
++---------------------------+---------------------------------------------------------------+
+| session.max_awaiting_rel  | Maximum number of packets awaiting PUBREL packet              |
++---------------------------+---------------------------------------------------------------+
+| session.await_rel_timeout | Timeout for awaiting PUBREL                                   |
++---------------------------+---------------------------------------------------------------+
+| session.enable_stats      | Enable session stats                                          |
++---------------------------+---------------------------------------------------------------+
+| session.expiry_interval   | Session expiry time.                                          |
++---------------------------+---------------------------------------------------------------+
 
 ------------------
 MQTT Message Queue

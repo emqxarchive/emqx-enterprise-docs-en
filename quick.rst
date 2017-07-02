@@ -5,7 +5,7 @@
 Quick Setup
 ===========
 
-Suppose a EMQ X Cluster with two Linux nodes deployed on a cloud VPC network or a private network:
+Suppose an EMQ X Cluster with two Linux nodes deployed on a cloud VPC network or a private network:
 
 +---------------------+---------------------+
 | Node name           |    IP               |
@@ -94,7 +94,7 @@ if EMQ X is installed using zip package::
 Clustering the EMQ X Nodes
 --------------------------
 
-Start the two nodes, on the emqx1@192.168.0.10 run:: 
+Start the two nodes, then on the emqx1@192.168.0.10 run:: 
 
     $ ./bin/emqx_ctl cluster join emqx2@192.168.0.20
 
