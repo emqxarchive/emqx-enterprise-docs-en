@@ -63,7 +63,7 @@ EMQ X Provides the MQTT service on following TCP ports by default:
 
 Firewall should make the relevant ports accessible for public. 
 
-Following ports are open for cluster internal communication:
+Following ports are opened for cluster internal communication:
 
 +-----------+-----------------------------------+
 | 4369      | Node discovery port               |
