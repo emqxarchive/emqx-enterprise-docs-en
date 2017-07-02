@@ -84,8 +84,8 @@ Modules Plugin
 
 Consists of modules like Presence, Subscription, Rewrite and etc.
 
-Configure the presence module
------------------------------
+Presence module
+---------------
 
 Presence module published presence message to $SYS/ when a client connected or disconnected: 
 
@@ -99,7 +99,7 @@ Presence module published presence message to $SYS/ when a client connected or d
 Subscription Module
 -------------------
 
-Subscription module forces clients to subscribe to some particular topics when connected to the EMQ X:
+    Subscription module forces clients to subscribe to some particular topics when connected to the broker:
 
 .. code-block:: properties
 

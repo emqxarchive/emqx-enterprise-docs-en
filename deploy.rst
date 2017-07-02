@@ -85,11 +85,11 @@ Deploying on QingCloud
 
 3. Create 2 EMQ X hosts inside the private network, like:
 
-    +-------+-------------+
-    | emqx1 | 192.168.0.2 |
-    +-------+-------------+
-    | emqx2 | 192.168.0.3 |
-    +-------+-------------+
++-------+-------------+
+| emqx1 | 192.168.0.2 |
++-------+-------------+
+| emqx2 | 192.168.0.3 |
++-------+-------------+
 
 4. Install and cluster EMQ X on these two hosts. Please refer to the sections of cluster installation for details.
     
@@ -115,11 +115,11 @@ Deploying on AWS
 
 3. Create 2 EMQ X hosts inside the private network, like:
 
-    +-------+-------------+
-    | emqx1 | 192.168.0.2 |
-    +-------+-------------+
-    | emqx2 | 192.168.0.3 |
-    +-------+-------------+
++-------+-------------+
+| emqx1 | 192.168.0.2 |
++-------+-------------+
+| emqx2 | 192.168.0.3 |
++-------+-------------+
 
 4. Open the TCP ports for MQTT services (e.g. 1883,8883) on the security group.
 
@@ -161,13 +161,13 @@ HAProxy serves as a LB for EMQ X cluster and terminates the SSL connections:
 
 1. Create EMQ X Cluster nodes like following:
 
-    +-------+-------------+
-    | node  | IP          |
-    +=======+=============+
-    | emqx1 | 192.168.0.2 |
-    +-------+-------------+
-    | emqx2 | 192.168.0.3 |
-    +-------+-------------+
++-------+-------------+
+| node  | IP          |
++=======+=============+
+| emqx1 | 192.168.0.2 |
++-------+-------------+
+| emqx2 | 192.168.0.3 |
++-------+-------------+
 
 2. Modify the /etc/haproxy/haproxy.cfg accordingly. 
    An example::
@@ -197,13 +197,13 @@ NGINX Plus serves as a LB for EMQ X cluster and terminates the SSL connections:
 
 2. Create EMQ X cluster nodes like following:
 
-    +-------+-------------+
-    | node  | IP          |
-    +=======+=============+
-    | emqx1 | 192.168.0.2 |
-    +-------+-------------+
-    | emqx2 | 192.168.0.3 |
-    +-------+-------------+
++-------+-------------+
+| node  | IP          |
++=======+=============+
+| emqx1 | 192.168.0.2 |
++-------+-------------+
+| emqx2 | 192.168.0.3 |
++-------+-------------+
 
 3. Modify the /etc/nginx/nginx.conf.
    An example::

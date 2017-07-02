@@ -114,9 +114,9 @@ Check the cluster status on any node::
 
     Cluster status: [{running_nodes,['emqx1@192.168.0.10','emqx@192.168.0.20']}]
 
------------
-Web Console
------------
+-------------
+Web Dashboard
+-------------
 
 'emqx-dashboard' plugin presents a web management console on port 18083. The status of cluster nodes, statistic of MQTT message, MQTT clients, MQTT sessions and routing informations are available in this console.
 

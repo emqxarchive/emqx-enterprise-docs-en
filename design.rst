@@ -313,15 +313,8 @@ Following hooks are defined:
 | client.disconnected    | Client disconnected              |
 +------------------------+----------------------------------+
 
-EMQ X uses (`Chain-of-responsibility_pattern`_) to implement hook mechanism. The callback functions registered to hook will be executed one by one::
+EMQ X uses (`Chain-of-responsibility_pattern`_) to implement hook mechanism. The callback functions registered to hook will be executed one by one:
 
-                  --------  ok | {ok, NewAcc}   --------  ok | {ok, NewAcc}   --------
-  (Args, Acc) --> | Fun1 | -------------------> | Fun2 | -------------------> | Fun3 | --> {ok, Acc} | {stop, Acc}
-                  --------                      --------                      --------
-                     |                             |                             |
-                stop | {stop, NewAcc}         stop | {stop, NewAcc}         stop | {stop, NewAcc}
-  
-  
 .. image:: ./_static/images/hooks_chain.jpg
 
 The input parameters for a callback function depend on the types of hook. Clone the emqx_plugin_template project to check the parameter in detail: 

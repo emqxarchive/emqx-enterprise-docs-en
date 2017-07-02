@@ -6,7 +6,7 @@ Overview
 
 EMQ is a distributed, massively scalable, highly extensible MQTT message broker which can sustain million level connections. When the document is being writen, EMQ hits 200,000 downloads on Github, it is chosen by more than 3000 users worldwide. More than 10,000 nodes were already deployed and serve 30 million mobile and IoT connections.
 
-EMQ X is the enterprise edition of the EMQ broker which extends the function and performance of EMQ. It improves the system architecture of EMQ, adopts Scalable RPC mechanism, provides more reliable clustering and higher performance of message routing.
+EMQ X is the enterprise edition of the EMQ broker which extends the function and enhance the performance of EMQ. It improves the system architecture of EMQ, adopts Scalable RPC mechanism, provides more reliable clustering and higher performance of message routing.
 
 EMQ X supports persistence MQTT messages to Redis, MySQL, PostgreSQL, MongoDB, Cassandra and other databases. It also supports bridging and forwarding MQTT messages to enterprise messaging middleware like Kafka and RabbitMQ.
 
