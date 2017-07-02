@@ -5,7 +5,7 @@
 Tuning Guide
 ============
 
-In a stress test, EMQ X R2 sustained 1.3 million concurrent MQTT connections on a 8 Core/32GB CentOS server.
+EMQ X R2 scaled to 1.3 million concurrent MQTT connections on a 8 Core/32GB CentOS server.
 
 Tuning the Linux Kernel, Networking, Erlang VM and the EMQ broker for one million concurrent MQTT connections.
 
@@ -40,7 +40,7 @@ Persist the maximum number of opened file handles for users in /etc/security/lim
     emqx      soft   nofile      1048576
     emqx      hard   nofile      1048576
 
-Note: Under Ubuntu, '/etc/systemd/system.conf' is to be modified:
+Note: Under ubuntu, '/etc/systemd/system.conf' has to to be modified:
 
 .. code-block:: properties
 
