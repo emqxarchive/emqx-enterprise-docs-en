@@ -23,7 +23,7 @@ One to one message Persistence
 
 5. Messages are sent to SUB;
 
-6. After the SUB acknowledged / received the message, backend removes the message from DB.
+6. Once the SUB acknowledged / received the message, backend removes the message from DB.
 
 One to many message Persistence 
 -------------------------------
@@ -55,7 +55,7 @@ EMQ X Persistence supports subscription by broker. When a client goes online, th
 List of Persistence Plugins
 ----------------------------
 
-EMQ X supports storing messages in Redis, MySQL, PostgreSQL, MongoDB and Cassandra:
+EMQ X allowes storing messages in Redis, MySQL, PostgreSQL, MongoDB and Cassandra:
 
 +-----------------------+--------------------------+-------------------------------+
 | Persistence Plugins   | Config File              | Description                   |
@@ -310,7 +310,7 @@ A client with ClientId of 'test' subscribes to topic1 and topic2::
     HSET "mqtt:sub:test" "topic1" 1
     HSET "mqtt:sub:test" "topic2" 2
 
-Lookup the subscribed topics of client with ClientId of 'test::
+Lookup the subscribed topics of client with ClientId of 'test'::
  
     HGETALL mqtt:sub:test
     1) "topic1"
@@ -454,7 +454,7 @@ SQL Parameters Description
 Configure 'action' with SQL
 ----------------------------
 
-MySQL backend supports using SQL in 'action':
+MySQL backend supports SQL in 'action':
 
 .. code-block:: properties
 
@@ -797,7 +797,7 @@ SQL Parameters Description
 Configure 'action' with SQL
 -----------------------------
 
-PostgreSQL backend supports using SQL in 'action':
+PostgreSQL backend supports SQL in 'action':
 
 .. code-block:: properties
 
@@ -849,7 +849,7 @@ E.g., if client 'test' is online::
       1 | test     | 1     | emqx@127.0.0.1 | 2016-11-15 09:40:40 | NULL                | 2016-12-24 09:40:22
     (1 rows)
 
-Client 'test" is offline::
+Client 'test' is offline::
 
     select * from mqtt_client where clientid = 'test';
 
@@ -1378,7 +1378,7 @@ Customized CQL command parameters includes:
 Configure 'action' with CQL
 ---------------------------
 
-Cassandra backend supports using CLQ in 'action':
+Cassandra backend supports CLQ in 'action':
 
 .. code-block:: properties
 

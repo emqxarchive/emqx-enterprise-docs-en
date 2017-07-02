@@ -24,7 +24,7 @@ Deployed under Linux, EMQ X allows 100k concurrent connections by default. To ac
 System-Wide File Handles
 ------------------------
 
-Maximun file handles:
+Maximum file handles:
 
 .. code-block:: console
 
@@ -33,7 +33,7 @@ Maximun file handles:
     sysctl -w fs.nr_open=262144
     echo 262144 > /proc/sys/fs/nr_open
 
-Maximum of file handles for current session:
+Maximum file handles for current session:
 
 .. code-block:: console
 
@@ -66,7 +66,7 @@ Note: Under Ubuntu, '/etc/systemd/system.conf' is to be modified:
 EMQ X Node Name
 ---------------
 
-Set the node name and cookies(communicating between nodes)
+Set the node name and cookies(required by communication between nodes)
 
 '/etc/emqx/emqx.conf' on emqx1::
 
@@ -114,15 +114,13 @@ Check the cluster status on any node::
 
     Cluster status: [{running_nodes,['emqx1@192.168.0.10','emqx@192.168.0.20']}]
 
------------------------------
-Managing utlizing Web Console
------------------------------
+-----------
+Web Console
+-----------
 
-'emqx-dashboard' plugin starts the web management and provides the management service on port 18083.
+'emqx-dashboard' plugin presents a web management console on port 18083. The status of cluster nodes, statistic of MQTT message, MQTT clients, MQTT sessions and routing informations are available in this console.
 
-Web console URL: http://localhost:18083/, default user-name: admin, password: public.
-
-Through the web console, the status of cluster nodes, statistic of MQTT message, MQTT clients, MQTT sessions and routing informations can be inquired.
+Web console URL: http://localhost:18083/, default username: admin, password: public.
 
 .. _tcp_ports:
 
@@ -130,7 +128,7 @@ Through the web console, the status of cluster nodes, statistic of MQTT message,
 TCP Ports of MQTT Service
 -------------------------
 
-By default, EMQ X starts following services on these ports:
+EMQ X services and associated ports:
 
 +-----------+-----------------------------------+
 | 1883      | MQTT                              |
@@ -166,7 +164,7 @@ By commenting out or deleting the above config, the related TCP services are dis
 TCP Port for Clustering
 -----------------------
 
-The firewalls must allow the nodes access each other on the following ports:
+Following ports of the firewalls between nodes should be accessible.
 
 +-----------+-----------------------------------+
 | 4369      | Node discovery port               |
