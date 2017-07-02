@@ -15,7 +15,7 @@ Typical deployment architecture:
 Load Balancer (LB)
 ------------------
 
-The Load Balancer (LB) distributes MQTT connections and traffic from devices across the EMQ X clusters. LB enhances the HA of the clusters, balances the loads among the cluster noes and makes the dynamic expansion possible.
+The Load Balancer (LB) distributes MQTT connections and traffic from devices across the EMQ X clusters. LB enhances the HA of the clusters, balances the loads among the cluster nodes and makes the dynamic expansion possible.
 
 It is recommended that SSL connections are terminated by a LB. The links between devices and the LB are secured by SSL, while the links between the LB and EMQ X cluster nodes are plain TCP connections. By this setup, a single EMQ X cluster can serve a million devices.
 
@@ -47,7 +47,7 @@ Recommend AWS with ELB for a public cloud deployment, and HAProxy for a private 
 EMQ X Cluster
 -------------
 
-EMQ X cluster nodes are deployed behind LB. It is suggested that the nodes are deployed on VPCs or on a private network. Cloud provider -- like AWS, Azure or QingCloud  -- usually provides VPC network.
+EMQ X cluster nodes are deployed behind LB. It is suggested that the nodes are deployed on VPCs or on a private network. Cloud provider, such as AWS, Azure or QingCloud, usually provides VPC network.
 
 EMQ X Provides the MQTT service on following TCP ports by default:
 
@@ -61,9 +61,9 @@ EMQ X Provides the MQTT service on following TCP ports by default:
 | 8084      | MQTT/WebSocket/SSL                |
 +-----------+-----------------------------------+
 
-According to the protocol and ports, the firewall should make the relevant ports accessible. 
+Firewall should make the relevant ports accessible for public. 
 
-For the clustering, the following ports of EMQ X node are used:
+Following ports are opened for cluster internal communication:
 
 +-----------+-----------------------------------+
 | 4369      | Node discovery port               |
@@ -73,7 +73,7 @@ For the clustering, the following ports of EMQ X node are used:
 | 6369      | Cluster channel                   |
 +-----------+-----------------------------------+
 
-When firewalls are deployed between nodes, the firewalls should be configured that the above ports are inter-accessible between the nodes.
+If deployed between nodes, firewalls should be configured that the above ports are inter-accessible between the nodes.
 
 -----------------------
 Deploying on QingCloud
@@ -144,7 +144,7 @@ Deploying on private network
 Direct connection of EMQ X cluster
 ----------------------------------
 
-EMQ X cluster DNS-resolvable and the clients access the cluster via domain name or IP list:
+EMQ X cluster should be DNS-resolvable and the clients access the cluster via domain name or IP list:
 
 1. Deploy EMQ X cluster. Please refer to the sections of 'Installation' and 'EMQ X nodes clustering' for details.
 
@@ -157,7 +157,7 @@ EMQ X cluster DNS-resolvable and the clients access the cluster via domain name 
 HAProxy -> EMQ X
 ----------------
 
-HAProxy as LB for EMQ X cluster and terminates the SSL connections:
+HAProxy serves as a LB for EMQ X cluster and terminates the SSL connections:
 
 1. Create EMQ X Cluster nodes like following:
 
@@ -191,7 +191,7 @@ HAProxy as LB for EMQ X cluster and terminates the SSL connections:
 NGINX Plus -> EMQ X
 -------------------
 
-NGINX Plus as LB for EMQ X cluster and terminates the SSL connections:
+NGINX Plus serves as a LB for EMQ X cluster and terminates the SSL connections:
 
 1. Install the NGINX Plus. An instruction for Ubuntu: https://cs.nginx.com/repo_setup
 
