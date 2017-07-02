@@ -11,7 +11,7 @@ Design of MQTT Auth
 
 EMQ X utilizes plugins to provide various Authentication mechanism. EMQ X supports username / password, ClientID and anonymous Auth. It also supports Auth integration with MySQL, PostgreSQL, Redis, MongoDB, HTTP and LDAP.
 
-By default, anonymous Auth is enabled by the system. By means of loading multiple Auth plugins, an Auth chain can be thus built:
+Anonymous Auth is enabled by default. An Auth chain can be built of multiple Auth plugins:
 
 .. image:: _static/images/7.png
 
@@ -19,7 +19,7 @@ By default, anonymous Auth is enabled by the system. By means of loading multipl
 Anonymous Auth
 ---------------
 
-Anonymous Auth is the last measure of Auth chain. By default, it is enabled in file 'etc/emqx.conf'. We suggest disabling it in production deployment:
+Anonymous Auth is the last validation of Auth chain. By default, it is enabled in file 'etc/emqx.conf'. Recommended to disable it in production deployment:
 
 .. code-block:: properties
 
@@ -30,13 +30,13 @@ Anonymous Auth is the last measure of Auth chain. By default, it is enabled in f
 Access Control List (ACL)
 -------------------------
 
-EMQ X Server utilizes Access Control List (ACL) to realize the access control on the clients.
+EMQ X Server utilizes Access Control List (ACL) to realize the access control upon clients.
 
 ACL defines::
 
     Allow|Deny Whom Subscribe|Publish Topics
 
-When MQTT clients subscribe to topics or publish messages, the EMQ X access control module tries to match the rules in the list till successfully matching otherwise it fallbacks to default routine:
+When MQTT clients subscribe to topics or publish messages, the EMQ X access control module tries to check against all rules in the list till a first match. Otherwise it fallbacks to default routine if no match found:
 
 .. image:: _static/images/6.png
 
@@ -157,7 +157,7 @@ Load Username Auth plugin:
 
 After the plugin is loaded, there are two possible ways to add users:
 
-1. Modify the 'emqx_auth_username.conf' and add user using plain text::
+1. Modify the 'emqx_auth_username.conf' and add user in plain text::
 
     auth.user.1.username = admin
     auth.user.1.password = public
@@ -241,7 +241,7 @@ Load HTTP Auth/ACL plugin:
 MySQL Auth/ACL Plugin
 ---------------------
 
-Create MQTT users/ACL' database, and configure the ACL and Auth queries in the 'emqx_auth_mysql.conf' file:
+Create MQTT users' ACL database, and configure the ACL and Auth queries in the 'emqx_auth_mysql.conf' file:
 
 MQTT Auth User List
 -------------------
