@@ -58,7 +58,7 @@ The default port MQTT/SSL listener is 8883:
 Shared Subscription
 -------------------
 
-Shared Subscription supports Load balancing to distribute MQTT messages between multiple subscribers in the same group::
+Shared Subscription supports Load balancing to distribute MQTT messages between multiple subscribers in the same group:
 
 .. image:: _static/images/9_1.png
 
