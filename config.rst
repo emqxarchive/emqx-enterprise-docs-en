@@ -370,9 +370,10 @@ EMQ X creates a session for each MQTT connection:
 +---------------------------+---------------------------------------------------------------+
 | session.upgrade_qos       | Upgrade QoS according to subscription                         |
 +---------------------------+---------------------------------------------------------------+
-| session.max_inflight      | Inflight window. Maximum allowed simultaneous QoS1/2 packet.  |
-|                           | 0 means unlimited. Higher value means higher throughput while |
-|                           | lower value means stricter packet transmission order.         |
+| session.max_inflight      | Inflight window.                                              |
+|                           | Maximum allowed simultaneous QoS1/2 packet.                   |
+|                           | 0 means unlimited. Higher value means higher throughput       |
+|                           | while lower value means stricter packet transmission order.   |
 +---------------------------+---------------------------------------------------------------+
 | session.retry_interval    | Retry interval between QoS1/2 messages and PUBACK messages    |
 +---------------------------+---------------------------------------------------------------+
