@@ -160,7 +160,11 @@ List all Clients on a Node
 
 Definition::
 
-    GET api/v2/nodes/{node_name}/clients?curr_page={page_no}&page_size={page_size}
+    GET api/v2/nodes/{node_name}/clients
+
+Request parameter::
+
+    curr_page={page_no}&page_size={page_size}
 
 Example Request::
 
@@ -239,8 +243,6 @@ Definition::
 
 Example Request::
 
-.. code-block:: bash
-
     GET api/v2/clients/C_1492145414740
 
 Response:
@@ -276,7 +278,7 @@ List all Sessions on a Node
 
 Definition::
 
-    GET  api/v2/node/{node_name}/sessions?curr_page=1&page_size=20
+    GET api/v2/node/{node_name}/sessions?curr_page=1&page_size=20
 
 Example Request::
 
@@ -313,7 +315,7 @@ Response:
     }
     
 Retrieve a Session on a Node
----------------------------
+----------------------------
 
 Definition::
 
@@ -395,7 +397,11 @@ List all Subscriptions of a Node
 
 Definition::
 
-    GET api/v2/nodes/{node_name}/subscriptions?curr_page={page_no}&page_size={page_size}
+    GET api/v2/nodes/{node_name}/subscriptions
+    
+Request parameters::
+
+    curr_page={page_no}&page_size={page_size}
 
 Example Request::
 
@@ -471,6 +477,15 @@ Reqeust parameters:
         "client_id": "C_1492145414740"
     }
 
+Response:
+
+.. code-block:: json
+
+    {
+        "code": 0,
+        "result": []
+    }
+
 ------
 Routes
 ------
@@ -509,7 +524,7 @@ Response:
     }
 
 Retrieve a Route in the Cluster
-------------------------------
+-------------------------------
 
 Definition::
 
