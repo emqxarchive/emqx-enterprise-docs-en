@@ -482,6 +482,10 @@ Definition::
 
     GET api/v2/routes
 
+Request parameters::
+
+    curr_page={page_no}&page_size={page_size}
+
 Response:
 
 .. code-block:: json
@@ -1012,6 +1016,206 @@ Response:
     {
         "code": 0,
         "result": []
+    }
+
+-------
+Metrics
+-------
+
+Get Metrics of all Nodes
+-------------------------
+
+Definition::
+
+    GET api/v2/monitoring/metrics/
+
+Response:
+
+.. code-block:: json
+
+    {
+        "code": 0,
+        "result": {
+            "emqx@127.0.0.1":
+            {
+                "packets/disconnect":0,
+                "messages/dropped":0,
+                "messages/qos2/received":0,
+                "packets/suback":0,
+                "packets/pubcomp/received":0,
+                "packets/unsuback":0,
+                "packets/pingresp":0,
+                "packets/puback/missed":0,
+                "packets/pingreq":0,
+                "messages/retained":3,
+                "packets/sent":0,
+                "messages/qos2/dropped":0,
+                "packets/unsubscribe":0,
+                "packets/pubrec/missed":0,
+                "packets/connack":0,
+                "messages/received":0,
+                "packets/pubrec/sent":0,
+                "packets/publish/received":0,
+                "packets/pubcomp/sent":0,
+                "bytes/received":0,
+                "packets/connect":0,
+                "packets/puback/received":0,
+                "messages/sent":0,
+                "packets/publish/sent":0,
+                "bytes/sent":0,
+                "packets/pubrel/missed":0,
+                "packets/puback/sent":0,
+                "messages/qos0/received":0,
+                "packets/subscribe":0,
+                "packets/pubrel/sent":0,
+                "messages/forward":0,
+                "messages/qos2/sent":0,
+                "packets/received":0,
+                "packets/pubrel/received":0,
+                "messages/qos1/received":0,
+                "messages/qos1/sent":0,
+                "packets/pubrec/received":0,
+                "packets/pubcomp/missed":0,
+                "messages/qos0/sent":0
+            }
+        }
+    }
+
+Get Metrics of a Node
+---------------------
+
+Definition::
+
+    GET api/v2/monitoring/metrics/{node_name}
+
+Example Request::
+
+    GET api/v2/monitoring/metrics/emqx@127.0.0.1
+
+Response:
+
+.. code-block:: json
+
+    {
+        "code": 0,
+        "result": {
+            "packets/disconnect":0,
+            "messages/dropped":0,
+            "messages/qos2/received":0,
+            "packets/suback":0,
+            "packets/pubcomp/received":0,
+            "packets/unsuback":0,
+            "packets/pingresp":0,
+            "packets/puback/missed":0,
+            "packets/pingreq":0,
+            "messages/retained":3,
+            "packets/sent":0,
+            "messages/qos2/dropped":0,
+            "packets/unsubscribe":0,
+            "packets/pubrec/missed":0,
+            "packets/connack":0,
+            "messages/received":0,
+            "packets/pubrec/sent":0,
+            "packets/publish/received":0,
+            "packets/pubcomp/sent":0,
+            "bytes/received":0,
+            "packets/connect":0,
+            "packets/puback/received":0,
+            "messages/sent":0,
+            "packets/publish/sent":0,
+            "bytes/sent":0,
+            "packets/pubrel/missed":0,
+            "packets/puback/sent":0,
+            "messages/qos0/received":0,
+            "packets/subscribe":0,
+            "packets/pubrel/sent":0,
+            "messages/forward":0,
+            "messages/qos2/sent":0,
+            "packets/received":0,
+            "packets/pubrel/received":0,
+            "messages/qos1/received":0,
+            "messages/qos1/sent":0,
+            "packets/pubrec/received":0,
+            "packets/pubcomp/missed":0,
+            "messages/qos0/sent":0
+        }
+    }
+
+----------
+Statistics
+----------
+
+Get Statistics of all Nodes
+----------------------------
+
+Definition::
+
+    GET api/v2/monitoring/stats
+
+Example Request::
+
+    GET api/v2/monitoring/stats
+
+Response:
+
+.. code-block:: json
+
+    {
+        "code": 0,
+        "result": {
+            "emqx@127.0.0.1":
+            {
+                "clients/count":0,
+                "clients/max":0,
+                "retained/count":0,
+                "retained/max":0,
+                "routes/count":0,
+                "routes/max":0,
+                "sessions/count":0,
+                "sessions/max":0,
+                "subscribers/count":0,
+                "subscribers/max":0,
+                "subscriptions/count":0,
+                "subscriptions/max":0,
+                "topics/count":0,
+                "topics/max":0
+            }
+        }
+    }
+
+Get Statistics of a Node
+------------------------
+
+Definition::
+
+    GET api/v2/monitoring/stats/{node_name}
+
+Example Request::
+
+    GET api/v2/monitoring/stats/emqx@127.0.0.1
+
+Response:
+
+.. code-block:: json
+
+    {
+        "code": 0,
+        "result": {
+            "clients/count":0,
+            "clients/max":0,
+            "retained/count":0,
+            "retained/max":0,
+            "routes/count":0,
+            "routes/max":0,
+            "sessions/count":0,
+            "sessions/max":0,
+            "subscribers/count":0,
+            "subscribers/max":0,
+            "subscriptions/count":0,
+            "subscriptions/max":0,
+            "topics/count":0,
+            "topics/max":0
+        }
     }
 
 ----------
