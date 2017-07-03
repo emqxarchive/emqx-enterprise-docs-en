@@ -365,26 +365,52 @@ EMQ X creates a session for each MQTT connection:
     ## s - second
     mqtt.session.expiry_interval = 2h
 
-+---------------------------+---------------------------------------------------------------+
-| session.max_subscriptions | Maximum allowed subscriptions                                 |
-+---------------------------+---------------------------------------------------------------+
-| session.upgrade_qos       | Upgrade QoS according to subscription                         |
-+---------------------------+---------------------------------------------------------------+
-| session.max_inflight      | Inflight window.                                              |
-|                           | Maximum allowed simultaneous QoS1/2 packet.                   |
-|                           | 0 means unlimited. Higher value means higher throughput       |
-|                           | while lower value means stricter packet transmission order.   |
-+---------------------------+---------------------------------------------------------------+
-| session.retry_interval    | Retry interval between QoS1/2 messages and PUBACK messages    |
-+---------------------------+---------------------------------------------------------------+
-| session.max_awaiting_rel  | Maximum number of packets awaiting PUBREL packet              |
-+---------------------------+---------------------------------------------------------------+
-| session.await_rel_timeout | Timeout for awaiting PUBREL                                   |
-+---------------------------+---------------------------------------------------------------+
-| session.enable_stats      | Enable session stats                                          |
-+---------------------------+---------------------------------------------------------------+
-| session.expiry_interval   | Session expiry time.                                          |
-+---------------------------+---------------------------------------------------------------+
+..    
+    +----------------------------+------------------------------------------------------------+
+    | session.max_subscriptions  | Maximum allowed subscriptions                              |
+    +----------------------------+------------------------------------------------------------+
+    | session.upgrade_qos        | Upgrade QoS according to subscription                      |
+    +----------------------------+------------------------------------------------------------+
+    | session.max_inflight       | Inflight window.                                           |
+    |                            |                                                            |
+    |                            | Maximum allowed simultaneous QoS1/2 packet.                |
+    |                            |                                                            |
+    |                            | 0 means unlimited. Higher value means higher throughput    |
+    |                            |                                                            |
+    |                            | while lower value means stricter packet transmission order.|
+    +----------------------------+------------------------------------------------------------+
+    | session.retry_interval     | Retry interval between QoS1/2 messages and PUBACK messages |
+    +----------------------------+------------------------------------------------------------+
+    | session.max_awaiting_rel   | Maximum number of packets awaiting PUBREL packet           |
+    +----------------------------+------------------------------------------------------------+
+    | session.await_rel_timeout  | Timeout for awaiting PUBREL                                |
+    +----------------------------+------------------------------------------------------------+
+    | session.enable_stats       | Enable session stats                                       |
+    +----------------------------+------------------------------------------------------------+
+    | session.expiry_interval    | Session expiry time.                                       |
+    +----------------------------+------------------------------------------------------------+
+
+.. list-table:: 
+    :widths: 50 100
+    :header-rows: 0
+
+    * - session.max_subscriptions
+      - Maximum allowed subscriptions
+    * - session.upgrade_qos
+      - Upgrade QoS according to subscription
+    * - session.max_inflight
+      - Inflight window. Maximum allowed simultaneous QoS1/2 packet. 0 means unlimited. Higher value means higher throughput while lower value means stricter packet transmission order.
+    * - session.retry_interval
+      - Retry interval between QoS1/2 messages and PUBACK messages
+    * - session.max_awaiting_rel
+      - Maximum number of packets awaiting PUBREL packet
+    * - session.await_rel_timeout
+      - Timeout for awaiting PUBREL
+    * - session.enable_stats
+      - Enable session stats
+    * - session.expiry_interval
+      - Session expiry time.
+
 
 ------------------
 MQTT Message Queue

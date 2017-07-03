@@ -34,7 +34,7 @@ On the dashboard, following information can be queried: Status of EMQ X, statist
 Dashboard Listener
 ------------------
 
-Config file: 'emqx_dashboard.conf'，default port of listener: 18083.
+Config file: 'emqx_dashboard.conf', default port of listener: 18083.
 
 .. code-block:: properties
 

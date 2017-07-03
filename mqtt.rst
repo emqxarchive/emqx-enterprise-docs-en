@@ -272,7 +272,7 @@ Besides TCP, MQTT Protocol supports WebSocket as transport layer. A client can c
 
 When using MQTT WebSocket protocol, binary mode must be used and header of sub-protocol must be carried::
 
-    Sec-WebSocket-Protocol: mqttv3.1 （or mqttv3.1.)1
+    Sec-WebSocket-Protocol: mqttv3.1 (or mqttv3.1.)1
 
 .. _mqtt_client_libraries:
 
