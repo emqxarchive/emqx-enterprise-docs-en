@@ -315,7 +315,7 @@ Following hooks are defined:
 
 EMQ X uses (`Chain-of-responsibility_pattern`_) to implement hook mechanism. The callback functions registered to hook will be executed one by one:
 
-.. image:: ./_static/images/hooks_chain.jpg
+.. image:: ./_static/images/11_6.png
 
 The input parameters for a callback function depend on the types of hook. Clone the emqx_plugin_template project to check the parameter in detail: 
 
