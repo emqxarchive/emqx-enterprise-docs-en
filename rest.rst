@@ -10,19 +10,19 @@ Data API
 
 Client::
 
-    GET  api/v2/node/{node_name}/clients?curr_page=1&page_size=20
+    GET  api/v2/nodes/{node_name}/clients?curr_page=1&page_size=20
 
 Session::
 
-    GET  api/v2/node/{node_name}/sessions?curr_page=1&page_size=20
+    GET  api/v2/nodes/{node_name}/sessions?curr_page=1&page_size=20
 
 Route::
    
-    GET  api/v2/node/{node_name}/routers?curr_page=1&page_size=20
+    GET  api/v2/routers?curr_page=1&page_size=20
 
 Subscription::
 
-    GET  api/v2/node/{node_name}/subscriptions?curr_page=1&page_size=20
+    GET  api/v2/nodes/{node_name}/subscriptions?curr_page=1&page_size=20
 
 Clients on a Node
 -----------------
@@ -240,7 +240,7 @@ Routes in a Cluster
 
 .. code-block:: bash
 
-    GET api/v2/nodes/emqx@127.0.0.1/routers
+    GET api/v2/routers
 
 Response
 
@@ -267,12 +267,13 @@ Response
 
 
 
-A Route in a Cluster
+
+A Topic of a Router
 --------------------
 
 .. code-block:: bash
 
-    GET api/v2/nodes/emqx@127.0.0.1/routers/$client/C_1492145414740
+    GET api/v2/routers/topic
 
 Response
 
@@ -285,35 +286,7 @@ Response
             "objects":
             [
                 {
-                    "topic": "$client/C_1492145414740",
-                    "node": "emqx@127.0.0.1"
-                }
-            ]
-        }
-    }
-    
-
-
-
-A Client of a Router
---------------------
-
-.. code-block:: bash
-
-    GET api/v2/routers/$client/C_1492145414740
-
-Response
-
-.. code-block:: json
-
-    {
-        "code": 0,
-        "result":
-        {
-            "objects":
-            [
-                {
-                    "topic": "$client/C_1492145414740",
+                    "topic": "topic",
                     "node": "emqx@127.0.0.1"
                 }
             ]
