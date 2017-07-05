@@ -11,7 +11,7 @@ MQTT Message Persistence
 One-to-one message Persistence
 ------------------------------
 
-.. image:: ./_static/images/backend_queue.png
+.. image:: ./_static/images/backends_1.png
 
 1. PUB publishes a message;
 
@@ -28,7 +28,7 @@ One-to-one message Persistence
 Many-to-many message Persistence
 --------------------------------
 
-.. image:: ./_static/images/backend_pubsub.png
+.. image:: ./_static/images/backends_2.png
 
 1. PUB publishes a message;
 

@@ -13,7 +13,7 @@ Distributed Erlang/OTP
 
 Erlang/OTP is a concurrent, fault-tolerant, distributed programming platform. A distributed Erlang/OTP system consists of a number of Erlang runtime systems called ‘node’. Nodes connect to each other with TCP/IP sockets and communicate by Message Passing:
 
-.. image:: _static/images/10_1.png
+.. image:: _static/images/clustering_1.png
 
 Node
 ----------
@@ -102,7 +102,7 @@ Suppose that we create subscriptions:
 
 Finally the topic trie and route table in the cluster:
 
-.. image:: _static/images/10_2.png
+.. image:: _static/images/clustering_2.png
 
 Message Route and Deliver
 ----------------------------
@@ -119,7 +119,7 @@ Suppose client1 PUBLISH a message to the topic ‘t/a’, the message Route and 
     node2-->client2: Deliver[t/#]
     node3-->client3: Deliver[t/a]
 
-.. image:: ./_static/images/route.png
+.. image:: ./_static/images/design_9.png
 
 --------------------
 EMQ X Cluster Setup 

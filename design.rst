@@ -13,7 +13,7 @@ Introduction
 
 Upgraded from EMQ R1, EMQ X R 2.0 separated the Message Flow Plane and Monitor/Control Plane. This makes possible of sustaining million-level MQTT connections. Separating of Flow Plane and Monitor/Control Plane also makes the EMQ cluster more reliable and provides higher performance. The Architecture of EMQ X R2 is like following:
 
-.. image:: _static/images/11_1.png
+.. image:: _static/images/design_1.png
 
 EMQ X supports MQTT message persistence to Redis, MySQL, PostgreSQL, MongoDB and Cassandra. It can bridge and forward MQTT messages to enterprise middleware like Kafka and RabbitMQ.
 
@@ -24,7 +24,7 @@ The full asynchronous architecture of EMQ message broker is based on Erlang/OTP 
 
 A MQTT message from Publisher to Subscriber, is asynchronously processed in the EMQ X broker by a series of Erlang processes:
 
-.. image:: _static/images/11_2.png
+.. image:: _static/images/design_2.png
 
 Message Persistence
 -------------------
@@ -42,7 +42,7 @@ Concept
 
 The EMQ X broker looks much like a network Switch or Router, not a traditional enterprise message queue. Compare with a network router that routes packets based on IP or MPLS label, the EMQ broker routes MQTT messages against topics.
 
-.. image:: ./_static/images/concept.png
+.. image:: ./_static/images/design_3.png
 
 Design Philosophy
 -----------------
@@ -115,7 +115,7 @@ MQueue and Inflight Window
 
 Concept of Message Queue and Inflight Window:
 
-.. image:: _static/images/11_3.png
+.. image:: _static/images/design_4.png
 
 1. Inflight Window stores the delivered messages which is awaiting for PUBACK.
 
@@ -132,7 +132,7 @@ The 16-bit packetId is defined by MQTT protocol specification, used by client/se
 
 Format of the globally unique message id:
 
-.. image:: _static/images/11_4.png
+.. image:: _static/images/design_5.png
 
 1. Timestamp: erlang:system_time if Erlang >= R18, otherwise os:timestamp
 
@@ -144,7 +144,7 @@ Format of the globally unique message id:
 
 The PacketId and MessageId in an End-to-End Message PubSub Sequence:
 
-.. image:: _static/images/11_5.png
+.. image:: _static/images/design_6.png
 
 .. _route_layer:
 
@@ -154,7 +154,7 @@ PubSub Layer
 
 The PubSub layer maintains a subscription table and is responsible to dispatch MQTT messages to subscribers.
 
-.. image:: ./_static/images/dispatch.jpg
+.. image:: ./_static/images/design_7.png
 
 MQTT messages will be dispatched to the subscriber’s session, which finally delivers the messages to client.
 
@@ -168,11 +168,11 @@ The routing(distributed) layer maintains and replicates the global Topic Trie an
 
 For example, if node1 subscribed ‘t/+/x’ and ‘t/+/y’, node2 subscribed ‘t/#’ and node3 subscribed ‘t/a’, there will be a topic trie and route table:
 
-.. image:: _static/images/10_2.png
+.. image:: ./_static/images/design_8.png
 
 The routing layer would route MQTT messages among clustered nodes by topic trie match and routing table lookup:
 
-.. image:: ./_static/images/route.png
+.. image:: ./_static/images/design_9.png
 
 .. _auth_acl:
 
@@ -315,7 +315,7 @@ Following hooks are defined:
 
 EMQ X uses (`Chain-of-responsibility_pattern`_) to implement hook mechanism. The callback functions registered to hook will be executed one by one:
 
-.. image:: ./_static/images/11_6.png
+.. image:: ./_static/images/design_10.png
 
 The input parameters for a callback function depend on the types of hook. Clone the emqx_plugin_template project to check the parameter in detail: 
 
