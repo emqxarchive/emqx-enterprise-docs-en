@@ -188,17 +188,17 @@ MQTT Message QoS is not end to end, but between the client and the server. The Q
 Qos0 Message Publish & Subscribe
 --------------------------------
 
-.. image:: ./_static/images/qos0_seq.png
+.. image:: ./_static/images/mqtt_1.png
 
 Qos1 Message Publish & Subscribe
 ---------------------------------
 
-.. image:: ./_static/images/qos1_seq.png
+.. image:: ./_static/images/mqtt_2.png
 
 Qos2 Message Publish & Subscribe
 ---------------------------------
 
-.. image:: ./_static/images/qos2_seq.png
+.. image:: ./_static/images/mqtt_3.png
 
 .. _mqtt_clean_session:
 

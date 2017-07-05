@@ -9,7 +9,7 @@ EMQ X Cluster can be deployed as an IoT Hub on an enterprise's private cloud, or
 
 Typical deployment architecture:
 
-.. image:: _static/images/emqx_deploy.png
+.. image:: _static/images/design_1.png
 
 ------------------
 Load Balancer (LB)
@@ -97,11 +97,11 @@ Deploying on QingCloud
 
 6. Create MQTT TCP listener:
 
-.. image:: _static/images/1_1.png
+.. image:: _static/images/deploy_2.png
  
 Or create SSL listener and terminate the SSL connections on LB:
 
-.. image:: _static/images/2_1.png
+.. image:: _static/images/deploy_3.png
  
 7. Connect the MQTT clients to the LB using the public IP address and test the deployment.
 
@@ -129,11 +129,11 @@ Deploying on AWS
 
 7. Create MQTT TCP listener on the ELB:
 
-.. image:: _static/images/4_1.png
+.. image:: _static/images/deploy_4.png
 
-   Or create SSL listener and terminate the SSL connections on the ELB:
+Or create SSL listener and terminate the SSL connections on the ELB:
 
-.. image:: _static/images/5_1.png
+.. image:: _static/images/deploy_5.png
 
 8. Connect the MQTT clients to the ELB using the public IP address and test the deployment.
 

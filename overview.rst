@@ -101,7 +101,7 @@ Fastlane Subscription
 
 EMQ X supports Fastlane Subscription, it can greatly enhance the message routing efficiency and is thus very suitable for big data collection of IoT applications.
 
-.. image:: _static/images/fastlane.png
+.. image:: _static/images/overview_2.png
 
 Fastlane usage: *$fastlane/<Topic>*
 
@@ -112,7 +112,7 @@ Fastlane limitations:
 
 Fastlane subscription is suitable for IoT sensor data collection:
 
-.. image:: _static/images/3_1.png
+.. image:: _static/images/overview_3.png
 
 ----------------------
 Subscription by Broker
@@ -128,7 +128,7 @@ MQTT Data Persistence
 
 EMQ X supports MQTT data (subscription, messages, client online/offline status) persistence to Redis, MySQL, PostgreSQL, MongoDB and Cassandra databases:
 
-.. image:: _static/images/storage.png
+.. image:: _static/images/overview_4.png
 
 For details please refer to the "Backends" chapter.
 
@@ -138,5 +138,5 @@ Message Bridge & Forward
 
 EMQ X allows bridging and forwarding MQTT messages to message-oriented middleware such as RabbitMQ and Kafka. It can be deployed as an IoT Hub:
 
-.. image:: _static/images/iothub.png
+.. image:: _static/images/overview_5.png
 

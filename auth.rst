@@ -13,7 +13,7 @@ EMQ X utilizes plugins to provide various Authentication mechanism. EMQ X suppor
 
 Anonymous Auth is enabled by default. An Auth chain can be built of multiple Auth plugins:
 
-.. image:: _static/images/7.png
+.. image:: _static/images/authn_1.png
 
 ---------------
 Anonymous Auth
@@ -38,7 +38,7 @@ ACL defines::
 
 When MQTT clients subscribe to topics or publish messages, the EMQ X access control module tries to check against all rules in the list till a first match. Otherwise it fallbacks to default routine if no match found:
 
-.. image:: _static/images/6.png
+.. image:: _static/images/authn_2.png
 
 ---------------------------
 Default Access Control File

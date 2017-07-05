@@ -11,7 +11,7 @@ MQTT PUBLISH & SUBSCRIPTION
 
 MQTT is light weight publish/subscribe message transport protocol. EMQ X is a message broker implementing MQTT protocol:
 
-.. image:: ./_static/images/pubsub_concept.png
+.. image:: ./_static/images/guide_1.png
 
 When EMQ X is started, any clients that support MQTT protocol can connect to the EMQ X broker and then publish / subscribe messages.
 
@@ -60,7 +60,7 @@ Shared Subscription
 
 Shared Subscription supports Load balancing to distribute MQTT messages between multiple subscribers in the same group:
 
-.. image:: _static/images/9_1.png
+.. image:: ./_static/images/guide_2.png
 
 Two ways to create a shared subscription:
 
@@ -96,7 +96,7 @@ Fastlane Subscription
 
 EMQ X supports Fastlane subcription, it improves the message dispatching efficiency:
 
-.. image:: _static/images/fastlane.png
+.. image:: _static/images/guide_3.png
 
 Usage of Fastlane: *$fastlane/* prefix + topic
 
@@ -107,7 +107,7 @@ Limitation on Fastlane:
 
 Fastlane is suitable for IoT sensor data collection:
 
-.. image:: _static/images/9_2.png
+.. image:: _static/images/guide_4.png
 
 .. _http_publish:
 

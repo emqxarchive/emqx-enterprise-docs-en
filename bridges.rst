@@ -15,7 +15,7 @@ Kafka Bridge
 
 EMQ X bridges and forwards MQTT messages to Kafka cluster:
 
-.. image:: _static/images/8_1.png
+.. image:: _static/images/bridges_1.png
 
 Config file for Kafka bridge plugin: etc/plugins/emqx_bridge_kafka.conf
 
@@ -230,7 +230,7 @@ RabbitMQ Bridge
 
 EMQ X bridges and forwards MQTT messages to RabbitMQ cluster:
 
-.. image:: _static/images/8_2.png
+.. image:: _static/images/bridges_2.png
 
 Config file of RabbitMQ bridge plugin: etc/plugins/emqx_bridge_rabbit.conf
 
@@ -374,7 +374,7 @@ Bridging EMQ X Nodes
 
 EMQ X supports bridging between multiple nodes:
 
-.. image:: _static/images/8_3.png
+.. image:: _static/images/bridges_3.png
 
 Given EMQ nodes emqx1 and emqx2:
 
@@ -424,7 +424,7 @@ mosquitto Bridge
 
 Mosquitto can be bridged to EMQ X cluster using common MQTT connection:
 
-.. image:: _static/images/8_4.png
+.. image:: _static/images/bridges_4.png
 
 An example of mosquitto bridge plugin config file: mosquitto.conf::
 
