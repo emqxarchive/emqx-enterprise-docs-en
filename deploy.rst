@@ -9,7 +9,7 @@ EMQ X Cluster can be deployed as an IoT Hub on an enterprise's private cloud, or
 
 Typical deployment architecture:
 
-.. image:: _static/images/design_1.png
+.. image:: _static/images/deploy_1.png
 
 ------------------
 Load Balancer (LB)
