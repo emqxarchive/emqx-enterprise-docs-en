@@ -457,6 +457,12 @@ Redis Server Address
     ## Redis Server
     auth.redis.server = 127.0.0.1:6379
 
+    ## Redis Sentinel
+    ## auth.redis.server = 127.0.0.1:26379
+
+    ## Redis Sentinel Cluster name
+    ## auth.redis.sentinel = mymaster
+
     ## Redis Pool Size
     auth.redis.pool = 8
 
