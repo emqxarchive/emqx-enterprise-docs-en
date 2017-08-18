@@ -20,7 +20,7 @@ The REST API allows you to query MQTT clients, sessions, subscriptions, and rout
 | Retrieve a node’s statistics    | GET api/v2/monitoring/nodes/{node_name}                         |
 +---------------------------------+-----------------------------------------------------------------+
 |                                                                                                   |
-+---------------------------------+-----------------------------------------------------------------+
++---------------------------------------------------------------------------------------------------+
 | Clients                                                                                           |
 +---------------------------------+-----------------------------------------------------------------+
 | List all Clients on a Node      | GET api/v2/nodes/{node_name}/clients                            |
@@ -30,11 +30,13 @@ The REST API allows you to query MQTT clients, sessions, subscriptions, and rout
 | Retrieve a Client in the        | GET api/v2/clients/{client_id}                                  |
 | Cluster                         |                                                                 |
 +---------------------------------+-----------------------------------------------------------------+
+| Disconnect a Client             | DELETE api/v2/clients/{clientid}                                |
++---------------------------------+-----------------------------------------------------------------+
 |                                                                                                   |
 +---------------------------------------------------------------------------------------------------+
 | Sessions                                                                                          |
 +---------------------------------+-----------------------------------------------------------------+
-| List all Sessions on a Node     | GET api/v2/node/{node_name}/sessions?curr_page=1&page_size=20   |
+| List all Sessions on a Node     | GET api/v2/node/{node_name}/sessions                            |
 +---------------------------------+-----------------------------------------------------------------+
 | Retrieve a Session on a Node    | GET api/v2/nodes/{node_name}/sessions/{client_id}               |
 +---------------------------------+-----------------------------------------------------------------+
@@ -48,12 +50,13 @@ The REST API allows you to query MQTT clients, sessions, subscriptions, and rout
 | List all Subscriptions of       | GET api/v2/nodes/{node_name}/subscriptions                      |
 | a Node                          |                                                                 |
 +---------------------------------+-----------------------------------------------------------------+
+| List Subscriptions of a Client  | GET api/v2/nodes/{node_name}subscriptions/{cliet_id}            |
+| on a node                       |                                                                 |
++---------------------------------+-----------------------------------------------------------------+
 | List Subscriptions of a Client  | GET api/v2/subscriptions/{cliet_id}                             |
 +---------------------------------+-----------------------------------------------------------------+
-| Create a Subscription           | POST api/v2/mqtt/subscribe                                      |
-+---------------------------------+-----------------------------------------------------------------+
 |                                                                                                   |
-+---------------------------------+-----------------------------------------------------------------+
++---------------------------------------------------------------------------------------------------+
 | Routes                                                                                            |
 +---------------------------------+-----------------------------------------------------------------+
 | List all Routes in the Cluster  | GET api/v2/routes                                               |
@@ -61,41 +64,33 @@ The REST API allows you to query MQTT clients, sessions, subscriptions, and rout
 | Retrieve a Route in the Cluster | GET api/v2/routes/{topic}                                       |
 +---------------------------------+-----------------------------------------------------------------+
 |                                                                                                   |
++---------------------------------------------------------------------------------------------------+
+| Publish/Subscribe/Unsubscribe                                                                     |
 +---------------------------------+-----------------------------------------------------------------+
-| Users                                                                                             |
+| Publish MQTT Message            | POST api/v2/mqtt/publish                                        |
 +---------------------------------+-----------------------------------------------------------------+
-| User Login                      | POST /api/v2/auth                                               |
+| Subscribe                       | POST api/v2/mqtt/subscribe                                      |
 +---------------------------------+-----------------------------------------------------------------+
-| Create a new User               | POST /api/v2/users/                                             |
-+---------------------------------+-----------------------------------------------------------------+
-| Retrieve a User                 | GET /api/v2/users/{username}                                    |
-+---------------------------------+-----------------------------------------------------------------+
-| List all Users                  | GET /api/v2/users/                                              |
-+---------------------------------+-----------------------------------------------------------------+
-| Update a User                   | PUT /api/v2/users/{username}                                    |
-+---------------------------------+-----------------------------------------------------------------+
-| Delete a User (Except Admin)    | DELETE /api/v2/users/{username}                                 |
+| Unsubscribe                     | POST api/v2/mqtt/unsubscribe                                    |
 +---------------------------------+-----------------------------------------------------------------+
 |                                                                                                   |
-+---------------------------------+-----------------------------------------------------------------+
++---------------------------------------------------------------------------------------------------+
 | Plugins                                                                                           |
 +---------------------------------+-----------------------------------------------------------------+
 | List all Plugins of a Node      | GET /api/v2/nodes/{node_name}/plugins/                          |
 +---------------------------------+-----------------------------------------------------------------+
-| Start/Stop a Plugin             | PUT /api/v2/nodes/plugins/{name}                                |
-+---------------------------------+-----------------------------------------------------------------+
-| List all Listeners              | GET api/v2/listeners                                            |
-+---------------------------------+-----------------------------------------------------------------+
-| List listeners of a Node        | GET api/v2/listeners/{node_name}                                |
+| Start/Stop a Plugin on a node   | PUT /api/v2/nodes/{node_name}/plugins/{plugin_name}             |
 +---------------------------------+-----------------------------------------------------------------+
 |                                                                                                   |
 +---------------------------------------------------------------------------------------------------+
-| Messages                                                                                          |
+| Listeners                                                                                         |
 +---------------------------------+-----------------------------------------------------------------+
-| Publish MQTT Message            | POST api/v2/mqtt/publish                                        |
+| List all Listeners              | GET api/v2/monitoring/listeners                                 |
++---------------------------------+-----------------------------------------------------------------+
+| List listeners of a Node        | GET api/v2/monitoring/listeners/{node_name}                     |
 +---------------------------------+-----------------------------------------------------------------+
 |                                                                                                   |
-+---------------------------------+-----------------------------------------------------------------+
++---------------------------------------------------------------------------------------------------+
 | Metrics                                                                                           |
 +---------------------------------+-----------------------------------------------------------------+
 | Get Metrics of all Nodes        | GET api/v2/monitoring/metrics/                                  |
@@ -103,7 +98,7 @@ The REST API allows you to query MQTT clients, sessions, subscriptions, and rout
 | Get Metrics of a Node           | GET api/v2/monitoring/metrics/{node_name}                       |
 +---------------------------------+-----------------------------------------------------------------+
 |                                                                                                   |
-+---------------------------------+-----------------------------------------------------------------+
++---------------------------------------------------------------------------------------------------+
 | Statistics                                                                                        |
 +---------------------------------+-----------------------------------------------------------------+
 | Get Statistics of all Nodes     | GET api/v2/monitoring/stats                                     |
@@ -139,6 +134,10 @@ List all Nodes in the Cluster
 -----------------------------
 
 Definition::
+
+    GET api/v2/management/nodes
+
+Example Request::
 
     GET api/v2/management/nodes
 
@@ -197,6 +196,10 @@ Definition::
 
     GET api/v2/monitoring/nodes
 
+Example Request::
+
+    GET api/v2/monitoring/nodes
+
 Response:
 
 .. code-block:: json
@@ -223,7 +226,7 @@ Response:
     }
 
 Retrieve a node's statistics
----------------------------
+----------------------------
 
 Definition::
 
@@ -273,7 +276,7 @@ Request parameter::
 
 Example Request::
 
-    GET api/v2/nodes/emqx@127.0.0.1/clients
+    GET api/v2/nodes/emqx@127.0.0.1/clients?curr_page=1&page_size=20
 
 Response:
 
@@ -304,7 +307,7 @@ Response:
     }
 
 Retrieve a Client on a Node
---------------------------
+---------------------------
 
 Definition::
 
@@ -340,7 +343,7 @@ Response:
     }
 
 Retrieve a Client in the Cluster
--------------------------------
+--------------------------------
 
 Definition::
 
@@ -374,6 +377,27 @@ Response:
         }
     }
 
+Disconnect a Client
+-------------------
+
+Difinition::
+
+    DELETE api/v2/clients/{clientid}
+
+Expample Requst::
+    
+    DELETE api/v2/clients/C_1492145414740
+
+Response:
+
+.. code-block:: json
+    
+    {
+        "code":0,
+        "result":[]
+    }
+
+ 
 --------
 Sessions
 --------
@@ -383,11 +407,15 @@ List all Sessions on a Node
 
 Definition::
 
-    GET api/v2/node/{node_name}/sessions?curr_page=1&page_size=20
+    GET api/v2/node/{node_name}/sessions
+
+Request parameters::
+
+    curr_page={page_no}&page_size={page_size}
 
 Example Request::
 
-    GET api/v2/nodes/emqx@127.0.0.1/sessions
+    GET api/v2/nodes/emqx@127.0.0.1/sessions?curr_page=1&page_size=20
 
 Response:
 
@@ -456,8 +484,8 @@ Response:
         }
     }
 
-Retrieve a Session in the Cluster
---------------------------------
+Retrieve Sessions of a client in the Cluster
+---------------------------------------------
 
 Definition::
 
@@ -510,7 +538,7 @@ Request parameters::
 
 Example Request::
 
-    GET api/v2/nodes/emqx@127.0.0.1/subscriptions
+    GET api/v2/nodes/emqx@127.0.0.1/subscriptions?curr_page=1&page_size=20
 
 Response:
 
@@ -524,6 +552,36 @@ Response:
             "page_size": 20,
             "total_num": 1,
             "total_page": 1,
+            "objects":
+            [
+                {
+                    "client_id": "C_1492145414740",
+                    "topic": "$client/C_1492145414740",
+                    "qos": 1
+                }
+            ]
+        }
+    }
+    
+List Subscriptions of a client on a node
+----------------------------------------
+
+Definition::
+
+    GET api/v2/nodes/{node_name}/subscriptions/{clientid}
+
+Example Request::
+
+    GET api/v2/nodes/emqx@127.0.0.1/subscriptions/C_1492145414740
+
+Response:
+
+.. code-block:: json
+
+    {
+        "code": 0,
+        "result":
+        {
             "objects":
             [
                 {
@@ -565,32 +623,6 @@ Response:
         }
     }
 
-Create a Subscription
-----------------------
-
-Definition::
-
-    POST api/v2/mqtt/subscribe
-
-Reqeust parameters:
-
-.. code-block:: json
-
-    {
-        "topic": "test",
-        "qos": 1,
-        "client_id": "C_1492145414740"
-    }
-
-Response:
-
-.. code-block:: json
-
-    {
-        "code": 0,
-        "result": []
-    }
-
 ------
 Routes
 ------
@@ -605,6 +637,10 @@ Definition::
 Request parameters::
 
     curr_page={page_no}&page_size={page_size}
+    
+Example request::
+
+    GET api/v2/routes
 
 Response:
 
@@ -628,8 +664,8 @@ Response:
         }
     }
 
-Retrieve a Route in the Cluster
--------------------------------
+Retrieve Route Information of a Topic in the Cluster
+----------------------------------------------------
 
 Definition::
 
@@ -637,7 +673,7 @@ Definition::
 
 Example Request::
 
-    GET api/v2/routes/topic
+    GET api/v2/routes/test_topic
 
 Response:
 
@@ -650,157 +686,100 @@ Response:
             "objects":
             [
                 {
-                    "topic": "topic",
+                    "topic": "test_topic",
                     "node": "emqx@127.0.0.1"
                 }
             ]
         }
     }
 
------
-Users
------
+-----------------------------
+Publish/Subscribe/Unsubscribe
+-----------------------------
 
-User Login
-----------
-
-Definition::
-
-    POST /api/v2/auth
-
-Request parameters:
-    
-.. code-block:: json
-
-    {
-        "username": "admin",
-        "password": "public"
-    }
-
-Response:
-
-.. code-block:: json
-
-    {
-        "code": 0,
-        "result": []
-    }
-
-Create a new User
------------------
+Publish MQTT Message
+--------------------
 
 Definition::
 
-    POST /api/v2/users/
-
-Request parameters:
-
-.. code-block:: json
-    
-    {
-        "username": "root",
-        "password": "root",
-        "email": "admin@emqtt.io",
-        "role": "administrator",
-        "remark": "123"
-    }
-    
-Response:
-
-.. code-block:: json
-
-    {
-        "code": 0,
-        "result": []
-    }
-    
-Retrieve a User
----------------
-
-Definition::
-
-    GET /api/v2/users/{username}
-
-Response:
-
-.. code-block:: json
-
-    {
-        "code": 0,
-        "result":
-        {
-            "username": "root",
-            "email": "admin@emqtt.io",
-            "role": "administrator",
-            "remark": "123",
-            "created_at": "2017-04-14 13 (tel:2017041413):51:43"
-        }
-    }
-
-List all Users
---------------
-
-Definition::
-
-    GET /api/v2/users/
-
-Response:
-
-.. code-block:: json
-
-    {
-        "code": 0,
-        "result":
-        [
-            {
-                "username": "admin",
-                "email": "admin@emqtt.io",
-                "role": "administrator",
-                "remark": "administrator",
-                "created_at": "2017-04-07 10 (tel:2017040710):30:01"
-            },
-            {
-                "username": "root",
-                "email": "admin@emqtt.io",
-                "role": "administrator",
-                "remark": "123",
-                "created_at": "2017-04-14 13 (tel:2017041413):51:43"
-            }
-        ]
-    }
-
-Update a User
--------------
-
-Definition::
-
-    PUT /api/v2/users/{username}
+    POST api/v2/mqtt/publish
 
 Request parameters:
 
 .. code-block:: json
 
     {
-        "email": "admin@emqtt.io",
-        "role": "administrator",
-        "remark": "123456"
+        "topic"         : "test",
+        "payload"       : "hello",
+        "qos"           : 1,
+        "retain"        : false,
+        "client_id"     : "C_1492145414740"
     }
 
+.. NOTE:: "topic" is mandatory and other parameters are optional. by default "payload":"", "qos":0, "retain":false, "client_id":"http".
+
+Example request::
+
+    POST api/v2/mqtt/publish
+    
 Response:
 
-.. code-block:: bash
+.. code-block:: json
 
     {
         "code": 0,
         "result": []
     }
 
-Delete a User (Except Admin)
-----------------------------
+Subscribe
+---------
+
+Definition::
+  
+    POST api/v2/mqtt/subscribe
+
+Request parameters:
+
+.. code-block:: json
+
+    {
+        "topic"         : "test",
+        "qos"           : 1,
+        "client_id"     : "C_1492145414740"
+    }
+
+Example request::
+
+    POST api/v2/mqtt/subscribe
+
+Response:
+
+.. code-block:: json
+
+    {
+        "code"  : 0,
+        "result": []
+    }
+
+Unsubscribe
+-----------
 
 Definition::
 
-    DELETE /api/v2/users/{username}
+    POST api/v2/mqtt/unsubscribe
+
+Request parameters:
+
+.. code-block:: json
+
+    {
+        "topic"    : "test",
+        "client_id": "C_1492145414740"
+    }
+
+Example request::
+
+    POST api/v2/mqtt/unsubscribe
 
 Response:
 
@@ -811,6 +790,7 @@ Response:
         "result": []
     }
 
+ 
 -------
 Plugins
 -------
@@ -821,6 +801,10 @@ List all Plugins of a Node
 Definition::
 
     GET /api/v2/nodes/{node_name}/plugins/
+
+ Example request::
+
+     GET api/v2/nodes/emqx@127.0.0.1/plugins
 
 Response:
 
@@ -959,12 +943,12 @@ Response:
         ]
     }
 
-Start/Stop a Plugin
--------------------
+Start/Stop a Plugin on a node
+-----------------------------
 
 Definition::
 
-    PUT /api/v2/nodes/plugins/{name}
+    PUT /api/v2/nodes/{node_name}/plugins/{plugin_name}
 
 Request parameters:
 
@@ -974,6 +958,10 @@ Request parameters:
         "active": true/false,
     }
 
+Example request::
+
+    PUT api/v2/nodes/emqx@127.0.0.1/plugins/emqx_recon
+    
 Response:
 
 .. code-block:: json
@@ -983,12 +971,16 @@ Response:
         "result": []
     }
 
+---------
+Listeners
+---------
+
 List all Listeners
 ------------------
 
 Definition::
 
-    GET api/v2/listeners
+    GET api/v2/monitoring/listeners
 
 Response:
 
@@ -1049,11 +1041,11 @@ List listeners of a Node
 
 Definition::
 
-    GET api/v2/listeners/{node_name}
+    GET api/v2/monitoring/listeners/{node_name}
 
 Example Request::
 
-    GET api/v2/listeners/emqx@127.0.0.1
+    GET api/v2/monitoring/listeners/emqx@127.0.0.1
     
 Response:
 
@@ -1106,37 +1098,6 @@ Response:
         ]
     }
 
---------
-Messages
---------
-
-Publish MQTT Message
---------------------
-
-Definition::
-
-    POST api/v2/mqtt/publish
-
-Request parameters:
-
-.. code-block:: json
-
-    {
-        "topic": "test",
-        "payload": "hello",
-        "qos": 1,
-        "retain": false,
-        "client_id": "C_1492145414740"
-    }
-    
-Response:
-
-.. code-block:: json
-
-    {
-        "code": 0,
-        "result": []
-    }
 
 -------
 Metrics
@@ -1368,5 +1329,7 @@ Error Code
 | 110   | plugin has been loaded                  |
 +-------+-----------------------------------------+
 | 111   | plugin has been unloaded                |
++-------+-----------------------------------------+
+| 112   | user is not online                      |
 +-------+-----------------------------------------+
 
