@@ -18,8 +18,11 @@ EMQ X message broker can be extended by plugins. Ultilizing the module registrat
 +---------------------+-------------------------+----------------+---------------------------+
 | emqx_recon          | emqx_recon.conf         | Y              | Recon plugin              |
 +---------------------+-------------------------+----------------+---------------------------+
-| emqx_reloader       | emqx_reloader.conf      | Y              | Reloader plugin           |
+| emqx_reloader       | emqx_reloader.conf      | N              | Reloader plugin           |
 +---------------------+-------------------------+----------------+---------------------------+
+| emqx_web_hook       | emqx_web_hook.conf      | N              | Web Hook plugin           |
++---------------------+-------------------------+----------------+---------------------------+
+
 
 ----------------
 Dashboard Plugin
@@ -190,6 +193,44 @@ Reloader Plugin CLI
     ./bin/emqx_ctl reload
 
     reload <Module>             # Reload a Module
+
+---------------
+Web Hook Plugin
+---------------
+
+Web Hook Plugin is responsible for sending mqtt message via http post to the configured Web Server.
+
+Configuration
+-------------
+
+Config fiele emqx_web_hook.conf:
+
+.. code-block:: properties
+
+    ## http post web server
+    web.hook.api.url = http://127.0.0.1:8080
+
+    ## hook rule
+    web.hook.rule.client.connected.1     = {"action": "on_client_connected"}
+    web.hook.rule.client.disconnected.1  = {"action": "on_client_disconnected"}
+    web.hook.rule.client.subscribe.1     = {"action": "on_client_subscribe"}
+    web.hook.rule.client.unsubscribe.1   = {"action": "on_client_unsubscribe"}
+    web.hook.rule.session.created.1      = {"action": "on_session_created"}
+    web.hook.rule.session.subscribed.1   = {"action": "on_session_subscribed"}
+    web.hook.rule.session.unsubscribed.1 = {"action": "on_session_unsubscribed"}
+    web.hook.rule.session.terminated.1   = {"action": "on_session_terminated"}
+    web.hook.rule.message.publish.1      = {"action": "on_message_publish"}
+    web.hook.rule.message.delivered.1    = {"action": "on_message_delivered"}
+    web.hook.rule.message.acked.1        = {"action": "on_message_acked"}
+
+
+
+Load Web Hook Plugin
+---------------------
+
+.. code-block:: bash
+
+    ./bin/emqx_ctl plugins load emqx_web_hook
 
 .. _recon: http://ferd.github.io/recon/
 
