@@ -90,10 +90,10 @@ Config Connection Pool of Multiple Redis Servers:
     backend.redis.pool1.server = 127.0.0.1:6379
 
     ## Redis Sentinel
-    ## auth.redis.server = 127.0.0.1:26378
+    ## backend.redis.server = 127.0.0.1:26378
 
     ##Redis Sentinel Cluster name
-    ##auth.redis.sentinel = mymaster
+    ## backend.redis.sentinel = mymaster
 
     ## Redis Pool Size 
     backend.redis.pool1.pool_size = 8
