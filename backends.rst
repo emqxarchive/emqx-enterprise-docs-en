@@ -1016,9 +1016,10 @@ Config file: emqx_backend_mongo.conf
 Configure MongoDB Server
 ------------------------
 
-Connection pool of multiple PostgreSQL servers is supported:
+Connection pool of multiple MongoDB servers is supported:
 
 .. code-block:: properties
+
     ## MongoDB Server Pools
     ## Mongo Topology Type single|unknown|sharded|rs
     backend.mongo.pool1.type = single
