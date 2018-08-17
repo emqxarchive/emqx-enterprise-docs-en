@@ -85,4 +85,3 @@ MQTT TCP 或 SSL 监听器，设置单个连接发布消息速率限制：
     ## Default: 10 messages per minute
     ## listener.ssl.external.max_publish_rate = 10,60
 
-
