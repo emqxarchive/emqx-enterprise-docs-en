@@ -27,9 +27,9 @@ Configure Kafka Cluster
     ## Kafka Server
     bridge.kafka.pool1.server = 127.0.0.1:9092
 
-    ## Kafka Pool Size 
+    ## Kafka Pool Size
     bridge.kafka.pool1.pool_size = 8
-    
+
     ## Kafka Parition Strategy
     bridge.kafka.parition_strategy = random
 
@@ -37,7 +37,7 @@ Configure Kafka Bridge Hooks
 ----------------------------
 
 .. code-block:: properties
-    
+
     ## Client Connected Record Hook
     bridge.kafka.hook.client.connected.1 = {"action": "on_client_connected", "pool": "pool1", "topic": "client_connected"}
 
@@ -86,11 +86,11 @@ Forward Client Connected / Disconnected Events to Kafka
 Client goes online, EMQ X forwards 'client_connected' event message to Kafka:
 
 .. code-block:: javascript
-    
+
     topic = "client_connected",
     value = {
-             "client_id": ${clientid}, 
-             "node": ${node}, 
+             "client_id": ${clientid},
+             "node": ${node},
              "ts": ${ts}
             }
 
@@ -110,7 +110,7 @@ Forward Subscription Event to Kafka
 -----------------------------------
 
 .. code-block:: javascript
-    
+
     topic = session_subscribed
 
     value = {
@@ -125,7 +125,7 @@ Forward Unsubscription Event to Kafka
 --------------------------------------
 
 .. code-block:: javascript
-    
+
     topic = session_unsubscribed
 
     value = {
@@ -149,7 +149,7 @@ Forward MQTT Messages to Kafka
              "topic": ${topic},
              "payload": ${payload},
              "qos": ${qos},
-             "node": ${node}, 
+             "node": ${node},
              "ts": ${timestamp}
             }
 
@@ -157,7 +157,7 @@ Forwarding MQTT Message Deliver Event to Kafka
 -----------------------------------------------
 
 .. code-block:: javascript
-    
+
     topic = message_delivered
 
     value = {"client_id": ${clientid},
@@ -174,7 +174,7 @@ Forwarding MQTT Message Ack Event to Kafka
 -------------------------------------------
 
 .. code-block:: javascript
-    
+
     topic = message_acked
 
     value = {
@@ -206,14 +206,14 @@ Kafka consumes MQTT subscription messages::
 Kafka consumes MQTT published messages::
 
     sh kafka-console-consumer.sh --zookeeper localhost:2181 --topic message_publish --from-beginning
-    
+
 Kafka consumes MQTT message Deliver and Ack event messages::
 
     sh kafka-console-consumer.sh --zookeeper localhost:2181 --topic message_delivered --from-beginning
-    
+
     sh kafka-console-consumer.sh --zookeeper localhost:2181 --topic message_acked --from-beginning
-    
-.. NOTE:: the payload is base64 encoded 
+
+.. NOTE:: the payload is base64 encoded
 
 Enable Kafka Bridge
 -------------------
@@ -358,7 +358,7 @@ Sample code of Rabbit message Consumption in Python:
 Sample of RabbitMQ client coding in other programming languages::
 
     https://github.com/rabbitmq/rabbitmq-tutorials
-    
+
 Enable RabbitMQ Bridge
 ----------------------
 

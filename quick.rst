@@ -94,7 +94,7 @@ if EMQ X is installed using zip package::
 Clustering the EMQ X Nodes
 --------------------------
 
-Start the two nodes, then on the emqx1@192.168.0.10 run:: 
+Start the two nodes, then on the emqx1@192.168.0.10 run::
 
     $ ./bin/emqx_ctl cluster join emqx2@192.168.0.20
 
@@ -151,7 +151,7 @@ The ports can be configured in the 'Listeners' section of the file 'etc/emqx.con
 
     ## SSL Listener: 8883, 127.0.0.1:8883, ::1:8883
     listener.ssl.external = 8883
-    
+
     ## HTTP and WebSocket Listener
     listener.http.external = 8083
 

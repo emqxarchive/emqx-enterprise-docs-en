@@ -242,7 +242,7 @@ Default ACL is based on 'acl.conf'. If other Auth plugin(s), e.g. MySQL and Post
 
 Defining ACL rules in 'acl.conf'::
 
-    allow|deny user|IP_Address|ClientID PUBLISH|SUBSCRIBE TOPICS 
+    allow|deny user|IP_Address|ClientID PUBLISH|SUBSCRIBE TOPICS
 
 ACL rules are Erlang Tuples, which are matched one by one:
 
@@ -310,7 +310,7 @@ Max time interval from Socket connection to arrival of CONNECT packet:
 Force GC Client Connection
 --------------------------
 
-This parameter is used to optimize the CPU / memory occupancy of MQTT connection. When certain amount of messages are transferred, the connection is forced to GC: 
+This parameter is used to optimize the CPU / memory occupancy of MQTT connection. When certain amount of messages are transferred, the connection is forced to GC:
 
 .. code-block:: properties
 
@@ -365,7 +365,7 @@ EMQ X creates a session for each MQTT connection:
     ## s - second
     mqtt.session.expiry_interval = 2h
 
-..    
+..
     +----------------------------+------------------------------------------------------------+
     | session.max_subscriptions  | Maximum allowed subscriptions                              |
     +----------------------------+------------------------------------------------------------+
@@ -390,7 +390,7 @@ EMQ X creates a session for each MQTT connection:
     | session.expiry_interval    | Session expiry time.                                       |
     +----------------------------+------------------------------------------------------------+
 
-.. list-table:: 
+.. list-table::
     :widths: 50 100
     :header-rows: 0
 
@@ -626,7 +626,7 @@ One way SSL authentication by default:
 
     ## listener.ssl.external.secure_renegotiate = off
 
-    ### A performance optimization setting, it allows clients to reuse 
+    ### A performance optimization setting, it allows clients to reuse
     ### pre-existing sessions, instead of initializing new ones.
     ### Read more about it here.
     listener.ssl.external.reuse_sessions = on

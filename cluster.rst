@@ -54,7 +54,7 @@ epmd(Erlang Port Mapper Daemon) is a daemon service that is responsible for mapp
 Cookie
 -------
 
-Erlang nodes authenticate each other by a magic cookie when communicating. 
+Erlang nodes authenticate each other by a magic cookie when communicating.
 
 The cookie could be configured by::
 
@@ -122,7 +122,7 @@ Suppose client1 PUBLISH a message to the topic ‘t/a’, the message Route and 
 .. image:: ./_static/images/design_9.png
 
 --------------------
-EMQ X Cluster Setup 
+EMQ X Cluster Setup
 --------------------
 
 Suppose we deploy two nodes cluster on s1.emqtt.io, s2.emqtt.io:
@@ -150,7 +150,7 @@ emqx@s1.emqtt.io Config
 
     node.name = emq@192.168.0.10
 
-Or using the environment variable:: 
+Or using the environment variable::
 
     export EMQX_NODE_NAME=emqx@s1.emqtt.io && ./bin/emqx start
 
@@ -225,18 +225,18 @@ Consider two load-balanced nodes in a cluster: node1 and node2. A MQTT client co
 Firewalls
 ----------
 
-If there are firewalls between the nodes, the 4369 port, 5369 port and a TCP port range shall be made available. The 4369 is for epmd port mapping and the 5369 is used for nodes' data communication and the tcp port range is for nodes' clustering communication. 
+If there are firewalls between the nodes, the 4369 port, 5369 port and a TCP port range shall be made available. The 4369 is for epmd port mapping and the 5369 is used for nodes' data communication and the tcp port range is for nodes' clustering communication.
 
 Ports shall be made available on firewall:
 
 +--------------+----------------------------------+
 | Port         | Usage                            |
 +--------------+----------------------------------+
-| 4369         | epmd port mapping                | 
+| 4369         | epmd port mapping                |
 +--------------+----------------------------------+
-| 5369         | Nodes' data communication        | 
+| 5369         | Nodes' data communication        |
 +--------------+----------------------------------+
-| 6369         | Nodes's clustering communication | 
+| 6369         | Nodes's clustering communication |
 +--------------+----------------------------------+
 
 Modify the 'emqx.conf' in line with the firewall configuration:

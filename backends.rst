@@ -1,3 +1,4 @@
+
 .. _backends:
 
 ========
@@ -38,7 +39,7 @@ Many-to-many message Persistence
 
 4. Backend retrieves the messages of this topic;
 
-5. Messages are sent to SUB1 and SUB2; 
+5. Messages are sent to SUB1 and SUB2;
 
 6. Backend records the read position of SUB1 and SUB2, the next message’s retrieval starts from this position.
 
@@ -95,10 +96,10 @@ Config Connection Pool of Multiple Redis Servers:
     ##Redis Sentinel Cluster name
     ## backend.redis.sentinel = mymaster
 
-    ## Redis Pool Size 
+    ## Redis Pool Size
     backend.redis.pool1.pool_size = 8
 
-    ## Redis database 
+    ## Redis database
     backend.redis.pool1.database = 1
 
     ## Redis subscribe channel
@@ -108,40 +109,40 @@ Configure Persistence Hooks
 ----------------------------
 
 .. code-block:: properties
-    
+
     ## Expired after seconds, if =< 0 take the default value
     backend.redis.msg.expired_after = 3600
-    
-    ## Client Connected Record 
+
+    ## Client Connected Record
     backend.redis.hook.client.connected.1    = {"action": {"function": "on_client_connected"}, "pool": "pool1"}
 
-    ## Subscribe Lookup Record 
+    ## Subscribe Lookup Record
     backend.redis.hook.client.connected.2    = {"action": {"function": "on_subscribe_lookup"}, "pool": "pool1"}
 
-    ## Client DisConnected Record 
+    ## Client DisConnected Record
     backend.redis.hook.client.disconnected.1 = {"action": {"function": "on_client_disconnected"}, "pool": "pool1"}
 
     ## Lookup Unread Message for one QOS > 0
     backend.redis.hook.session.subscribed.1  = {"topic": "queue/#", "action": {"function": "on_message_fetch_for_queue"}, "pool": "pool1"}
-    
+
     ## Lookup Unread Message for many QOS > 0
     backend.redis.hook.session.subscribed.2  = {"topic": "pubsub/#", "action": {"function": "on_message_fetch_for_pubsub"}, "pool": "pool1"}
 
-    ## Lookup Retain Message 
+    ## Lookup Retain Message
     backend.redis.hook.session.subscribed.3  = {"action": {"function": "on_retain_lookup"}, "pool": "pool1"}
 
     ## Store Publish Message  QOS > 0
     backend.redis.hook.message.publish.1     = {"topic": "#", "action": {"function": "on_message_publish"}, "pool": "pool1"}
 
-    ## Store Retain Message 
+    ## Store Retain Message
     backend.redis.hook.message.publish.2     = {"topic": "#", "action": {"function": "on_message_retain"}, "pool": "pool1"}
 
-    ## Delete Retain Message 
+    ## Delete Retain Message
     backend.redis.hook.message.publish.3     = {"topic": "#", "action": {"function": "on_retain_delete"}, "pool": "pool1"}
 
     ## Store Ack for one
     backend.redis.hook.message.acked.1       = {"topic": "queue/#", "action": {"function": "on_message_acked_for_queue"}, "pool": "pool1"}
-    
+
     ## Store Ack for many
     backend.redis.hook.message.acked.2       = {"topic": "pubsub/#", "action": {"function": "on_message_acked_for_pubsub"}, "pool": "pool1"}
 
@@ -201,7 +202,7 @@ Configure 'action' with Redis Commands
 Redis backend supports raw 'commands' in 'action', e.g.:
 
 .. code-block:: properties
-    
+
     ## After a client connected to the EMQ X server, it executes a redis command (multiple redis commands also supported)
     backend.redis.hook.client.connected.3 = {"action": {"commands": ["SET conn:${clientid} clientid"]}, "pool": "pool1"}
 
@@ -211,7 +212,7 @@ Using Redis Hash for Devices' Connection State
 *mqtt:client* Hash for devices' connection state::
 
     hmset
-    key = mqtt:client:${clientid} 
+    key = mqtt:client:${clientid}
     value = {state:int, online_at:timestamp, offline_at:timestamp}
 
     hset
@@ -222,9 +223,9 @@ Using Redis Hash for Devices' Connection State
 Lookup devices' connection state::
 
     HGETALL "mqtt:client:${clientId}"
-    
+
 E.g.: Client with ClientId 'test' goes online::
-    
+
     HGETALL mqtt:client:test
     1) "state"
     2) "1"
@@ -232,9 +233,9 @@ E.g.: Client with ClientId 'test' goes online::
     4) "1481685802"
     5) "offline_at"
     6) "undefined"
-    
+
 Client with ClientId 'test' goes offline::
-    
+
     HGETALL mqtt:client:test
     1) "state"
     2) "0"
@@ -257,7 +258,7 @@ Lookup retained message::
     HGETALL "mqtt:retain:${topic}"
 
 Lookup retained messages with a topic of 'retain'::
-    
+
     HGETALL mqtt:retain:topic
      1) "id"
      2) "6P9NLcJ65VXBbC22sYb4"
@@ -308,7 +309,7 @@ Using Redis Hash for Subscription
     value = ${qos}
 
 A client subscribes to a topic::
-    
+
     HSET mqtt:sub:${clientid} ${topic} ${qos}
 
 A client with ClientId of 'test' subscribes to topic1 and topic2::
@@ -317,13 +318,13 @@ A client with ClientId of 'test' subscribes to topic1 and topic2::
     HSET "mqtt:sub:test" "topic2" 2
 
 Lookup the subscribed topics of client with ClientId of 'test'::
- 
+
     HGETALL mqtt:sub:test
     1) "topic1"
     2) "1"
     3) "topic2"
     4) "2"
- 
+
 Redis SUB/UNSUB Publish
 -----------------------
 
@@ -331,7 +332,7 @@ When a device subscribes / unsubscribes to topics, EMQ X broker publish an event
 
     PUBLISH
     channel = "mqtt_channel"
-    message = {type: string , topic: string, clientid: string, qos: int} 
+    message = {type: string , topic: string, clientid: string, qos: int}
     \*type: [subscribe/unsubscribe]
 
 client with ClientID 'test' subscribe to 'topic0'::
@@ -394,28 +395,28 @@ Configure MySQL Persistence Hooks
 
 .. code-block:: properties
 
-    ## Client Connected Record 
+    ## Client Connected Record
     backend.mysql.hook.client.connected.1    = {"action": {"function": "on_client_connected"}, "pool": "pool1"}
 
-    ## Subscribe Lookup Record 
+    ## Subscribe Lookup Record
     backend.mysql.hook.client.connected.2    = {"action": {"function": "on_subscribe_lookup"}, "pool": "pool1"}
-    
-    ## Client DisConnected Record 
+
+    ## Client DisConnected Record
     backend.mysql.hook.client.disconnected.1 = {"action": {"function": "on_client_disconnected"}, "pool": "pool1"}
 
     ## Lookup Unread Message QOS > 0
     backend.mysql.hook.session.subscribed.1  = {"topic": "#", "action": {"function": "on_message_fetch"}, "pool": "pool1"}
 
-    ## Lookup Retain Message 
+    ## Lookup Retain Message
     backend.mysql.hook.session.subscribed.2  = {"topic": "#", "action": {"function": "on_retain_lookup"}, "pool": "pool1"}
 
     ## Store Publish Message  QOS > 0
     backend.mysql.hook.message.publish.1     = {"topic": "#", "action": {"function": "on_message_publish"}, "pool": "pool1"}
 
-    ## Store Retain Message 
+    ## Store Retain Message
     backend.mysql.hook.message.publish.2     = {"topic": "#", "action": {"function": "on_message_retain"}, "pool": "pool1"}
 
-    ## Delete Retain Message 
+    ## Delete Retain Message
     backend.mysql.hook.message.publish.3     = {"topic": "#", "action": {"function": "on_retain_delete"}, "pool": "pool1"}
 
     ## Store Ack
@@ -446,7 +447,7 @@ Description of MySQL Persistence Hooks
 | message.acked          | #                      | on_message_acked        | Process ACK                      |
 +------------------------+------------------------+-------------------------+----------------------------------+
 
-SQL Parameters Description 
+SQL Parameters Description
 --------------------------
 
 +----------------------+---------------------------------------+----------------------------------------------------------------+
@@ -486,9 +487,9 @@ Create MySQL DB
 
 Import MySQL DB & Table Schema
 ------------------------------
-    
+
 .. code-block:: bash
-    
+
     mysql -u root -p mqtt < etc/sql/emqx_backend_mysql.sql
 
 .. NOTE:: DB name is free of choice
@@ -519,13 +520,13 @@ Query the client connection state:
 .. code-block:: sql
 
     select * from mqtt_client where clientid = ${clientid};
-    
+
 If client 'test' is online:
 
 .. code-block:: sql
 
     select * from mqtt_client where clientid = "test";
-    
+
     +----+----------+-------+----------------+---------------------+---------------------+---------------------+
     | id | clientid | state | node           | online_at           | offline_at          | created             |
     +----+----------+-------+----------------+---------------------+---------------------+---------------------+
@@ -538,7 +539,7 @@ If client 'test' is offline:
 .. code-block:: sql
 
     select * from mqtt_client where clientid = "test";
-    
+
     +----+----------+-------+----------------+---------------------+---------------------+---------------------+
     | id | clientid | state | node           | online_at           | offline_at          | created             |
     +----+----------+-------+----------------+---------------------+---------------------+---------------------+
@@ -575,15 +576,15 @@ E.g., client 'test' subscribes to 'test_topic1' and 'test_topic2':
 Query subscription of a client:
 
 .. code-block:: sql
-    
+
     select * from mqtt_sub where clientid = ${clientid};
 
 E.g., query the Subscription of client 'test':
 
 .. code-block:: sql
-    
+
     select * from mqtt_sub where clientid = "test";
-    
+
     +----+--------------+-------------+------+---------------------+
     | id | clientId     | topic       | qos  | created             |
     +----+--------------+-------------+------+---------------------+
@@ -598,7 +599,7 @@ MySQL Message Table
 *mqtt_msg* stores MQTT messages:
 
 .. code-block:: sql
-    
+
     DROP TABLE IF EXISTS `mqtt_msg`;
     CREATE TABLE `mqtt_msg` (
       `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
@@ -624,7 +625,7 @@ Query messages published by client 'test':
 .. code-block:: sql
 
     select * from mqtt_msg where sender = "test";
-    
+
     +----+-------------------------------+----------+--------+------+-----+--------+---------+---------------------+
     | id | msgid                         | topic    | sender | node | qos | retain | payload | arrived             |
     +----+-------------------------------+----------+--------+------+-----+--------+---------+---------------------+
@@ -639,7 +640,7 @@ MySQL Retained Message Table
 mqtt_retain stores retained messages:
 
 .. code-block:: sql
-    
+
     DROP TABLE IF EXISTS `mqtt_retain`;
     CREATE TABLE `mqtt_retain` (
       `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
@@ -665,7 +666,7 @@ Query retained messages with topic 'retain':
 .. code-block:: sql
 
     select * from mqtt_retain where topic = "retain";
-    
+
     +----+----------+-------------------------------+---------+------+------+---------+---------------------+
     | id | topic    | msgid                         | sender  | node | qos  | payload | arrived             |
     +----+----------+-------------------------------+---------+------+------+---------+---------------------+
@@ -679,7 +680,7 @@ MySQL Acknowledgement Table
 *mqtt_acked* stores acknowledgements from the clients:
 
 .. code-block:: sql
-    
+
     DROP TABLE IF EXISTS `mqtt_acked`;
     CREATE TABLE `mqtt_acked` (
       `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
@@ -746,28 +747,28 @@ Configure PostgreSQL Persistence Hooks
 
 .. code-block:: properties
 
-    ## Client Connected Record 
+    ## Client Connected Record
     backend.pgsql.hook.client.connected.1    = {"action": {"function": "on_client_connected"}, "pool": "pool1"}
 
-    ## Subscribe Lookup Record 
+    ## Subscribe Lookup Record
     backend.pgsql.hook.client.connected.2    = {"action": {"function": "on_subscribe_lookup"}, "pool": "pool1"}
 
-    ## Client DisConnected Record 
+    ## Client DisConnected Record
     backend.pgsql.hook.client.disconnected.1 = {"action": {"function": "on_client_disconnected"}, "pool": "pool1"}
 
     ## Lookup Unread Message QOS > 0
     backend.pgsql.hook.session.subscribed.1  = {"topic": "#", "action": {"function": "on_message_fetch"}, "pool": "pool1"}
 
-    ## Lookup Retain Message 
+    ## Lookup Retain Message
     backend.pgsql.hook.session.subscribed.2  = {"topic": "#", "action": {"function": "on_retain_lookup"}, "pool": "pool1"}
 
     ## Store Publish Message  QOS > 0
     backend.pgsql.hook.message.publish.1     = {"topic": "#", "action": {"function": "on_message_publish"}, "pool": "pool1"}
 
-    ## Store Retain Message 
+    ## Store Retain Message
     backend.pgsql.hook.message.publish.2     = {"topic": "#", "action": {"function": "on_message_retain"}, "pool": "pool1"}
 
-    ## Delete Retain Message 
+    ## Delete Retain Message
     backend.pgsql.hook.message.publish.3     = {"topic": "#", "action": {"function": "on_retain_delete"}, "pool": "pool1"}
 
     ## Store Ack
@@ -798,7 +799,7 @@ Description of PostgreSQL Persistence Hooks
 | message.acked          | #                      | on_message_acked        | Process ACK                      |
 +------------------------+------------------------+-------------------------+----------------------------------+
 
-SQL Parameters Description 
+SQL Parameters Description
 --------------------------
 
 
@@ -832,19 +833,19 @@ PostgreSQL backend supports SQL in 'action':
 
 Create PostgreSQL DB
 --------------------
-    
+
 .. code-block:: bash
 
     createdb mqtt -E UTF8 -e
 
 Import PostgreSQL DB & Table Schema
 -----------------------------------
-    
+
 .. code-block:: bash
-    
+
     \i etc/sql/emqx_backend_pgsql.sql
 
-.. NOTE:: DB name is free of choice 
+.. NOTE:: DB name is free of choice
 
 PostgreSQL Client Connection Table
 -----------------------------------
@@ -886,7 +887,7 @@ Client 'test' is offline::
 
 PostgreSQL Subscription Table
 -----------------------------
-    
+
 *mqtt_sub* stores subscriptions of clients::
 
     CREATE TABLE mqtt_sub(
@@ -906,18 +907,18 @@ E.g., client 'test' subscribes to topic 'test_topic1' and 'test_topic2':
     insert into mqtt_sub(clientid, topic, qos) values('test', 'test_topic2', 2);
 
 Query subscription of a client::
-    
+
     select * from mqtt_sub where clientid = ${clientid};
 
 Query subscription of client 'test'::
-    
+
     select * from mqtt_sub where clientid = 'test';
 
-     id | clientId     | topic       | qos  | created             
+     id | clientId     | topic       | qos  | created
     ----+--------------+-------------+------+---------------------
-      1 | test         | test_topic1 |    1 | 2016-12-24 17:09:05 
+      1 | test         | test_topic1 |    1 | 2016-12-24 17:09:05
       2 | test         | test_topic2 |    2 | 2016-12-24 17:12:51
-    (2 rows) 
+    (2 rows)
 
 PostgreSQL Message Table
 ------------------------
@@ -938,17 +939,17 @@ PostgreSQL Message Table
     );
 
 Query messages published by a client::
-    
+
     select * from mqtt_msg where sender = ${clientid};
 
 Query messages published by client 'test'::
 
     select * from mqtt_msg where sender = 'test';
 
-     id | msgid                         | topic    | sender | node | qos | retain | payload | arrived             
+     id | msgid                         | topic    | sender | node | qos | retain | payload | arrived
     ----+-------------------------------+----------+--------+------+-----+--------+---------+---------------------
-     1  | 53F98F80F66017005000004A60003 | hello    | test   | NULL |   1 |      0 | hello   | 2016-12-24 17:25:12 
-     2  | 53F98F9FE42AD7005000004A60004 | world    | test   | NULL |   1 |      0 | world   | 2016-12-24 17:25:45 
+     1  | 53F98F80F66017005000004A60003 | hello    | test   | NULL |   1 |      0 | hello   | 2016-12-24 17:25:12
+     2  | 53F98F9FE42AD7005000004A60004 | world    | test   | NULL |   1 |      0 | world   | 2016-12-24 17:25:45
     (2 rows)
 
 PostgreSQL Retained Message Table
@@ -977,18 +978,18 @@ Query retained messages with topic 'retain'::
 
     select * from mqtt_retain where topic = 'retain';
 
-     id | topic    | msgid                         | sender  | node | qos  | payload | arrived             
+     id | topic    | msgid                         | sender  | node | qos  | payload | arrived
     ----+----------+-------------------------------+---------+------+------+---------+---------------------
-      1 | retain   | 53F33F7E4741E7007000004B70001 | test    | NULL |    1 | www     | 2016-12-24 16:55:18 
+      1 | retain   | 53F33F7E4741E7007000004B70001 | test    | NULL |    1 | www     | 2016-12-24 16:55:18
     (1 rows)
- 
+
 PostgreSQL Acknowledgement Table
 --------------------------------
 
 *mqtt_acked* stores acknowledgements from the clients:
 
 .. code-block:: sql
-    
+
     CREATE TABLE mqtt_acked (
       id SERIAL primary key,
       clientid character varying(100),
@@ -1066,28 +1067,28 @@ Configure MongoDB Persistence Hooks
 
 .. code-block:: properties
 
-    ## Client Connected Record 
+    ## Client Connected Record
     backend.mongo.hook.client.connected.1    = {"action": {"function": "on_client_connected"}, "pool": "pool1"}
 
-    ## Subscribe Lookup Record 
+    ## Subscribe Lookup Record
     backend.mongo.hook.client.connected.2    = {"action": {"function": "on_subscribe_lookup"}, "pool": "pool1"}
-    
-    ## Client DisConnected Record 
+
+    ## Client DisConnected Record
     backend.mongo.hook.client.disconnected.1 = {"action": {"function": "on_client_disconnected"}, "pool": "pool1"}
 
     ## Lookup Unread Message QOS > 0
     backend.mongo.hook.session.subscribed.1  = {"topic": "#", "action": {"function": "on_message_fetch"}, "pool": "pool1"}
 
-    ## Lookup Retain Message 
+    ## Lookup Retain Message
     backend.mongo.hook.session.subscribed.2  = {"topic": "#", "action": {"function": "on_retain_lookup"}, "pool": "pool1"}
 
     ## Store Publish Message  QOS > 0
     backend.mongo.hook.message.publish.1     = {"topic": "#", "action": {"function": "on_message_publish"}, "pool": "pool1"}
 
-    ## Store Retain Message 
+    ## Store Retain Message
     backend.mongo.hook.message.publish.2     = {"topic": "#", "action": {"function": "on_message_retain"}, "pool": "pool1"}
 
-    ## Delete Retain Message 
+    ## Delete Retain Message
     backend.mongo.hook.message.publish.3     = {"topic": "#", "action": {"function": "on_retain_delete"}, "pool": "pool1"}
 
     ## Store Ack
@@ -1163,7 +1164,7 @@ E.g., if client 'test' is online:
 .. code-block:: javascript
 
     db.mqtt_client.findOne({clientid: "test"})
-    
+
     {
         "_id" : ObjectId("58646c9bdde89a9fb9f7fb73"),
         "clientid" : "test",
@@ -1178,7 +1179,7 @@ Client 'test' is offline:
 .. code-block:: javascript
 
     db.mqtt_client.findOne({clientid: "test"})
-    
+
     {
         "_id" : ObjectId("58646c9bdde89a9fb9f7fb73"),
         "clientid" : "test",
@@ -1211,9 +1212,9 @@ E.g., client 'test' subscribes to topic 'test_topic1' and 'test_topic2':
 Query subscription of client 'test':
 
 .. code-block:: javascript
-    
+
     db.mqtt_sub.find({clientid: "test"})
-    
+
     { "_id" : ObjectId("58646d90c65dff6ac9668ca1"), "clientid" : "test", "topic" : "test_topic1", "qos" : 1 }
     { "_id" : ObjectId("58646d96c65dff6ac9668ca2"), "clientid" : "test", "topic" : "test_topic2", "qos" : 2 }
 
@@ -1227,9 +1228,9 @@ MongoDB Message Collection
     {
         _id: int,
         topic: string,
-        msgid: string, 
-        sender: string, 
-        qos: 0,1,2, 
+        msgid: string,
+        sender: string,
+        qos: 0,1,2,
         retain: boolean (true, false),
         payload: string,
         arrived: timestamp
@@ -1241,20 +1242,20 @@ Query messages published by a client:
 
     db.mqtt_msg.find({sender: ${clientid}})
 
-Query messages published by client 'test': 
+Query messages published by client 'test':
 
 .. code-block:: javascript
-    
+
     db.mqtt_msg.find({sender: "test"})
-    { 
-        "_id" : 1, 
-        "topic" : "/World", 
-        "msgid" : "AAVEwm0la4RufgAABeIAAQ==", 
-        "sender" : "test", 
-        "qos" : 1, 
-        "retain" : 1, 
-        "payload" : "Hello world!", 
-        "arrived" : 1482976729 
+    {
+        "_id" : 1,
+        "topic" : "/World",
+        "msgid" : "AAVEwm0la4RufgAABeIAAQ==",
+        "sender" : "test",
+        "qos" : 1,
+        "retain" : 1,
+        "payload" : "Hello world!",
+        "arrived" : 1482976729
     }
 
 MongoDB Retained Message Collection
@@ -1266,9 +1267,9 @@ MongoDB Retained Message Collection
 
     {
         topic: string,
-        msgid: string, 
-        sender: string, 
-        qos: 0,1,2, 
+        msgid: string,
+        sender: string,
+        qos: 0,1,2,
         payload: string,
         arrived: timestamp
     }
@@ -1302,8 +1303,8 @@ MongoDB Acknowledgement Collection
 .. code-block:: javascript
 
     {
-        clientid: string, 
-        topic: string, 
+        clientid: string,
+        topic: string,
         mongo_id: int
     }
 
@@ -1325,13 +1326,13 @@ Config file: etc/plugins/emqx_backend_cassa.conf
 Configure Cassandra Cluster
 ----------------------------
 
-Multi node Cassandra cluster is supported: 
+Multi node Cassandra cluster is supported:
 
 .. code-block:: properties
-    
+
     ## Cassandra Node
     backend.ecql.pool1.nodes = 127.0.0.1:9042
-    
+
     ## Cassandra Pool Size
     backend.ecql.pool1.size = 8
 
@@ -1365,28 +1366,28 @@ Configure Cassandra Persistence Hooks
 
 .. code-block:: properties
 
-    ## Client Connected Record 
+    ## Client Connected Record
     backend.cassa.hook.client.connected.1    = {"action": {"function": "on_client_connected"}, "pool": "pool1"}
 
-    ## Subscribe Lookup Record 
+    ## Subscribe Lookup Record
     backend.cassa.hook.client.connected.2    = {"action": {"function": "on_subscription_lookup"}, "pool": "pool1"}
 
-    ## Client DisConnected Record 
+    ## Client DisConnected Record
     backend.cassa.hook.client.disconnected.1 = {"action": {"function": "on_client_disconnected"}, "pool": "pool1"}
 
     ## Lookup Unread Message QOS > 0
     backend.cassa.hook.session.subscribed.1  = {"topic": "#", "action": {"function": "on_message_fetch"}, "pool": "pool1"}
 
-    ## Lookup Retain Message 
+    ## Lookup Retain Message
     backend.cassa.hook.session.subscribed.2  = {"action": {"function": "on_retain_lookup"}, "pool": "pool1"}
 
     ## Store Publish Message  QOS > 0
     backend.cassa.hook.message.publish.1     = {"topic": "#", "action": {"function": "on_message_publish"}, "pool": "pool1"}
-    
+
     ## Delete Acked Record
     backend.cassa.hook.session.unsubscribed.1= {"topic": "#", action": {"cql": ["delete from acked where client_id = ${clientid} and topic = ${topic}"]}, "pool": "pool1"}
 
-    ## Store Retain Message 
+    ## Store Retain Message
     backend.cassa.hook.message.publish.2     = {"topic": "#", "action": {"function": "on_message_retain"}, "pool": "pool1"}
 
     ## Delete Retain Message
@@ -1425,23 +1426,23 @@ CQL Parameters Description
 
 Customized CQL command parameters includes:
 
-+----------------------+---------------------------------------+----------------------------------------------------------------+		
-| hook                 | Parameter                             | Example (${name} in CQL represents available parameter         |		
-+======================+=======================================+================================================================+		
-| client.connected     | clientid                              | insert into conn(clientid) values(${clientid})                 |		
-+----------------------+---------------------------------------+----------------------------------------------------------------+		
-| client.disconnected  | clientid                              | insert into disconn(clientid) values(${clientid})              |		
-+----------------------+---------------------------------------+----------------------------------------------------------------+		
-| session.subscribed   | clientid, topic, qos                  | insert into sub(topic, qos) values(${topic}, ${qos})           |		
-+----------------------+---------------------------------------+----------------------------------------------------------------+		
-| session.unsubscribed | clientid, topic                       | delete from sub where topic = ${topic}                         |		
-+----------------------+---------------------------------------+----------------------------------------------------------------+		
-| message.publish      | msgid, topic, payload, qos, clientid  | insert into msg(msgid, topic) values(${msgid}, ${topic})       |		
-+----------------------+---------------------------------------+----------------------------------------------------------------+		
-| message.acked        | msgid, topic, clientid                | insert into ack(msgid, topic) values(${msgid}, ${topic})       |		
-+----------------------+---------------------------------------+----------------------------------------------------------------+		
-| message.delivered    | msgid, topic, clientid                | insert into delivered(msgid, topic) values(${msgid}, ${topic}) |		
-+----------------------+---------------------------------------+----------------------------------------------------------------+		
++----------------------+---------------------------------------+----------------------------------------------------------------+
+| hook                 | Parameter                             | Example (${name} in CQL represents available parameter         |
++======================+=======================================+================================================================+
+| client.connected     | clientid                              | insert into conn(clientid) values(${clientid})                 |
++----------------------+---------------------------------------+----------------------------------------------------------------+
+| client.disconnected  | clientid                              | insert into disconn(clientid) values(${clientid})              |
++----------------------+---------------------------------------+----------------------------------------------------------------+
+| session.subscribed   | clientid, topic, qos                  | insert into sub(topic, qos) values(${topic}, ${qos})           |
++----------------------+---------------------------------------+----------------------------------------------------------------+
+| session.unsubscribed | clientid, topic                       | delete from sub where topic = ${topic}                         |
++----------------------+---------------------------------------+----------------------------------------------------------------+
+| message.publish      | msgid, topic, payload, qos, clientid  | insert into msg(msgid, topic) values(${msgid}, ${topic})       |
++----------------------+---------------------------------------+----------------------------------------------------------------+
+| message.acked        | msgid, topic, clientid                | insert into ack(msgid, topic) values(${msgid}, ${topic})       |
++----------------------+---------------------------------------+----------------------------------------------------------------+
+| message.delivered    | msgid, topic, clientid                | insert into delivered(msgid, topic) values(${msgid}, ${topic}) |
++----------------------+---------------------------------------+----------------------------------------------------------------+
 
 Configure 'action' with CQL
 ---------------------------
@@ -1453,7 +1454,7 @@ Cassandra backend supports CLQ in 'action':
     ## After a client is connected to the EMQ X server, it executes a CQL command(multiple command also supported):
     backend.cassa.hook.client.connected.3 = {"action": {"cql": ["insert into conn(clientid) values(${clientid})"]}, "pool": "pool1"}
 
-Initializing Cassandra 
+Initializing Cassandra
 ----------------------
 
 Create KeySpace:
@@ -1467,7 +1468,7 @@ Import Cassandra tables:
 
 .. code-block:: sql
 
-    cqlsh -e "SOURCE 'emqx_backend_cassa.cql'" 
+    cqlsh -e "SOURCE 'emqx_backend_cassa.cql'"
 
 .. NOTE:: KeySpace is free of choice
 
@@ -1488,11 +1489,11 @@ Cassandra Client Connection Table
 Query a client's connection state::
 
     select * from mqtt.client where clientid = ${clientid};
-    
+
 If client 'test' is online::
 
     select * from mqtt.client where clientid = 'test';
-    
+
      client_id | connected                       | disconnected  | node          | state
     -----------+---------------------------------+---------------+---------------+-------
           test | 2017-02-14 08:27:29.872000+0000 |          null | emqx@127.0.0.1|     1
@@ -1500,7 +1501,7 @@ If client 'test' is online::
 Client 'test' is offline::
 
     select * from mqtt.client where clientid = 'test';
-    
+
      client_id | connected                       | disconnected                    | node          | state
     -----------+---------------------------------+---------------------------------+---------------+-------
           test | 2017-02-14 08:27:29.872000+0000 | 2017-02-14 08:27:35.872000+0000 | emqx@127.0.0.1|     0
@@ -1523,23 +1524,23 @@ Client 'test' subscribes to topic 'test_topic1' and 'test_topic2'::
     insert into mqtt.sub(client_id, topic, qos) values('test', 'test_topic2', 2);
 
 Query subscriptions of a client::
-    
+
     select * from mqtt_sub where clientid = ${clientid};
 
 Query subscriptions of client 'test'::
-    
+
     select * from mqtt_sub where clientid = 'test';
 
      client_id | topic       | qos
     -----------+-------------+-----
           test | test_topic1 |   1
           test | test_topic2 |   2
-    
+
 Cassandra Message Table
 -----------------------
 
 *mqtt.msg* stores MQTT messages::
-    
+
     CREATE TABLE mqtt.msg (
         topic text,
         msgid text,
@@ -1558,7 +1559,7 @@ Query messages published by a client::
 Query messages published by client 'test'::
 
     select * from mqtt_msg where sender = 'test';
-    
+
      topic | msgid                | arrived                         | payload      | qos | retain | sender
     -------+----------------------+---------------------------------+--------------+-----+--------+--------
      hello | 2PguFrHsrzEvIIBdctmb | 2017-02-14 09:07:13.785000+0000 | Hello world! |   1 |      0 |   test
@@ -1568,7 +1569,7 @@ Cassandra Retained Message Table
 --------------------------------
 
 *mqtt.retain* stores retained messages::
-    
+
     CREATE TABLE mqtt.retain (
         topic text,
         msgid text,
@@ -1583,15 +1584,15 @@ Query retained messages with topic 'retain'::
 
     select * from mqtt_retain where topic = 'retain';
 
-     topic  | msgid                
+     topic  | msgid
     --------+----------------------
-     retain | 2PguFrHsrzEvIIBdctmb 
+     retain | 2PguFrHsrzEvIIBdctmb
 
 Cassandra Acknowledgement Table
 --------------------------------
 
 *mqtt.acked* stores acknowledgements from the clients::
-    
+
     CREATE TABLE mqtt.acked (
         client_id text,
         topic text,

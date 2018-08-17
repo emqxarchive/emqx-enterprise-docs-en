@@ -61,7 +61,7 @@ EMQ X Provides the MQTT service on following TCP ports by default:
 | 8084      | MQTT/WebSocket/SSL                |
 +-----------+-----------------------------------+
 
-Firewall should make the relevant ports accessible for public. 
+Firewall should make the relevant ports accessible for public.
 
 Following ports are opened for cluster internal communication:
 
@@ -92,17 +92,17 @@ Deploying on QingCloud
 +-------+-------------+
 
 4. Install and cluster EMQ X on these two hosts. Please refer to the sections of cluster installation for details.
-    
+
 5. Create LB and assign the public IP address.
 
 6. Create MQTT TCP listener:
 
 .. image:: _static/images/deploy_2.png
- 
+
 Or create SSL listener and terminate the SSL connections on LB:
 
 .. image:: _static/images/deploy_3.png
- 
+
 7. Connect the MQTT clients to the LB using the public IP address and test the deployment.
 
 ----------------
@@ -169,7 +169,7 @@ HAProxy serves as a LB for EMQ X cluster and terminates the SSL connections:
 | emqx2 | 192.168.0.3 |
 +-------+-------------+
 
-2. Modify the /etc/haproxy/haproxy.cfg accordingly. 
+2. Modify the /etc/haproxy/haproxy.cfg accordingly.
    An example::
 
     listen mqtt-ssl
@@ -233,5 +233,5 @@ NGINX Plus serves as a LB for EMQ X cluster and terminates the SSL connections:
 .. _AWS:        https://aws.amazon.com
 .. _aliyun:     https://www.aliyun.com
 .. _HAProxy:    https://www.haproxy.org
-.. _NGINX:      https://www.nginx.com 
+.. _NGINX:      https://www.nginx.com
 

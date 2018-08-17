@@ -47,7 +47,7 @@ Default Access Control File
 The default access control of EMQ X server is configured by the file acl.conf:
 
 .. code-block:: properties
-    
+
     ## ACL nomatch
     mqtt.acl_nomatch = allow
 
@@ -196,7 +196,7 @@ Load the LDAP Auth plugin:
 HTTP Auth/ACL Plugin
 ---------------------
 
-Configure the HTTP Auth/ACL in the 'emqx_auth_http.conf' file: 
+Configure the HTTP Auth/ACL in the 'emqx_auth_http.conf' file:
 
 .. code-block:: properties
 
@@ -296,10 +296,10 @@ MySQL Server Address
     auth.mysql.pool = 8
 
     ## Mysql Username
-    ## auth.mysql.username = 
+    ## auth.mysql.username =
 
     ## Mysql Password
-    ## auth.mysql.password = 
+    ## auth.mysql.password =
 
     ## Mysql Database
     auth.mysql.database = mqtt
@@ -398,7 +398,7 @@ Postgre Server Address
 
     auth.pgsql.username = root
 
-    #auth.pgsql.password = 
+    #auth.pgsql.password =
 
     auth.pgsql.database = mqtt
 
@@ -449,7 +449,7 @@ Redis/ACL Auth Plugin
 
 Config file: 'emqx_auth_redis.conf':
 
-Redis Server Address 
+Redis Server Address
 --------------------
 
 .. code-block:: properties
@@ -541,10 +541,10 @@ MongoDB Server
     auth.mongo.pool = 8
 
     ## Mongo User
-    ## auth.mongo.user = 
+    ## auth.mongo.user =
 
     ## Mongo Password
-    ## auth.mongo.password = 
+    ## auth.mongo.password =
 
     ## Mongo Database
     auth.mongo.database = mqtt
@@ -597,7 +597,7 @@ MongoDB Database
 
 .. NOTE:: The DB name and Collection name are free of choice
 
-Example of a MongoDB User Collection 
+Example of a MongoDB User Collection
 ------------------------------------
 
 .. code-block:: javascript

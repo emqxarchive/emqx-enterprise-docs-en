@@ -29,14 +29,14 @@ Features
 
 4. 1 byte Fixed header, 2bytes KeepAlive packet. Compact packet structure.
 
-5. Support QoS, reliable transmission. 
+5. Support QoS, reliable transmission.
 
 Applications
 ------------
 
-MQTT protocol is widely used in Internet of Things, Mobile Internet, smart hardware, automobile, energy and other industry. 
+MQTT protocol is widely used in Internet of Things, Mobile Internet, smart hardware, automobile, energy and other industry.
 
-1. IoT M2M communication, IoT big data collection 
+1. IoT M2M communication, IoT big data collection
 
 2. Mobile message push, Web message push
 
@@ -49,7 +49,7 @@ MQTT protocol is widely used in Internet of Things, Mobile Internet, smart hardw
 6. Smart city, telemedicine, distance education
 
 7. Energy industry
-   
+
 .. _mqtt_topic:
 
 ---------------------------------
@@ -265,7 +265,7 @@ Two ways to clean a retained message:
 .. _mqtt_websocket:
 
 -------------------------
-MQTT WebSocket Connection 
+MQTT WebSocket Connection
 -------------------------
 
 Besides TCP, MQTT Protocol supports WebSocket as transport layer. A client can connect to server and publish/subscribe through a WebSocket browser.
@@ -277,10 +277,10 @@ When using MQTT WebSocket protocol, binary mode must be used and header of sub-p
 .. _mqtt_client_libraries:
 
 ---------------------
-MQTT Client Library 
+MQTT Client Library
 ---------------------
 
-emqtt Client Library 
+emqtt Client Library
 --------------------
 
 emqtt project: https://github.com/emqtt
@@ -309,15 +309,15 @@ mqtt.org: https://github.com/mqtt/mqtt.github.io/wiki/libraries
 MQTT v.s. XMPP
 ------------------
 
-MQTT is designed to be light weight and easy to use. It is suitable for the mobile Internet and the Internet of Things. While XMPP is a product of the PC era. 
+MQTT is designed to be light weight and easy to use. It is suitable for the mobile Internet and the Internet of Things. While XMPP is a product of the PC era.
 
 1. MQTT uses a one-byte fixed header and two-byte KeepAlive packet, its packet has a size and simple to en/decode. While XMPP is encapsulated in XML, it is large in size and complicated in interaction.
 
 2. MQTT uses topic for routing, it is more flexible than XMPP's peer to peer routing based on JID.
 
-3. MQTT protocol doesn't define a payload format, thus it carries different higher level protocol with ease. While the XMPP uses XML for payload, it must encapsulate binary in Base64 format.   
+3. MQTT protocol doesn't define a payload format, thus it carries different higher level protocol with ease. While the XMPP uses XML for payload, it must encapsulate binary in Base64 format.
 
-4. MQTT supports message acknowledgement and QoS mechanism, which is absent in XMPP, thus MQTT is more reliable. 
+4. MQTT supports message acknowledgement and QoS mechanism, which is absent in XMPP, thus MQTT is more reliable.
 
 .. _emqttc: https://github.com/emqtt/emqttc
 .. _CocoaMQTT: https://github.com/emqtt/CocoaMQTT

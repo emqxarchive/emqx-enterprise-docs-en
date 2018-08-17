@@ -90,7 +90,7 @@ Consists of modules like Presence, Subscription, Rewrite and etc.
 Presence module
 ---------------
 
-Presence module published presence message to $SYS/ when a client connected or disconnected: 
+Presence module published presence message to $SYS/ when a client connected or disconnected:
 
 .. code-block:: properties
 
@@ -116,7 +116,7 @@ Subscription Module
 
     ## module.subscription.2.topic = $user/%u
     ## module.subscription.2.qos = 1
- 
+
 Rewrite Module
 --------------
 
