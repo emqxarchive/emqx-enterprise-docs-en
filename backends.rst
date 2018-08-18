@@ -857,8 +857,8 @@ PostgreSQL Client Connection Table
       clientid character varying(100),
       state integer,
       node character varying(100),
-      online_at integer,
-      offline_at integer,
+      online_at timestamp,
+      offline_at timestamp,
       created timestamp without time zone,
       UNIQUE (clientid)
     );
