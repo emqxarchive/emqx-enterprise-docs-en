@@ -1024,18 +1024,50 @@ Connection pool of multiple MongoDB servers is supported:
     ## MongoDB Server Pools
     ## Mongo Topology Type single|unknown|sharded|rs
     backend.mongo.pool1.type = single
+
     ## If type rs, need config setname
     ## backend.mongo.pool1.rs_set_name = testrs
+
     ## Mongo Server 127.0.0.1:27017,127.0.0.2:27017...
     backend.mongo.pool1.server = 127.0.0.1:27017
+
+    ## MongoDB Pool Size
     backend.mongo.pool1.c_pool_size = 8
+
+    ## MongoDB Database
     backend.mongo.pool1.database = mqtt
+
     ## Mongo User
     ## backend.mongo.pool1.login =  emqtt
     ## Mongo Password
     ## backend.mongo.pool1.password = emqtt
 
-    ## Value: unsafe | safe
+    ## MongoDB AuthSource
+    ## Value: String
+    ## Default: mqtt
+    ## backend.mongo.pool1.auth_source = admin
+
+    ## Whether to enable SSL connection.
+    ##
+    ## Value: true | false
+    ## backend.mongo.pool1.ssl = false
+
+    ## SSL keyfile.
+    ##
+    ## Value: File
+    ## backend.mongo.pool1.keyfile =
+
+    ## SSL certfile.
+    ##
+    ## Value: File
+    ## backend.mongo.pool1.certfile =
+
+    ## SSL cacertfile.
+    ##
+    ## Value: File
+    ## backend.mongo.pool1.cacertfile =
+
+    # Value: unsafe | safe
     ## backend.mongo.pool1.w_mode = safe
     ## Value: master | slave_ok
     ## backend.mongo.pool1.r_mode = slave_ok
@@ -1082,11 +1114,11 @@ Configure MongoDB Persistence Hooks
     ## Lookup Retain Message
     backend.mongo.hook.session.subscribed.2  = {"topic": "#", "action": {"function": "on_retain_lookup"}, "pool": "pool1"}
 
-    ## Store Publish Message  QOS > 0
-    backend.mongo.hook.message.publish.1     = {"topic": "#", "action": {"function": "on_message_publish"}, "pool": "pool1"}
+    ## Store Publish Message  QOS > 0, payload_format options mongo_json | plain_text
+    backend.mongo.hook.message.publish.1     = {"topic": "#", "action": {"function": "on_message_publish"}, "pool": "pool1", "payload_format": "mongo_json"}
 
-    ## Store Retain Message
-    backend.mongo.hook.message.publish.2     = {"topic": "#", "action": {"function": "on_message_retain"}, "pool": "pool1"}
+    ## Store Retain Message, payload_format options mongo_json | plain_text
+    backend.mongo.hook.message.publish.2     = {"topic": "#", "action": {"function": "on_message_retain"}, "pool": "pool1", "payload_format": "mongo_json"}
 
     ## Delete Retain Message
     backend.mongo.hook.message.publish.3     = {"topic": "#", "action": {"function": "on_retain_delete"}, "pool": "pool1"}
