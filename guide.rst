@@ -268,7 +268,7 @@ Clients -- Client Statistics
 | clients/max         | Maximum concurrent clients allowed          |
 +---------------------+---------------------------------------------+
 
-Sessions -- Session Statistics 
+Sessions -- Session Statistics
 ...............................
 
 +---------------------+---------------------------------------------+
@@ -279,7 +279,7 @@ Sessions -- Session Statistics
 | sessions/max        | Maximum concurrent session allowed          |
 +---------------------+---------------------------------------------+
 
-Subscriptions -- Subscription Statistics 
+Subscriptions -- Subscription Statistics
 ........................................
 
 +---------------------+---------------------------------------------+
@@ -306,7 +306,7 @@ Metrics -- Traffic/Packet/Message Statistics
 
 Topic prefix: $SYS/brokers/${node}/metrics/
 
-Traffic 
+Traffic
 ............
 
 +---------------------+---------------------------------------------+
@@ -350,7 +350,7 @@ MQTT Packet Statistics
 | packets/disconnect       | Count of received DISCONNECT packets  |
 +--------------------------+---------------------------------------+
 
-MQTT Message Statistic 
+MQTT Message Statistic
 ......................
 
 +--------------------------+--------------------------------+

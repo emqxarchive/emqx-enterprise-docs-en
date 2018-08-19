@@ -37,7 +37,7 @@ EMQ X separates Message routing and message persistence. It supports message per
 Architecture
 ------------
 
-Concept 
+Concept
 --------
 
 The EMQ X broker looks much like a network Switch or Router, not a traditional enterprise message queue. Compare with a network router that routes packets based on IP or MPLS label, the EMQ broker routes MQTT messages against topics.
@@ -180,7 +180,7 @@ The routing layer would route MQTT messages among clustered nodes by topic trie 
 Authentication & ACL
 ---------------------
 
-EMQ X supports an extensible authentication and ACL mechanism, which is implemented in emqx_access_control, emqx_auth_mod and emqx_acl_mod. 
+EMQ X supports an extensible authentication and ACL mechanism, which is implemented in emqx_access_control, emqx_auth_mod and emqx_acl_mod.
 
 emqx_access_control provides APIs for registering and unregistering Auth or ACL modules::
 
@@ -289,7 +289,7 @@ Define Hook
 
 EMQ X broker triggers hooks when: a client is connected / disconnected, topics are subscribed / unsubscribed or messages are published / delivered / acknowledged.
 
-Following hooks are defined: 
+Following hooks are defined:
 
 +------------------------+----------------------------------+
 | Hook                   | Description                      |
@@ -317,7 +317,7 @@ EMQ X uses (`Chain-of-responsibility_pattern`_) to implement hook mechanism. The
 
 .. image:: ./_static/images/design_10.png
 
-The input parameters for a callback function depend on the types of hook. Clone the emqx_plugin_template project to check the parameter in detail: 
+The input parameters for a callback function depend on the types of hook. Clone the emqx_plugin_template project to check the parameter in detail:
 
 +-----------------+------------------------+
 | Return          | Description            |

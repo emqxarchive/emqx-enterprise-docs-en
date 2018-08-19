@@ -5,7 +5,7 @@
 Plugins
 =======
 
-EMQ X message broker can be extended by plugins. Ultilizing the module registration and hook mechanism, developers can customize the broker with plugins to extended the authentication, access control, data persistence, bridge and management functions.
+EMQ X messaging broker can be extended by plugins. Ultilizing the module registration and hook mechanism, developers can customize the broker with plugins to extended the authentication, access control, data persistence, bridge and management functions.
 
 +---------------------+-------------------------+----------------+---------------------------+
 | Plugin              | Config file             | Load by default| Description               |
@@ -22,7 +22,6 @@ EMQ X message broker can be extended by plugins. Ultilizing the module registrat
 +---------------------+-------------------------+----------------+---------------------------+
 | emqx_web_hook       | emqx_web_hook.conf      | N              | Web Hook plugin           |
 +---------------------+-------------------------+----------------+---------------------------+
-
 
 ----------------
 Dashboard Plugin
@@ -90,7 +89,7 @@ Consists of modules like Presence, Subscription, Rewrite and etc.
 Presence module
 ---------------
 
-Presence module published presence message to $SYS/ when a client connected or disconnected: 
+Presence module published presence message to $SYS/ when a client connected or disconnected:
 
 .. code-block:: properties
 
@@ -116,7 +115,7 @@ Subscription Module
 
     ## module.subscription.2.topic = $user/%u
     ## module.subscription.2.qos = 1
- 
+
 Rewrite Module
 --------------
 

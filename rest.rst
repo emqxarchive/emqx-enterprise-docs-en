@@ -171,7 +171,7 @@ Definition::
 Example Request::
 
     GET api/v2/management/nodes/emqx@127.0.0.1
- 
+
 Response:
 
 .. code-block:: json
@@ -385,19 +385,19 @@ Difinition::
     DELETE api/v2/clients/{clientid}
 
 Expample Requst::
-    
+
     DELETE api/v2/clients/C_1492145414740
 
 Response:
 
 .. code-block:: json
-    
+
     {
         "code":0,
         "result":[]
     }
 
- 
+
 --------
 Sessions
 --------
@@ -446,7 +446,7 @@ Response:
             ]
         }
     }
-    
+
 Retrieve a Session on a Node
 ----------------------------
 
@@ -520,7 +520,7 @@ Response:
             ]
         }
     }
-    
+
 -------------
 Subscriptions
 -------------
@@ -531,7 +531,7 @@ List all Subscriptions of a Node
 Definition::
 
     GET api/v2/nodes/{node_name}/subscriptions
-    
+
 Request parameters::
 
     curr_page={page_no}&page_size={page_size}
@@ -562,7 +562,7 @@ Response:
             ]
         }
     }
-    
+
 List Subscriptions of a client on a node
 ----------------------------------------
 
@@ -592,7 +592,7 @@ Response:
             ]
         }
     }
-    
+
 List Subscriptions of a Client
 ------------------------------
 
@@ -637,7 +637,7 @@ Definition::
 Request parameters::
 
     curr_page={page_no}&page_size={page_size}
-    
+
 Example request::
 
     GET api/v2/routes
@@ -721,7 +721,7 @@ Request parameters:
 Example request::
 
     POST api/v2/mqtt/publish
-    
+
 Response:
 
 .. code-block:: json
@@ -735,7 +735,7 @@ Subscribe
 ---------
 
 Definition::
-  
+
     POST api/v2/mqtt/subscribe
 
 Request parameters:
@@ -790,7 +790,7 @@ Response:
         "result": []
     }
 
- 
+
 -------
 Plugins
 -------
@@ -952,7 +952,7 @@ Definition::
 
 Request parameters:
 
-.. code-block:: json 
+.. code-block:: json
 
     {
         "active": true/false,
@@ -961,7 +961,7 @@ Request parameters:
 Example request::
 
     PUT api/v2/nodes/emqx@127.0.0.1/plugins/emqx_recon
-    
+
 Response:
 
 .. code-block:: json
@@ -1035,7 +1035,7 @@ Response:
             ]
         }
     }
-    
+
 List listeners of a Node
 ------------------------
 
@@ -1046,7 +1046,7 @@ Definition::
 Example Request::
 
     GET api/v2/monitoring/listeners/emqx@127.0.0.1
-    
+
 Response:
 
 .. code-block:: json

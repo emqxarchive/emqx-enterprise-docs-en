@@ -25,7 +25,7 @@ EMQ X Enterprise Documentation
    plugins
    rest
    tune
+   ratelimit
    mqtt
    contact
-
 

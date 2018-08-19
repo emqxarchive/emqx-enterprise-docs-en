@@ -41,9 +41,9 @@ Features
 3. Persistence to Redis: subscriptions, client connection status, MQTT messages, retained messages, SUB/UNSUB events.
 
 4. Persistence to MySQL: subscriptions, client connection status, MQTT messages, retained messages.
-   
+
 5. Persistence to PostgreSQL: subscriptions, client connection status, MQTT messages, retained messages.
- 
+
 6. Persistence to MongoDB: subscriptions, client connection status, MQTT messages, retained messages.
 
 7. Bridge to Kafka: EMQ X forwards MQTT messages, client connected/disconnected event to Kafka.
@@ -133,7 +133,7 @@ EMQ X supports MQTT data (subscription, messages, client online/offline status) 
 For details please refer to the "Backends" chapter.
 
 ------------------------
-Message Bridge & Forward 
+Message Bridge & Forward
 ------------------------
 
 EMQ X allows bridging and forwarding MQTT messages to message-oriented middleware such as RabbitMQ and Kafka. It can be deployed as an IoT Hub:

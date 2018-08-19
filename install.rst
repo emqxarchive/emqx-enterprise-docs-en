@@ -139,7 +139,7 @@ EMQ X Linux General Packages:
 | Debian8(64-bit)     | emqx-enterprise-debian8-v2.1.0.zip       |
 +---------------------+------------------------------------------+
 
-Following is a demonstration of installing EMQ X on CentOS: 
+Following is a demonstration of installing EMQ X on CentOS:
 
 .. code-block:: bash
 
@@ -216,7 +216,7 @@ Install on Mac OS X
 
 Same procedure as Linux.
 
-Modify the 'etc/emqx.conf' file as following to check the MQTT massages on the console: 
+Modify the 'etc/emqx.conf' file as following to check the MQTT massages on the console:
 
 .. code-block:: properties
 
@@ -265,5 +265,5 @@ Enter the running container::
 .. _AWS:        https://aws.amazon.com
 .. _aliyun:     https://www.aliyun.com
 .. _HAProxy:    https://www.haproxy.org
-.. _NGINX:      https://www.nginx.com 
+.. _NGINX:      https://www.nginx.com
 

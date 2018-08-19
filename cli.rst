@@ -69,7 +69,7 @@ Query statistics of MQTT Client, Session, Topic, Subscription and Route::
 broker metrics
 --------------
 
-Query metrics of Bytes, MQTT Packets and Messages(sent/received):: 
+Query metrics of Bytes, MQTT Packets and Messages(sent/received)::
 
     $ ./bin/emqx_ctl broker metrics
 
@@ -462,7 +462,7 @@ Unload a plugin::
 bridges
 -----------
 
-Bridge multiple EMQ X nodes:: 
+Bridge multiple EMQ X nodes::
 
                   ---------             ---------
     Publisher --> | node1 | --Bridge--> | node2 | --> Subscriber
