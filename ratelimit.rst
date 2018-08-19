@@ -5,13 +5,13 @@
 Rate Limit
 ==========
 
-EMQ X Enterprise 企业版支持多种限速方式，以保证系统可靠稳定运行。
+EMQ X Enterprise Edition supports rate limit in multiple aspects to ensure stability of the system.
 
 -------------------------
 Max Cocurrent Connections
 -------------------------
 
-MQTT TCP 或 SSL 监听器，配置最大允许并发连接数：
+MQTT TCP or SSL lister, set the maximum concurrent connections: 
 
 .. code-block:: properties
 
@@ -29,7 +29,7 @@ MQTT TCP 或 SSL 监听器，配置最大允许并发连接数：
 Max Connection Rate
 -------------------
 
-MQTT TCP 或 SSL 监听器，配置最大允许连接速率，默认每秒1000连接：
+MQTT TCP or SSL listener, set the maximum allowed connecting speed. It is set to 1000 connenctions per seconde by default: 
 
 .. code-block:: properties
 
@@ -47,7 +47,7 @@ MQTT TCP 或 SSL 监听器，配置最大允许连接速率，默认每秒1000�
 Traffic Rate Limit
 ------------------
 
-MQTT TCP 或 SSL 监听器，设置单个连接流量限制：
+MQTT TCP or SSL listener, set rate limit for a single connection:
 
 .. code-block:: properties
 
@@ -67,7 +67,7 @@ MQTT TCP 或 SSL 监听器，设置单个连接流量限制：
 Publish Rate Limit
 ------------------
 
-MQTT TCP 或 SSL 监听器，设置单个连接发布消息速率限制：
+MQTT TCP or SSL listenern, set message publishing rate limit for a single connection: 
 
 .. code-block:: properties
 
