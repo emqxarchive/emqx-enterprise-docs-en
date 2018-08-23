@@ -255,19 +255,19 @@ Configure RabbitMQ Cluster
     bridge.rabbit.1.virtual_host = /
 
     ## Rabbit Brokers heartbeat
-    bridge.rabbit.1.heartbeat = 0
+    bridge.rabbit.1.heartbeat = 30
 
     # bridge.rabbit.2.server = 127.0.0.1:5672
 
     # bridge.rabbit.2.pool_size = 8
 
-    # bridge.rabbit.1.username = guest
+    # bridge.rabbit.2.username = guest
 
-    # bridge.rabbit.1.password = guest
+    # bridge.rabbit.2.password = guest
 
-    # bridge.rabbit.1.virtual_host = /
+    # bridge.rabbit.2.virtual_host = /
 
-    # bridge.rabbit.1.heartbeat = 0
+    # bridge.rabbit.2.heartbeat = 30
 
 Configure RabbitMQ Bridge Hooks
 -------------------------------
@@ -283,7 +283,7 @@ Configure RabbitMQ Bridge Hooks
 
     bridge.rabbit.hook.message.publish.2 = {"topic": "#", "action": "on_message_publish", "rabbit": 1, "exchange": "topic:emq.pub"}
 
-    bridge.rabbit.hook.message.acked.1 = {"action": "on_message_acked", "rabbit": 1, "exchange": "topic:emq.acked"}
+    bridge.rabbit.hook.message.acked.1 = {"topic": "#", "action": "on_message_acked", "rabbit": 1, "exchange": "topic:emq.acked"}
 
 Forward Subscription Event to RabbitMQ
 ---------------------------------------
