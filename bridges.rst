@@ -25,60 +25,97 @@ Configure Kafka Cluster
 .. code-block:: properties
 
     ## Kafka Server
-    bridge.kafka.pool1.server = 127.0.0.1:9092
+    ## bridge.kafka.servers = 127.0.0.1:9092,127.0.0.2:9092,127.0.0.3:9092
+    bridge.kafka.servers = 127.0.0.1:9092
 
-    ## Kafka Pool Size
-    bridge.kafka.pool1.pool_size = 8
+    ## Kafka Parition Strategy. option value: per_partition | per_broker
+    bridge.kafka.connection_strategy = per_partition
 
-    ## Kafka Parition Strategy
-    bridge.kafka.parition_strategy = random
+    bridge.kafka.min_metadata_refresh_interval = 5S
+
+    ## Produce writes type. option value: sync | async
+    bridge.kafka.produce = sync
+
+    bridge.kafka.produce.sync_timeout = 3S
+
+    ## Base directory for replayq to store messages on disk.
+    ## If this config entry if missing or set to undefined,
+    ## replayq works in a mem-only manner.
+    ## i.e. messages are not queued on disk -- in such case,
+    ## the send or send_sync API callers are responsible for
+    ## possible message loss in case of application,
+    ## network or kafka disturbances. For instance,
+    ## in the wolff:send API caller may trap_exit then
+    ## react on parition-producer worker pid's 'EXIT'
+    ## message to issue a retry after restarting the producer.
+    ## bridge.kafka.replayq_dir = /tmp/emqx_bridge_kafka/
+
+    ## default=10MB, replayq segment size.
+    ## bridge.kafka.producer.replayq_seg_bytes = 10MB
+
+    ## producer required_acks. option value all_isr | leader_only | none.
+    bridge.kafka.producer.required_acks = none
+
+    ## default=10000. Timeout leader wait for replicas before reply to producer.
+    ## bridge.kafka.producer.ack_timeout = 10S
+
+    ## default number of message sets sent on wire before block waiting for acks
+    ## bridge.kafka.producer.max_batch_bytes = 1024KB
+
+    ## by default, send max 1 MB of data in one batch (message set)
+    ## bridge.kafka.producer.min_batch_bytes = 0
+
+    ## Number of batches to be sent ahead without receiving ack for the last request.
+    ## Must be 0 if messages must be delivered in strict order.
+    ## bridge.kafka.producer.max_send_ahead = 0
+
+    ## by default, no compression
+    # bridge.kafka.producer.compression = no_compression
+
+    # bridge.kafka.encode_payload_type = base64
+
+    # bridge.kafka.sock.buffer = 32KB
+    # bridge.kafka.sock.recbuf = 32KB
+    bridge.kafka.sock.sndbuf = 1MB
+    # bridge.kafka.sock.read_packets = 20
 
 Configure Kafka Bridge Hooks
 ----------------------------
 
 .. code-block:: properties
 
-    ## Client Connected Record Hook
-    bridge.kafka.hook.client.connected.1 = {"action": "on_client_connected", "pool": "pool1", "topic": "client_connected"}
+    ## Bridge Kafka Hooks
+    ## ${topic}: the kafka topics to which the messages will be published.
+    ## ${filter}: the mqtt topic (may contain wildcard) on which the action will be performed .
 
-    ## Client Disconnected Record Hook
-    bridge.kafka.hook.client.disconnected.1 = {"action": "on_client_disconnected", "pool": "pool1", "topic": "client_disconnected"}
-
-    ## Session Subscribed Record Hook
-    bridge.kafka.hook.session.subscribed.1 = {"action": "on_session_subscribed", "filter": "#", "pool": "pool1", "topic": "session_subscribed"}
-
-    ## Session Unsubscribed Record Hook
-    bridge.kafka.hook.session.unsubscribed.1 = {"action": "on_session_unsubscribed", "filter": "#", "pool": "pool1", "topic": "session_unsubscribed"}
-
-    ## Message Publish Record Hook
-    bridge.kafka.hook.message.publish.1 = {"action": "on_message_publish", "filter": "#", "pool": "pool1", "topic": "message_publish"}
-
-    ## Message Delivered Record Hook
-    bridge.kafka.hook.message.delivered.1 = {"action": "on_message_delivered", "filter": "#", "pool": "pool1", "topic": "message_delivered"}
-
-    ## Message Acked Record Hook
-    bridge.kafka.hook.message.acked.1 = {"action": "on_message_acked", "filter": "#", "pool": "pool1", "topic": "message_acked"}
+    bridge.kafka.hook.client.connected.1     = {"topic": "client_connected"}
+    bridge.kafka.hook.client.disconnected.1  = {"topic": "client_disconnected"}
+    bridge.kafka.hook.session.subscribed.1   = {"filter": "#",  "topic": "session_subscribed"}
+    bridge.kafka.hook.session.unsubscribed.1 = {"filter": "#",  "topic": "session_unsubscribed"}
+    bridge.kafka.hook.message.publish.1      = {"filter": "#",  "topic": "message_publish"}
+    bridge.kafka.hook.message.delivered.1    = {"filter": "#",  "topic": "message_delivered"}
+    bridge.kafka.hook.message.acked.1        = {"filter": "#",  "topic": "message_acked"}
 
 Description of Kafka Bridge Hooks
 ---------------------------------
 
-+------------------------+----------------------------------+
-| action                 | Description                      |
-+========================+==================================+
-| on_client_connected    | Client connected                 |
-+------------------------+----------------------------------+
-| on_client_disconnected | Client disconnected              |
-+------------------------+----------------------------------+
-| on_session_subscribed  | Topics subscribed                |
-+------------------------+----------------------------------+
-| on_session_unsubscribed| Topics unsubscribed              |
-+------------------------+----------------------------------+
-| on_message_publish     | Messages published               |
-+------------------------+----------------------------------+
-| on_message_delivered   | Messages delivered               |
-+------------------------+----------------------------------+
-| on_message_acked       | Messages acknowledged            |
-+------------------------+----------------------------------+
++-----------------------------------------+----------------------------------+
+| Event                                   | Description                      |
++=========================================+==================================+
+| bridge.kafka.hook.client.connected.1    | Client connected                 |
++-----------------------------------------+----------------------------------+
+| bridge.kafka.hook.client.disconnected.1 | Client disconnected              |
++-----------------------------------------+----------------------------------+
+| bridge.kafka.hook.session.subscribed.1  | Topics subscribed                |
++-----------------------------------------+----------------------------------+
+| bridge.kafka.hook.session.unsubscribed.1| Topics unsubscribed              |
++-----------------------------------------+----------------------------------+
+| bridge.kafka.hook.message.publish.1     | Messages published               |
++-----------------------------------------+----------------------------------+
+| bridge.kafka.hook.message.delivered.1   | Messages delivered               |
++-----------------------------------------+----------------------------------+
+| bridge.kafka.hook.message.acked.1       | Messages acknowledged            |
++-----------------------------------------+----------------------------------+
 
 Forward Client Connected / Disconnected Events to Kafka
 --------------------------------------------------------
