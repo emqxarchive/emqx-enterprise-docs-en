@@ -155,3 +155,5 @@ Other Feature improvements and bug fixs
 - Supported storing messages with QoS 0
 
 - Optimized server performance when clients are offline in batch
+
+- Support for reloading plugins to import new configurations
