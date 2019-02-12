@@ -11,5 +11,5 @@ EMQ X can be used as access platform for smart hardware, smart home, IoT, automo
 
 ## License
 
-Copyright (c) 2013-2017 EMQ Enterprise, Inc. All Rights Reserved.
+Copyright (c) 2016-2019 EMQ Enterprise, Inc. All Rights Reserved.
 
