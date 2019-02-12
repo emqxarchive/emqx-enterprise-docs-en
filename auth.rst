@@ -144,7 +144,7 @@ Configure the Username / Password list in the 'emqx_auth_username.conf':
     ## Examples:
     ##auth.user.1.username = admin
     ##auth.user.1.password = public
-    ##auth.user.2.username = feng@emqtt.io
+    ##auth.user.2.username = feng@emqx.io
     ##auth.user.2.password = public
     ##auth.user.3.username = name~!@#$%^&*()_+
     ##auth.user.3.password = pwsswd~!@#$%^&*()_+

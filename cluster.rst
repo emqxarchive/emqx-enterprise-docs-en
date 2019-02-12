@@ -125,26 +125,26 @@ Suppose client1 PUBLISH a message to the topic ‘t/a’, the message Route and 
 EMQ X Cluster Setup
 --------------------
 
-Suppose we deploy two nodes cluster on s1.emqtt.io, s2.emqtt.io:
+Suppose we deploy two nodes cluster on s1.emqx.io, s2.emqx.io:
 
 +----------------------+-----------------+---------------------+
 | Node                 | Host (FQDN)     |    IP               |
 +----------------------+-----------------+---------------------+
-| emqx@s1.emqtt.io or  | s1.emqtt.io     | 192.168.0.10        |
+| emqx@s1.emqx.io or  | s1.emqx.io     | 192.168.0.10        |
 | emqx@192.168.0.10    |                 |                     |
 +----------------------+-----------------+---------------------+
-| emqx@s2.emqtt.io or  | s2.emqtt.io     | 192.168.0.20        |
+| emqx@s2.emqx.io or  | s2.emqx.io     | 192.168.0.20        |
 | emqx@192.168.0.20    |                 |                     |
 +----------------------+-----------------+---------------------+
 
 .. WARNING:: The node name is Name@Host, where Host is IP address or the fully qualified host name.
 
-emqx@s1.emqtt.io Config
+emqx@s1.emqx.io Config
 ------------------------
 
 .. code-block:: properties
 
-    node.name = emq@s1.emqtt.io
+    node.name = emq@s1.emqx.io
 
     or
 
@@ -152,16 +152,16 @@ emqx@s1.emqtt.io Config
 
 Or using the environment variable::
 
-    export EMQX_NODE_NAME=emqx@s1.emqtt.io && ./bin/emqx start
+    export EMQX_NODE_NAME=emqx@s1.emqx.io && ./bin/emqx start
 
 .. WARNING:: The name cannot be changed after node joined the cluster.
 
-emqx@s2.emqtt.io Config
+emqx@s2.emqx.io Config
 ------------------------
 
 .. code-block:: properties
 
-    node.name = emq@s2.emqtt.io
+    node.name = emq@s2.emqx.io
 
     or
 
@@ -170,25 +170,25 @@ emqx@s2.emqtt.io Config
 Join the Cluster
 ----------------
 
-Start the two broker nodes, and execute ‘cluster join‘ on emqttd@s2.emqtt.io::
+Start the two broker nodes, and execute ‘cluster join‘ on emqttd@s2.emqx.io::
 
-    $ ./bin/emqx_ctl cluster join emqx@s1.emqtt.io
-
-    Join the cluster successfully.
-    Cluster status: [{running_nodes,['emqx@s1.emqtt.io','emqx@s2.emqtt.io']}]
-
-or, execute 'cluster join' on emqx@s1.emqtt.io::
-
-    $ ./bin/emqx_ctl cluster join emqx@s2.emqtt.io
+    $ ./bin/emqx_ctl cluster join emqx@s1.emqx.io
 
     Join the cluster successfully.
-    Cluster status: [{running_nodes,['emqx@s1.emqtt.io','emqx@s2.emqtt.io']}]
+    Cluster status: [{running_nodes,['emqx@s1.emqx.io','emqx@s2.emqx.io']}]
+
+or, execute 'cluster join' on emqx@s1.emqx.io::
+
+    $ ./bin/emqx_ctl cluster join emqx@s2.emqx.io
+
+    Join the cluster successfully.
+    Cluster status: [{running_nodes,['emqx@s1.emqx.io','emqx@s2.emqx.io']}]
 
 Query the cluster status::
 
     $ ./bin/emqx_ctl cluster status
 
-    Cluster status: [{running_nodes,['emqx@s1.emqtt.io','emqx@s2.emqtt.io']}]
+    Cluster status: [{running_nodes,['emqx@s1.emqx.io','emqx@s2.emqx.io']}]
 
 Leave the Cluster
 -------------------
@@ -199,13 +199,13 @@ Two ways to leave the cluster:
 
 2.  remove: remove other nodes from the cluster
 
-emqx@s2.emqtt.io tries to leave the cluster::
+emqx@s2.emqx.io tries to leave the cluster::
 
     $ ./bin/emqx_ctl cluster leave
 
- Or remove emqttd@s2.emqtt.io node from the cluster on emqttd@s1.emqtt.io::
+ Or remove emqttd@s2.emqx.io node from the cluster on emqttd@s1.emqx.io::
 
-    $ ./bin/emqx_ctl cluster remove emqx@s2.emqtt.io
+    $ ./bin/emqx_ctl cluster remove emqx@s2.emqx.io
 
 .. _cluster_session:
 
