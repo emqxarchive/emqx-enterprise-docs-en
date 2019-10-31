@@ -7,6 +7,22 @@ Bridges
 
 EMQ X can bridge and forward messages to Kafka, RabbitMQ or other EMQ X nodes. Meanwhile, mosquitto and rsm can be bridged to EMQ X using common MQTT connection.
 
+----------------------
+List of Bridge Plugins
+----------------------
+
++-----------------------+--------------------------+---------------------------+
+| Bridge Plugin         | Config File              | Description               |
++=======================+==========================+===========================+
+| emqx_bridge_kafka     | emqx_bridge_kafka.conf   | Kafka Bridge              |
++-----------------------+--------------------------+---------------------------+
+| emqx_bridge_rabbit    | emqx_bridge_rabbit.conf  | RabbitMQ Bridge           |
++-----------------------+--------------------------+---------------------------+
+| emqx_bridge_pulsar    | emqx_bridge_pulsar.conf  | Pulsar Bridge             |
++-----------------------+--------------------------+---------------------------+
+| emqx_bridge_mqtt      | emqx_bridge_mqtt.conf    | MQTT Broker Bridge        |
++-----------------------+--------------------------+---------------------------+
+
 .. _kafka_bridge:
 
 -------------
@@ -403,87 +419,485 @@ Enable RabbitMQ Bridge
 
     ./bin/emqx_ctl plugins load emqx_bridge_rabbit
 
-.. _emqx_bridge:
+.. _pulsar_bridge:
 
+-------------
+Pulsar Bridge
+-------------
+
+EMQ X bridges and forwards MQTT messages to Pulsar cluster:
+
+.. image:: _static/images/bridge_pulsar.png
+
+Config file for Pulsar bridge plugin: etc/plugins/emqx_bridge_pulsar.conf
+
+Configure Pulsar Cluster
+------------------------
+
+.. code-block:: properties
+
+    ## Pulsar Server
+    bridge.pulsar.servers = 127.0.0.1:6650
+
+    ## Pick a partition producer and sync/async
+    bridge.pulsar.produce = sync
+
+    ## bridge.pulsar.produce.sync_timeout = 3s
+
+    ## bridge.pulsar.producer.batch_size = 1000
+
+    ## by default, no compression
+    ## bridge.pulsar.producer.compression = no_compression
+
+    ## bridge.pulsar.encode_payload_type = base64
+
+    ## bridge.pulsar.sock.buffer = 32KB
+    ## bridge.pulsar.sock.recbuf = 32KB
+    bridge.pulsar.sock.sndbuf = 1MB
+    ## bridge.pulsar.sock.read_packets = 20
+
+Configure Pulsar Bridge Hooks
+-----------------------------
+
+.. code-block:: properties
+
+    ## Bridge Pulsar Hooks
+    ## ${topic}: the pulsar topics to which the messages will be published.
+    ## ${filter}: the mqtt topic (may contain wildcard) on which the action will be performed .
+
+    ## Client Connected Record Hook
+    bridge.pulsar.hook.client.connected.1     = {"topic": "client_connected"}
+
+    ## Client Disconnected Record Hook
+    bridge.pulsar.hook.client.disconnected.1  = {"topic": "client_disconnected"}
+
+    ## Session Subscribed Record Hook
+    bridge.pulsar.hook.session.subscribed.1   = {"filter": "#",  "topic": "session_subscribed"}
+
+    ## Session Unsubscribed Record Hook
+    bridge.pulsar.hook.session.unsubscribed.1 = {"filter": "#",  "topic": "session_unsubscribed"}
+
+    ## Message Publish Record Hook
+    bridge.pulsar.hook.message.publish.1      = {"filter": "#",  "topic": "message_publish"}
+
+    ## Message Delivered Record Hook
+    bridge.pulsar.hook.message.delivered.1    = {"filter": "#",  "topic": "message_delivered"}
+
+    ## Message Acked Record Hook
+    bridge.pulsar.hook.message.acked.1        = {"filter": "#",  "topic": "message_acked"}
+
+    ## More Configures
+    ## partitioner strategy:
+    ## Option:  random | roundrobin | first_key_dispatch
+    ## Example: bridge.pulsar.hook.message.publish.1 = {"filter":"#", "topic":"message_publish", "strategy":"random"}
+
+    ## key:
+    ## Option: ${clientid} | ${username}
+    ## Example: bridge.pulsar.hook.message.publish.1 = {"filter":"#", "topic":"message_publish", "key":"${clientid}"}
+
+    ## format:
+    ## Option: json | json
+    ## Example: bridge.pulsar.hook.message.publish.1 = {"filter":"#", "topic":"message_publish", "format":"json"}
+
+Description of Pulsar Bridge Hooks
+----------------------------------
+
++-------------------------------------------+----------------------------------+
+| Event                                     | Description                      |
++===========================================+==================================+
+| bridge.pulsar.hook.client.connected.1     | Client connected                 |
++-------------------------------------------+----------------------------------+
+| bridge.pulsar.hook.client.disconnected.1  | Client disconnected              |
++-------------------------------------------+----------------------------------+
+| bridge.pulsar.hook.session.subscribed.1   | Topics subscribed                |
++-------------------------------------------+----------------------------------+
+| bridge.pulsar.hook.session.unsubscribed.1 | Topics unsubscribed              |
++-------------------------------------------+----------------------------------+
+| bridge.pulsar.hook.message.publish.1      | Messages published               |
++-------------------------------------------+----------------------------------+
+| bridge.pulsar.hook.message.delivered.1    | Messages delivered               |
++-------------------------------------------+----------------------------------+
+| bridge.pulsar.hook.message.acked.1        | Messages acknowledged            |
++-------------------------------------------+----------------------------------+
+
+Forward Client Connected / Disconnected Events to Pulsar
+--------------------------------------------------------
+
+Client goes online, EMQ X forwards 'client_connected' event message to Pulsar:
+
+.. code-block:: javascript
+
+    topic = "client_connected",
+    value = {
+             "client_id": ${clientid},
+             "username": ${username},
+             "node": ${node},
+             "ts": ${ts}
+            }
+
+Client goes offline, EMQ X forwards 'client_disconnected' event message to Pulsar:
+
+.. code-block:: javascript
+
+    topic = "client_disconnected",
+    value = {
+             "client_id": ${clientid},
+             "username": ${username},
+             "reason": ${reason},
+             "node": ${node},
+             "ts": ${ts}
+            }
+
+Forward Subscription Event to Pulsar
+------------------------------------
+
+.. code-block:: javascript
+
+    topic = session_subscribed
+
+    value = {
+             "client_id": ${clientid},
+             "topic": ${topic},
+             "qos": ${qos},
+             "node": ${node},
+             "ts": ${timestamp}
+            }
+
+Forward Unsubscription Event to Pulsar
+--------------------------------------
+
+.. code-block:: javascript
+
+    topic = session_unsubscribed
+
+    value = {
+             "client_id": ${clientid},
+             "topic": ${topic},
+             "qos": ${qos},
+             "node": ${node},
+             "ts": ${timestamp}
+            }
+
+Forward MQTT Messages to Pulsar
+-------------------------------
+
+.. code-block:: javascript
+
+    topic = message_publish
+
+    value = {
+             "client_id": ${clientid},
+             "username": ${username},
+             "topic": ${topic},
+             "payload": ${payload},
+             "qos": ${qos},
+             "node": ${node},
+             "ts": ${timestamp}
+            }
+
+Forwarding MQTT Message Deliver Event to Pulsar
+-----------------------------------------------
+
+.. code-block:: javascript
+
+    topic = message_delivered
+
+    value = {"client_id": ${clientid},
+             "username": ${username},
+             "from": ${fromClientId},
+             "topic": ${topic},
+             "payload": ${payload},
+             "qos": ${qos},
+             "node": ${node},
+             "ts": ${timestamp}
+            }
+
+Forwarding MQTT Message Ack Event to Pulsar
+-------------------------------------------
+
+.. code-block:: javascript
+
+    topic = message_acked
+
+    value = {
+             "client_id": ${clientid},
+             "username": ${username},
+             "from": ${fromClientId},
+             "topic": ${topic},
+             "payload": ${payload},
+             "qos": ${qos},
+             "node": ${node},
+             "ts": ${timestamp}
+            }
+
+Examples of Pulsar Message Consumption
+--------------------------------------
+
+Pulsar consumes MQTT clients connected / disconnected event messages::
+
+    sh pulsar-client consume client_connected  -s "client_connected" -n 1000
+
+    sh pulsar-client consume client_disconnected  -s "client_disconnected" -n 1000
+
+Pulsar consumes MQTT subscription messages::
+
+    sh pulsar-client consume session_subscribed  -s "session_subscribed" -n 1000
+
+    sh pulsar-client consume session_unsubscribed  -s "session_unsubscribed" -n 1000
+
+Pulsar consumes MQTT published messages::
+
+    sh pulsar-client consume message_publish  -s "message_publish" -n 1000
+
+Pulsar consumes MQTT message Deliver and Ack event messages::
+
+    sh pulsar-client consume message_delivered  -s "message_delivered" -n 1000
+
+    sh pulsar-client consume message_acked  -s "message_acked" -n 1000
+
+.. NOTE::  the payload is base64 encoded default
+
+Enable Pulsar Bridge
 --------------------
-Bridging EMQ X Nodes
---------------------
-
-EMQ X supports bridging between multiple nodes:
-
-.. image:: _static/images/bridges_3.png
-
-Given EMQ nodes emqx1 and emqx2:
-
-+---------+--------------------+
-| Name    | Node               |
-+---------+--------------------+
-| emqx1   | emqx1@192.168.1.10 |
-+---------+--------------------+
-| emqx2   | emqx2@192.168.1.20 |
-+---------+--------------------+
-
-Start nodes emqx1 and emqx2, bridge emqx1 to emqx2, forward all message with topic 'sensor/#' to emqx2:
 
 .. code-block:: bash
 
-    $ ./bin/emqx_ctl bridges start emqx2@192.168.1.20 sensor/#
+    ./bin/emqx_ctl plugins load emqx_bridge_pulsar
 
-    bridge is started.
+.. _mqtt_bridge:
+
+-----------
+MQTT Bridge
+-----------
+
+EMQ X bridges and forwards MQTT messages to MQTT Broker:
+
+.. image:: _static/images/bridge_mqtt.png
+
+Config file for MQTT bridge plugin: etc/plugins/emqx_bridge_mqtt.conf
+
+Configure MQTT Bridge
+---------------------
+
+.. code-block:: properties
+
+    ## Bridge address: node name for local bridge, host:port for remote
+    bridge.mqtt.aws.address = 127.0.0.1:1883
+
+    ## Protocol version of the bridge: mqttv3 | mqttv4 | mqttv5
+    bridge.mqtt.aws.proto_ver = mqttv4
+
+    ## Whether to enable bridge mode for mqtt bridge
+    bridge.mqtt.aws.bridge_mode = true
+
+    ## The ClientId of a remote bridge
+    bridge.mqtt.aws.client_id = bridge_aws
+
+    ## The Clean start flag of a remote bridge
+    ## NOTE: Some IoT platforms require clean_start must be set to 'true'
+    bridge.mqtt.aws.clean_start = true
+
+    ## The username for a remote bridge
+    bridge.mqtt.aws.username = user
+
+    ## The password for a remote bridge
+    bridge.mqtt.aws.password = passwd
+
+    ## Bribge to remote server via SSL
+    bridge.mqtt.aws.ssl = off
+
+    ## PEM-encoded CA certificates of the bridge
+    bridge.mqtt.aws.cacertfile = etc/certs/cacert.pem
+
+    ## Client SSL Certfile of the bridge
+    bridge.mqtt.aws.certfile = etc/certs/client-cert.pem
+
+    ## Client SSL Keyfile of the bridge
+    bridge.mqtt.aws.keyfile = etc/certs/client-key.pem
+
+    ## SSL Ciphers used by the bridge
+    bridge.mqtt.aws.ciphers = ECDHE-ECDSA-AES256-GCM-SHA384,ECDHE-RSA-AES256-GCM-SHA384
+
+    ## Ciphers for TLS PSK
+    ## Note that 'bridge.${BridgeName}.ciphers' and 'bridge.${BridgeName}.psk_ciphers' cannot be configured at the same time.
+    ##
+    ## See 'https://tools.ietf.org/html/rfc4279#section-2'.
+    bridge.mqtt.aws.psk_ciphers = PSK-AES128-CBC-SHA,PSK-AES256-CBC-SHA,PSK-3DES-EDE-CBC-SHA,PSK-RC4-SHA
+
+    ## Ping interval of a down bridge.
+    bridge.mqtt.aws.keepalive = 60s
+
+    ## TLS versions used by the bridge.
+    bridge.mqtt.aws.tls_versions = tlsv1.2,tlsv1.1,tlsv1
+
+Configure Topics MQTT Bridge Forwards and Subscribes
+----------------------------------------------------
+
+.. code-block:: properties
+
+    ## Mountpoint of the bridge
+    bridge.mqtt.aws.mountpoint = bridge/aws/${node}/
+
+    ## Forward message topics
+    bridge.mqtt.aws.forwards = topic1/#,topic2/#
+
+    ## Subscriptions of the bridge topic
+    bridge.mqtt.aws.subscription.1.topic = cmd/topic1
+
+    ## Subscriptions of the bridge qos
+    bridge.mqtt.aws.subscription.1.qos = 1
+
+    ## Subscriptions of the bridge topic
+    bridge.mqtt.aws.subscription.2.topic = cmd/topic2
+
+    ## Subscriptions of the bridge qos
+    bridge.mqtt.aws.subscription.2.qos = 1
+
+Description of Topics MQTT Bridge Forwards and Subscribes
+---------------------------------------------------------
+
+Mountpoint:
+Mountpoint is used to prefix of topic when forwarding a message, this option must be used with ``forwards``. Forwards the message whose topic is "sensor1/hello", its topic will change to "bridge/aws/emqx1@192.168.1.1/sensor1/hello" when it reaches the remote node.
+
+Forwards:
+Messages forwarded to ``forwards`` specified by local EMQ X are forwarded to the remote MQTT Broker.
+
+Subscription:
+Local EMQ X synchronizes messages from a remote MQTT Broker to local by subscribing to the topic of the remote MQTT Broker.
+
+Enable MQTT Bridge
+------------------
+
+.. code-block:: bash
+
+    ./bin/emqx_ctl plugins load emqx_bridge_mqtt
+
+Bridge CLI Command
+------------------
+
+.. code-block:: bash
+
+    $ cd emqx && ./bin/emqx_ctl bridges
+    bridges list                                    # List bridges
+    bridges start <Name>                            # Start a bridge
+    bridges stop <Name>                             # Stop a bridge
+    bridges forwards <Name>                         # Show a bridge forward topic
+    bridges add-forward <Name> <Topic>              # Add bridge forward topic
+    bridges del-forward <Name> <Topic>              # Delete bridge forward topic
+    bridges subscriptions <Name>                    # Show a bridge subscriptions topic
+    bridges add-subscription <Name> <Topic> <Qos>   # Add bridge subscriptions topic
+
+List Status of All Bridges
+--------------------------
+
+.. code-block:: bash
 
     $ ./bin/emqx_ctl bridges list
+    name: emqx     status: Stopped
 
-    bridge: emqx1@127.0.0.1--sensor/#-->emqx2@127.0.0.1
-
-Test the bridge: emqx1--sensor/#-->emqx2:
-
-.. code-block:: bash
-
-    #on node emqx2
-
-    mosquitto_sub -t sensor/# -p 2883 -d
-
-    #on node emqx1
-
-    mosquitto_pub -t sensor/1/temperature -m "37.5" -d
-
-Delete the bridge:
+Start Specified Bridge
+----------------------
 
 .. code-block:: bash
 
-    ./bin/emqx_ctl bridges stop emqx2@127.0.0.1 sensor/#
+    $ ./bin/emqx_ctl bridges start emqx
+    Start bridge successfully.
 
-.. _mosquitto_bridge:
+Stop Specified Bridge
+---------------------
 
-----------------
-mosquitto Bridge
-----------------
+.. code-block:: bash
 
-Mosquitto can be bridged to EMQ X cluster using common MQTT connection:
+    $ ./bin/emqx_ctl bridges stop emqx
+    Stop bridge successfully.
 
-.. image:: _static/images/bridges_4.png
+List Forwarded Topic of Specified Bridge
+----------------------------------------
 
-An example of mosquitto bridge plugin config file: mosquitto.conf::
+.. code-block:: bash
 
-    connection emqx
-    address 192.168.0.10:1883
-    topic sensor/# out 2
+    $ ./bin/emqx_ctl bridges forwards emqx
+    topic:   topic1/#
+    topic:   topic2/#
 
-    # Set the version of the MQTT protocol to use with for this bridge. Can be one
-    # of mqttv31 or mqttv311. Defaults to mqttv31.
-    bridge_protocol_version mqttv311
+Add Forwarded Topic for Specified Bridge
+----------------------------------------
 
-.. _rsmb_bridge:
+.. code-block:: bash
 
-------------
-rsmb Bridge
-------------
+    $ ./bin/emqx_ctl bridges add-forwards emqx topic3/#
+    Add-forward topic successfully.
 
-Rsmb can be bridged to EMQ X cluster using common MQTT connection.
+Delete Forwarded Topic for Specified Bridge
+-------------------------------------------
 
-An example of rsmb bridge config file: broker.cfg::
+.. code-block:: bash
 
-    connection emqx
-    addresses 127.0.0.1:2883
-    topic sensor/#
+    $ ./bin/emqx_ctl bridges del-forwards emqx topic3/#
+    Del-forward topic successfully.
 
+List Subscriptions of Specified Bridge
+--------------------------------------
+
+.. code-block:: bash
+
+    $ ./bin/emqx_ctl bridges subscriptions emqx
+    topic: cmd/topic1, qos: 1
+    topic: cmd/topic2, qos: 1
+
+Add Subscriptions for Specified Bridge
+--------------------------------------
+
+.. code-block:: bash
+
+    $ ./bin/emqx_ctl bridges add-subscription emqx cmd/topic3 1
+    Add-subscription topic successfully.
+
+Delete Subscriptions of Specified Bridge
+----------------------------------------
+
+.. code-block:: bash
+
+    $ ./bin/emqx_ctl bridges del-subscription emqx cmd/topic3
+    Del-subscription topic successfully.
+
+.. _rpc_bridge:
+
+----------
+RPC Bridge
+----------
+
+EMQ X bridges and forwards MQTT messages to remote EMQ X:
+
+.. image:: _static/images/bridge_rpc.png
+
+Config file for RPC bridge plugin: etc/plugins/emqx_bridge_mqtt.conf
+
+Configure Broker Address for RPC Bridge
+---------------------------------------
+
+.. code-block:: properties
+
+    bridge.mqtt.emqx.address = emqx2@192.168.1.2
+
+Configure Topics RPC Bridge Forwards and Subscribes
+---------------------------------------------------
+
+.. code-block:: properties
+
+    ## Mountpoint of the bridge
+    bridge.mqtt.emqx.mountpoint = bridge/emqx1/${node}/
+
+    ## Forward message topics
+    bridge.mqtt.emqx.forwards = topic1/#,topic2/#
+
+Mountpoint:
+Mountpoint is used to prefix of topic when forwarding a message, this option must be used with ``forwards``. Forwards the message whose topic is "sensor1/hello", its topic will change to "bridge/aws/emqx1@192.168.1.1/sensor1/hello" when it reaches the remote node.
+
+Forwards:
+Messages forwarded to ``forwards`` specified by local EMQ X are forwarded to the remote EMQ X.
+
+Bridge CLI Command
+------------------
+
+CLI of RPC bridge is used in the same way as the MQTT bridge.

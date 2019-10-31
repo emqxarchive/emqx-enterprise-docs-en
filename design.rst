@@ -5,110 +5,102 @@
 Design
 ======
 
-.. _intro:
-
-------------
-Introduction
-------------
-
-Upgraded from EMQ R1, EMQ X R 2.0 separated the Message Flow Plane and Monitor/Control Plane. This makes possible of sustaining million-level MQTT connections. Separating of Flow Plane and Monitor/Control Plane also makes the EMQ cluster more reliable and provides higher performance. The Architecture of EMQ X R2 is like following:
-
-.. image:: _static/images/design_1.png
-
-EMQ X supports MQTT message persistence to Redis, MySQL, PostgreSQL, MongoDB and Cassandra. It can bridge and forward MQTT messages to enterprise middleware like Kafka and RabbitMQ.
-
-Full Asynchronous Architecture
-------------------------------
-
-The full asynchronous architecture of EMQ message broker is based on Erlang/OTP platform: asynchronous TCP connection processing, asynchronous topic subscription, asynchronous message publishment.
-
-A MQTT message from Publisher to Subscriber, is asynchronously processed in the EMQ X broker by a series of Erlang processes:
-
-.. image:: _static/images/design_2.png
-
-Message Persistence
--------------------
-
-EMQ X separates Message routing and message persistence. It supports message persistence to Redis, MySQL, PostgreSQl, MongoDB, Canssandra and middleware like Kafka.
-
-.. _architecture:
+.. _design_architecture:
 
 ------------
 Architecture
 ------------
 
-Concept
---------
+The *EMQ* broker 1.0 is more like a network Switch or Router, not a traditional enterprise message queue. Compared to a network router that routes packets based on IP or MPLS label, the *EMQ* broker routes MQTT messages based on topic trie.
 
-The EMQ X broker looks much like a network Switch or Router, not a traditional enterprise message queue. Compare with a network router that routes packets based on IP or MPLS label, the EMQ broker routes MQTT messages against topics.
+The *EMQ* 2.0 seperated the Message Flow Plane and Monitor/Control Plane, the Architecture is something like:
 
-.. image:: ./_static/images/design_3.png
+.. image:: _static/images/design_1.png
 
 Design Philosophy
 -----------------
 
 1. Focus on handling millions of MQTT connections and routing MQTT messages between clustered nodes.
 
-2. Embrace Erlang/OTP, the soft-realtime, low-latency, concurrent and fault-tolerant platform.
+2. Embrace Erlang/OTP, The Soft-Realtime, Low-Latency, Concurrent and Fault-Tolerant Platform.
 
 3. Layered Design: Connection, Session, PubSub and Router Layers.
 
-4. Separate the message flow plane and the control/management plane.
+4. Separate the Message Flow Plane and the Control/Management Plane.
 
-5. Stream MQTT messages to variant backends including MQ or databases.
+5. Stream MQTT messages to various backends including MQ or databases.
 
 System Layers
---------------
+-------------
 
-1. Connection Layer: Handle TCP and WebSocket connections, encode/decode MQTT packets.
+1. Connection Layer
 
-2. Session Layer: Process MQTT PUBLISH/SUBSCRIBE packets received from client, and deliver MQTT messages to client.
+   Handle TCP and WebSocket connections, encode/decode MQTT packets.
 
-3. Route Layer: Dispatch MQTT messages to subscribers in a node.
+2. Session Layer
 
-4. Distributed Layer: Route MQTT messages in the distributed nodes.
+   Process MQTT PUBLISH/SUBSCRIBE Packets received from client, and deliver MQTT messages to client.
 
-5. Authentication and Access Control: The connection layer supports extensible Auth and ACL modules.
+3. PubSub Layer
 
-6. Hooks and Plugins: Extensible hooks are supported at every system layer. It makes the Broker extensible by means of plugins.
+   Dispatch MQTT messages to subscribers in a node.
 
-.. _connection_layer:
+4. Routing(Distributed) Layer
 
------------------
+   Route MQTT messages among clustered nodes.
+
+----------------
 Connection Layer
------------------
+----------------
 
-Connection Layer handles server socket connection and MQTT protocol decoding:
+This layer is built on the `eSockd`_ library which is a general Non-blocking TCP/SSL Socket Server:
 
-1. Built on `eSockd`_ asynchronous TCP server framework
-2. TCP acceptor pool and asynchronous TCP acceptor
-3. TCP/SSL, WebSocket/SSL
-4. Max connections management
-5. Access control against peer address or CIDR
-6. Flow control based Leaky Bucket algorithm
-7. MQTT protocol encoder/decoder
-8. MQTT connection keepalive
-9. MQTT packet process
+* Acceptor Pool and Asynchronous TCP Accept
+* Parameterized Connection Module
+* Max connections management
+* Allow/Deny by peer address or CIDR
+* Keepalive Support
+* Rate Limit based on The Leaky Bucket Algorithm
+* Fully Asynchronous TCP RECV/SEND
 
-.. _session_layer:
+This layer is also responsible for encoding/decoding MQTT frames:
 
---------------
+1. Parse MQTT frames received from client
+2. Serialize MQTT frames sent to client
+3. MQTT Connection Keepalive
+
+Main erlang modules of this layer:
+
++--------------------+-----------------------+
+|       Module       |      Description      |
++====================+=======================+
+| emqx_connection    | TCP Client            |
++--------------------+-----------------------+
+| emqx_ws_connection | WebSocket Client      |
++--------------------+-----------------------+
+| emqx_protocol      | MQTT Protocol Handler |
++--------------------+-----------------------+
+| emqx_frame         | MQTT Frame Parser     |
++--------------------+-----------------------+
+
+-------------
 Session Layer
---------------
+-------------
 
-Session layer processes publish and subscribe service of MQTT protocol:
+The session layer processes MQTT packets received from client and delivers PUBLISH packets to client.
 
-1. Store clients' subscription and implement the QoS of subscriptions.
+A MQTT session will store the subscriptions and inflight messages in memory:
 
-2. Process the publish and delivery of QoS1/2 messages, retransmit timeout messages and retain offline messages.
+1. The Client’s subscriptions.
 
-3. Manage inflight window and control the message delivery throughput and transmission order.
+2. Inflight qos1/2 messages sent to the client but unacked, QoS 2 messages which
+   have been sent to the Client, but have not been completely acknowledged.
 
-4. Retain QoS1/2 messages which has been sent but not acknowledged by client.
+3. Inflight qos2 messages received from client and waiting for PUBREL. QoS 2
+   messages which have been received from the Client, but have not been
+   completely acknowledged.
 
-5. Retain QoS2 messages from client to server, which has not yet received a responding PUBREL message.
-
-6. Retain QoS1/2 offline messages of a persistent session, when the client is disconnected.
+4. All qos1, qos2 messages published to when client is disconnected.
 
 MQueue and Inflight Window
 --------------------------
@@ -117,36 +109,31 @@ Concept of Message Queue and Inflight Window:
 
 .. image:: _static/images/design_4.png
 
-1. Inflight Window stores the delivered messages which is awaiting for PUBACK.
+1. Inflight Window to store the messages delivered and await for PUBACK.
 
 2. Enqueue messages when the inflight window is full.
 
 3. If the queue is full, drop qos0 messages if store_qos0 is true, otherwise drop the oldest one.
 
-The larger the inflight window size is, the higher the throughput is. The smaller the window size is, the stricter the message order is.
+The larger the inflight window size is, the higher the throughput is. The smaller the window size is, the more strict the message order is.
 
-PacketId and MessageID
+PacketId and MessageId
 ----------------------
 
-The 16-bit packetId is defined by MQTT protocol specification, used by client/server to PUBLISH/PUBACK packets. A GUID(128-bit globally unique Id) will be generated by the broker and assigned to a MQTT message.
+The 16-bit PacketId is defined by MQTT Protocol Specification, used by client/server to PUBLISH/PUBACK packets. A GUID(128-bit globally unique Id) will be generated by the broker and assigned to a MQTT message.
 
 Format of the globally unique message id:
 
 .. image:: _static/images/design_5.png
 
 1. Timestamp: erlang:system_time if Erlang >= R18, otherwise os:timestamp
+2. NodeId:    encode node() to 2 bytes integer
+3. Pid:       encode pid to 4 bytes integer
+4. Sequence:  2 bytes sequence in one process
 
-2. NodeId: encode node() to 2 bytes integer
-
-3. Pid: encode pid to 4 bytes integer
-
-4. Sequence: 2 bytes sequence in one process
-
-The PacketId and MessageId in an End-to-End Message PubSub Sequence:
+The PacketId and MessageId in a End-to-End Message PubSub Sequence:
 
 .. image:: _static/images/design_6.png
-
-.. _route_layer:
 
 ------------
 PubSub Layer
@@ -156,17 +143,15 @@ The PubSub layer maintains a subscription table and is responsible to dispatch M
 
 .. image:: ./_static/images/design_7.png
 
-MQTT messages will be dispatched to the subscriber’s session, which finally delivers the messages to client.
+MQTT messages will be dispatched to the subscriber's session, which finally delivers the messages to client.
 
-.. _distributed_layer:
-
---------------
+-------------
 Routing Layer
---------------
+-------------
 
 The routing(distributed) layer maintains and replicates the global Topic Trie and Routing Table. The topic tire is composed of wildcard topics created by subscribers. The Routing Table maps a topic to nodes in the cluster.
 
-For example, if node1 subscribed ‘t/+/x’ and ‘t/+/y’, node2 subscribed ‘t/#’ and node3 subscribed ‘t/a’, there will be a topic trie and route table:
+For example, if node1 subscribed 't/+/x' and 't/+/y', node2 subscribed 't/#' and node3 subscribed 't/a', there will be a topic trie and route table:
 
 .. image:: ./_static/images/design_8.png
 
@@ -174,83 +159,198 @@ The routing layer would route MQTT messages among clustered nodes by topic trie 
 
 .. image:: ./_static/images/design_9.png
 
-.. _auth_acl:
+The routing design follows two rules:
 
----------------------
-Authentication & ACL
----------------------
+1. A message only gets forwarded to other cluster nodes if a cluster node is interested in it. This reduces the network traffic tremendously, because it prevents nodes from forwarding unnecessary messages.
 
-EMQ X supports an extensible authentication and ACL mechanism, which is implemented in emqx_access_control, emqx_auth_mod and emqx_acl_mod.
+2. As soon as a client on a node subscribes to a topic it becomes known within the cluster. If one of the clients somewhere in the cluster is publishing to this topic, the message will be delivered to its subscriber no matter to which cluster node it is connected.
 
-emqx_access_control provides APIs for registering and unregistering Auth or ACL modules::
+.. _design_hook:
 
-    register_mod(auth | acl, atom(), list()) -> ok | {error, any()}.
+------------
+Hooks Design
+------------
 
-    register_mod(auth | acl, atom(), list(), non_neg_integer()) -> ok | {error, any()}.
+The *EMQ* broker implements a simple but powerful hooks mechanism to help users develop plugin. The broker would run the hooks when a client is connected/disconnected, a topic is subscribed/unsubscribed or a MQTT message is published/delivered/acked.
 
-Authentication
----------------
+Hooks defined by the *EMQ* 3.0 broker:
 
-emqx_auth_mod defines the behaviour of an authentication module::
++------------------------+--------------------------------------------------------------+
+| Hook                   | Description                                                  |
++========================+==============================================================+
+| client.authenticate    | Run when client is trying to connect to the broker           |
++------------------------+--------------------------------------------------------------+
+| client.check_acl       | Run when client is trying to publish or subscribe to a topic |
++------------------------+--------------------------------------------------------------+
+| client.connected       | Run when client connected to the broker successfully         |
++------------------------+--------------------------------------------------------------+
+| client.subscribe       | Run before client subscribes topics                          |
++------------------------+--------------------------------------------------------------+
+| client.unsubscribe     | Run when client unsubscribes topics                          |
++------------------------+--------------------------------------------------------------+
+| session.subscribed     | Run After client(session) subscribed a topic                 |
++------------------------+--------------------------------------------------------------+
+| session.unsubscribed   | Run After client(session) unsubscribed a topic               |
++------------------------+--------------------------------------------------------------+
+| message.publish        | Run when a MQTT message is published                         |
++------------------------+--------------------------------------------------------------+
+| message.deliver        | Run when a MQTT message is delivering to target client       |
++------------------------+--------------------------------------------------------------+
+| message.acked          | Run when a MQTT message is acked                             |
++------------------------+--------------------------------------------------------------+
+| client.disconnected    | Run when client disconnected from broker                     |
++------------------------+--------------------------------------------------------------+
 
-    -module(emqx_auth_mod).
+The *EMQ* broker uses the `Chain-of-responsibility_pattern`_ to implement hook mechanism. The callback functions registered to hook will be executed one by one:
 
-    -ifdef(use_specs).
+.. image:: ./_static/images/design_10.png
 
-    -callback init(AuthOpts :: list()) -> {ok, State :: any()}.
+The callback function for a hook should return:
 
-    -callback check(Client, Password, State) -> ok | ignore | {error, string()} when
-        Client    :: mqtt_client(),
-        Password  :: binary(),
-        State     :: any().
++-----------------+------------------------+
+| Return          | Description            |
++=================+========================+
+| ok              | Continue               |
++-----------------+------------------------+
+| {ok, NewAcc}    | Return Acc and Continue|
++-----------------+------------------------+
+| stop            | Break                  |
++-----------------+------------------------+
+| {stop, NewAcc}  | Return Acc and Break   |
++-----------------+------------------------+
 
-    -callback description() -> string().
+The input arguments for a callback function depends on the types of hook. Checkout the `emq_plugin_template`_ project to see the hook examples in detail.
 
-    -else.
+Hook Implementation
+-------------------
 
-    -export([behaviour_info/1]).
+The hook APIs are defined in the ``emqx`` module:
 
-    behaviour_info(callbacks) ->
-        [{init, 1}, {check, 3}, {description, 0}];
-    behaviour_info(_Other) ->
-        undefined.
+.. code-block:: erlang
 
-    -endif.
+    -spec(hook(emqx_hooks:hookpoint(), emqx_hooks:action()) -> ok | {error, already_exists}).
+    hook(HookPoint, Action) ->
+        emqx_hooks:add(HookPoint, Action).
 
-Access Control (ACL)
---------------------
+    -spec(hook(emqx_hooks:hookpoint(), emqx_hooks:action(), emqx_hooks:filter() | integer())
+        -> ok | {error, already_exists}).
+    hook(HookPoint, Action, Priority) when is_integer(Priority) ->
+        emqx_hooks:add(HookPoint, Action, Priority);
+    hook(HookPoint, Action, Filter) when is_function(Filter); is_tuple(Filter) ->
+        emqx_hooks:add(HookPoint, Action, Filter);
+    hook(HookPoint, Action, InitArgs) when is_list(InitArgs) ->
+        emqx_hooks:add(HookPoint, Action, InitArgs).
 
-emqx_acl_mod defines the behaviour of an ACL module::
+    -spec(hook(emqx_hooks:hookpoint(), emqx_hooks:action(), emqx_hooks:filter(), integer())
+        -> ok | {error, already_exists}).
+    hook(HookPoint, Action, Filter, Priority) ->
+        emqx_hooks:add(HookPoint, Action, Filter, Priority).
 
-    -module(emqx_acl_mod).
+    -spec(unhook(emqx_hooks:hookpoint(), emqx_hooks:action()) -> ok).
+    unhook(HookPoint, Action) ->
+        emqx_hooks:del(HookPoint, Action).
 
-    -include("emqx.hrl").
+    -spec(run_hook(emqx_hooks:hookpoint(), list(any())) -> ok | stop).
+    run_hook(HookPoint, Args) ->
+        emqx_hooks:run(HookPoint, Args).
 
-    -ifdef(use_specs).
+    -spec(run_fold_hook(emqx_hooks:hookpoint(), list(any()), any()) -> any()).
+    run_fold_hook(HookPoint, Args, Acc) ->
+        emqx_hooks:run_fold(HookPoint, Args, Acc).
 
-    -callback init(AclOpts :: list()) -> {ok, State :: any()}.
+Hook Usage
+----------
 
-    -callback check_acl({Client, PubSub, Topic}, State :: any()) -> allow | deny | ignore when
-        Client   :: mqtt_client(),
-        PubSub   :: pubsub(),
-        Topic    :: binary().
+The `emq_plugin_template`_ project provides the examples for hook usage:
 
-    -callback reload_acl(State :: any()) -> ok | {error, any()}.
+.. code-block:: erlang
 
-    -callback description() -> string().
+    -module(emqx_plugin_template).
 
-    -else.
+    -export([load/1, unload/0]).
 
-    -export([behaviour_info/1]).
+    -export([on_message_publish/2, on_message_deliver/3, on_message_acked/3]).
 
-    behaviour_info(callbacks) ->
-        [{init, 1}, {check_acl, 2}, {reload_acl, 1}, {description, 0}];
-    behaviour_info(_Other) ->
-        undefined.
+    load(Env) ->
+        emqx:hook('message.publish', fun ?MODULE:on_message_publish/2, [Env]),
+        emqx:hook('message.deliver', fun ?MODULE:on_message_deliver/3, [Env]),
+        emqx:hook('message.acked', fun ?MODULE:on_message_acked/3, [Env]).
 
-    -endif.
+    on_message_publish(Message, _Env) ->
+        io:format("publish ~s~n", [emqx_message:format(Message)]),
+        {ok, Message}.
 
-emqx_acl_internal implements the default access control based on 'etc/acl.conf' file::
+    on_message_deliver(Credentials, Message, _Env) ->
+        io:format("deliver to client ~s: ~s~n", [Credentials, emqx_message:format(Message)]),
+        {ok, Message}.
+
+    on_message_acked(Credentials, Message, _Env) ->
+        io:format("client ~s acked: ~s~n", [Credentials, emqx_message:format(Message)]),
+        {ok, Message}.
+
+    unload() ->
+        emqx:unhook('message.publish', fun ?MODULE:on_message_publish/2),
+        emqx:unhook('message.acked', fun ?MODULE:on_message_acked/3),
+        emqx:unhook('message.deliver', fun ?MODULE:on_message_deliver/3).
+
+.. _design_auth_acl:
+
+----------------------
+Authentication and ACL
+----------------------
+
+The *EMQ* broker supports extensible Authentication/ACL by hooking to hook-points ``client.authenticate`` and ``client.check_acl``:
+
+Write Authentication Hook CallBacks
+-----------------------------------
+
+To register a callback function to ``client.authenticate``:
+
+.. code-block:: erlang
+
+    emqx:hook('client.authenticate', fun ?MODULE:on_client_authenticate/1, []).
+
+The callbacks must have an argument that receives the ``Credentials``, and returns an updated Credentials:
+
+.. code-block:: erlang
+
+    on_client_authenticate(Credentials = #{password := Password}) ->
+        {ok, Credentials#{result => success}}.
+
+The ``Credentials`` is a map that contains AUTH related info:
+
+.. code-block:: erlang
+
+    #{
+      client_id => ClientId,     %% The client id
+      username  => Username,     %% The username
+      peername  => Peername,     %% The peer IP Address and Port
+      password  => Password,     %% The password (Optional)
+      result    => Result        %% The authentication result, must be set to ``success`` if OK,
+                                 %% or ``bad_username_or_password`` or ``not_authorized`` if failed.
+    }
+
+Write ACL Hook Callbacks
+------------------------
+
+To register a callback function to ``client.authenticate``:
+
+.. code-block:: erlang
+
+    emqx:hook('client.check_acl', fun ?MODULE:on_client_check_acl/4, []).
+
+The callbacks must have arguments that receives the ``Credentials``, ``AccessType``, ``Topic``, ``ACLResult``, and then returns a new ACLResult:
+
+.. code-block:: erlang
+
+    on_client_check_acl(#{client_id := ClientId}, AccessType, Topic, ACLResult) ->
+        {ok, allow}.
+
+AccessType can be one of ``publish`` and ``subscribe``. Topic is the MQTT topic. The ACLResult is either ``allow`` or ``deny``.
+
+The module ``emqx_mod_acl_internal`` implements the default ACL based on etc/acl.conf file:
+
+.. code-block:: erlang
 
     %%%-----------------------------------------------------------------------------
     %%%
@@ -278,141 +378,44 @@ emqx_acl_internal implements the default access control based on 'etc/acl.conf' 
 
     {allow, all}.
 
-.. _hook:
+The Authentication/ACL plugins implemented by emqx organization:
 
---------------
-Hooks
---------------
++-----------------------+--------------------------------+
+| Plugin                | Authentication                 |
++-----------------------+--------------------------------+
+| emq_auth_username     | Username and Password          |
++-----------------------+--------------------------------+
+| emq_auth_clientid     | ClientID and Password          |
++-----------------------+--------------------------------+
+| emq_auth_ldap         | LDAP                           |
++-----------------------+--------------------------------+
+| emq_auth_http         | HTTP API                       |
++-----------------------+--------------------------------+
+| emq_auth_mysql        | MySQL                          |
++-----------------------+--------------------------------+
+| emq_auth_pgsql        | PostgreSQL                     |
++-----------------------+--------------------------------+
+| emq_auth_redis        | Redis                          |
++-----------------------+--------------------------------+
+| emq_auth_mongo        | MongoDB                        |
++-----------------------+--------------------------------+
+| emq_auth_jwt          | JWT                            |
++-----------------------+--------------------------------+
 
-Define Hook
---------------
+.. _design_plugin:
 
-EMQ X broker triggers hooks when: a client is connected / disconnected, topics are subscribed / unsubscribed or messages are published / delivered / acknowledged.
-
-Following hooks are defined:
-
-+------------------------+----------------------------------+
-| Hook                   | Description                      |
-+========================+==================================+
-| client.connected       | Client connected                 |
-+------------------------+----------------------------------+
-| client.subscribe       | client subscribes to topics      |
-+------------------------+----------------------------------+
-| client.unsubscribe     | Client unsubscribes to topics    |
-+------------------------+----------------------------------+
-| session.subscribed     | Client subscribed to topics      |
-+------------------------+----------------------------------+
-| session.unsubscribed   | Client unsubscribed to topics    |
-+------------------------+----------------------------------+
-| message.publish        | MQTT message published           |
-+------------------------+----------------------------------+
-| message.delivered      | MQTT message delivered           |
-+------------------------+----------------------------------+
-| message.acked          | MQTT message acknowledged        |
-+------------------------+----------------------------------+
-| client.disconnected    | Client disconnected              |
-+------------------------+----------------------------------+
-
-EMQ X uses (`Chain-of-responsibility_pattern`_) to implement hook mechanism. The callback functions registered to hook will be executed one by one:
-
-.. image:: ./_static/images/design_10.png
-
-The input parameters for a callback function depend on the types of hook. Clone the emqx_plugin_template project to check the parameter in detail:
-
-+-----------------+------------------------+
-| Return          | Description            |
-+=================+========================+
-| ok              | Continue               |
-+-----------------+------------------------+
-| {ok, NewAcc}    | Return Acc and continue|
-+-----------------+------------------------+
-| stop            | Break                  |
-+-----------------+------------------------+
-| {stop, NewAcc}  | Return Acc and break   |
-+-----------------+------------------------+
-
-Hook Implementation
--------------------
-
-The Hook API is defined in emqx module:
-
-.. code-block:: erlang
-
-    -module(emqx).
-
-    %% Hooks API
-    -export([hook/4, hook/3, unhook/2, run_hooks/3]).
-    hook(Hook :: atom(), Callback :: function(), InitArgs :: list(any())) -> ok | {error, any()}.
-
-    hook(Hook :: atom(), Callback :: function(), InitArgs :: list(any()), Priority :: integer()) -> ok | {error, any()}.
-
-    unhook(Hook :: atom(), Callback :: function()) -> ok | {error, any()}.
-
-    run_hooks(Hook :: atom(), Args :: list(any()), Acc :: any()) -> {ok | stop, any()}.
-
-The implementation of Hook is in emqx_hook module:
-
-.. code-block:: erlang
-
-    -module(emqx_hook).
-
-    %% Hooks API
-    -export([add/3, add/4, delete/2, run/3, lookup/1]).
-
-    add(HookPoint :: atom(), Callback :: function(), InitArgs :: list(any())) -> ok.
-
-    add(HookPoint :: atom(), Callback :: function(), InitArgs :: list(any()), Priority :: integer()) -> ok.
-
-    delete(HookPoint :: atom(), Callback :: function()) -> ok.
-
-    run(HookPoint :: atom(), Args :: list(any()), Acc :: any()) -> any().
-
-    lookup(HookPoint :: atom()) -> [#callback{}].
-
-Hook Usage
---------------
-
-emq_plugin_template privodes examples of hook usage. Following is an example for end to end message processing:
-
-.. code-block:: erlang
-
-    -module(emq_plugin_template).
-
-    -export([load/1, unload/0]).
-
-    -export([on_message_publish/2, on_message_delivered/4, on_message_acked/4]).
-
-    load(Env) ->
-        emqx:hook('message.publish', fun ?MODULE:on_message_publish/2, [Env]),
-        emqx:hook('message.delivered', fun ?MODULE:on_message_delivered/4, [Env]),
-        emqx:hook('message.acked', fun ?MODULE:on_message_acked/4, [Env]).
-
-    on_message_publish(Message, _Env) ->
-        io:format("publish ~s~n", [emqx_message:format(Message)]),
-        {ok, Message}.
-
-    on_message_delivered(ClientId, _Username, Message, _Env) ->
-        io:format("delivered to client ~s: ~s~n", [ClientId, emqx_message:format(Message)]),
-        {ok, Message}.
-
-    on_message_acked(ClientId, _Username, Message, _Env) ->
-        io:format("client ~s acked: ~s~n", [ClientId, emqx_message:format(Message)]),
-        {ok, Message}.
-
-    unload() ->
-        emqx:unhook('message.publish', fun ?MODULE:on_message_publish/2),
-        emqx:unhook('message.acked', fun ?MODULE:on_message_acked/4),
-        emqx:unhook('message.delivered', fun ?MODULE:on_message_delivered/4).
-
-.. _plugin:
-
-----------------
+-------------
 Plugin Design
-----------------
+-------------
 
-Plugin is a normal erlang application that can be started/stopped dynamically by a running EMQ X broker.
+Plugin is a normal erlang application that can be started/stopped dynamically by a running *EMQ* broker.
 
-emqx_plugins module implements the plugin mechanism and provides API to load and unload plugins::
+emqx_plugins Module
+---------------------
+
+The plugin mechanism is implemented by emqx_plugins module:
+
+.. code-block:: erlang
 
     -module(emqx_plugins).
 
@@ -424,72 +427,62 @@ emqx_plugins module implements the plugin mechanism and provides API to load and
     %% @doc UnLoad a Plugin
     unload(PluginName :: atom()) -> ok | {error, any()}.
 
-User can load and unload plugins using the CLI command './bin/empx_ctl'::
+Load a Plugin
+-------------
+
+Use './bin/emqx_ctl' CLI to load/unload a plugin::
 
     ./bin/emqx_ctl plugins load emq_auth_redis
 
     ./bin/emqx_ctl plugins unload emq_auth_redis
 
-Plugin developer please refer to: http://github.com/emqtt/emqx_plugin_template
+Plugin Template
+---------------
+
+http://github.com/emqx/emq_plugin_template
+
+.. _eSockd: https://github.com/emqx/esockd
+.. _Chain-of-responsibility_pattern: https://en.wikipedia.org/wiki/Chain-of-responsibility_pattern
+.. _emq_plugin_template: https://github.com/emqx/emq_plugin_template/blob/master/src/emq_plugin_template.erl
 
 -----------------
 Mnesia/ETS Tables
 -----------------
 
-+--------------------+--------+----------------------------------------+
-| Table              | Type   | Description                            |
-+====================+========+========================================+
-| mqtt_trie          | mnesia | Trie Table                             |
-+--------------------+--------+----------------------------------------+
-| mqtt_trie_node     | mnesia | Trie Node Table                        |
-+--------------------+--------+----------------------------------------+
-| mqtt_route         | mnesia | Global Route Table                     |
-+--------------------+--------+----------------------------------------+
-| mqtt_local_route   | mnesia | Local Route Table                      |
-+--------------------+--------+----------------------------------------+
-| mqtt_pubsub        | ets    | PubSub Tab                             |
-+--------------------+--------+----------------------------------------+
-| mqtt_subscriber    | ets    | Subscriber Tab                         |
-+--------------------+--------+----------------------------------------+
-| mqtt_subscription  | ets    | Subscription Tab                       |
-+--------------------+--------+----------------------------------------+
-| mqtt_session       | mnesia | Global Session Table                   |
-+--------------------+--------+----------------------------------------+
-| mqtt_local_session | ets    | Local Session Table                    |
-+--------------------+--------+----------------------------------------+
-| mqtt_client        | ets    | Client Table                           |
-+--------------------+--------+----------------------------------------+
-| mqtt_retained      | mnesia | Retained Message Table                 |
-+--------------------+--------+----------------------------------------+
-
-.. _erlang:
-
---------------
-Erlang Related
---------------
-
-1. Using Pool, Pool and Pool... Recommending GProc lib: https://github.com/uwiger/gproc
-
-2. Asynchronism in mind, asynchronous, asynchronous message, asynchronous message between layers. Synchronism is only for load protection.
-
-3. Prevent accumulation in Mailbox. Heavily loaded process uses gen_server2
-
-4. Messages flowing through Socket and session process must utilize hibernate mechanism. Binary handles could be recovered.
-
-5. Using binary data, avoiding memory copying / cloning between processes.
-
-6. ETS, ETS, ETS...Message Passing Vs ETS
-
-7. Avoiding ETS select and match on non-key fields
-
-8. Avoiding massive ETS read/write, ETS R/W causes memory copying. Use lookup_element, update_counter
-
-9. Properly open ETS table{write_concurrency, true}
-
-10. Protect Mnesia DB transaction, reduce transaction number, avoid transaction overload.
-
-11. Avoid Mnesia Table index, avoid matching and selecting on non-key fields
-
-.. _eSockd: https://github.com/emqtt/esockd
-.. _Chain-of-responsibility_pattern: https://en.wikipedia.org/wiki/Chain-of-responsibility_pattern
-
++--------------------------+--------+---------------------------------+
+|          Table           |  Type  |           Description           |
++==========================+========+=================================+
+| emqx_conn                | ets    | Connection Table                |
++--------------------------+--------+---------------------------------+
+| emqx_metrics             | ets    | Metrics Table                   |
++--------------------------+--------+---------------------------------+
+| emqx_session             | ets    | Session Table                   |
++--------------------------+--------+---------------------------------+
+| emqx_hooks               | ets    | Hooks Table                     |
++--------------------------+--------+---------------------------------+
+| emqx_subscriber          | ets    | Subscriber Table                |
++--------------------------+--------+---------------------------------+
+| emqx_subscription        | ets    | Subscription Table              |
++--------------------------+--------+---------------------------------+
+| emqx_admin               | mnesia | The Dashboard admin users Table |
++--------------------------+--------+---------------------------------+
+| emqx_retainer            | mnesia | Retained Message Table          |
++--------------------------+--------+---------------------------------+
+| emqx_shared_subscription | mnesia | Shared Subscription Table       |
++--------------------------+--------+---------------------------------+
+| emqx_session_registry    | mnesia | Global Session Registry Table   |
++--------------------------+--------+---------------------------------+
+| emqx_alarm_history       | mnesia | Alarms History                  |
++--------------------------+--------+---------------------------------+
+| emqx_alarm               | mnesia | Alarms                          |
++--------------------------+--------+---------------------------------+
+| emqx_banned              | mnesia | Built-In Banned Table           |
++--------------------------+--------+---------------------------------+
+| emqx_route               | mnesia | Global Route Table              |
++--------------------------+--------+---------------------------------+
+| emqx_trie                | mnesia | Trie Table                      |
++--------------------------+--------+---------------------------------+
+| emqx_trie_node           | mnesia | Trie Node Table                 |
++--------------------------+--------+---------------------------------+
+| mqtt_app                 | mnesia | App table                       |
++--------------------------+--------+---------------------------------+

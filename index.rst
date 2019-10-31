@@ -13,19 +13,19 @@ EMQ X Enterprise Documentation
    overview
    deploy
    install
-   quick
+   guide
    config
+   rule_engine
+   rule_tutorial
    auth
    backends
    bridges
-   guide
    cluster
    design
-   cli
+   commands
    plugins
    rest
-   tune
    ratelimit
+   tune
    mqtt
-   contact
 

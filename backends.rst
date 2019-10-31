@@ -56,21 +56,29 @@ EMQ X Persistence supports subscription by broker. When a client goes online, th
 List of Persistence Plugins
 ----------------------------
 
-EMQ X allowes storing messages in Redis, MySQL, PostgreSQL, MongoDB and Cassandra:
+EMQ X allowes storing messages in Redis, MySQL, PostgreSQL, MongoDB, Cassandra, DynamoDB, InfluxDB, OpenTSDB and Timescale:
 
-+-----------------------+--------------------------+-------------------------------+
-| Persistence Plugins   | Config File              | Description                   |
-+=======================+==========================+===============================+
-| emqx_backend_redis    | emqx_backend_redis.conf  | Redis Message Persistence     |
-+-----------------------+--------------------------+-------------------------------+
-| emqx_backend_mysql    | emqx_backend_mysql.conf  | MySQL Message Persistence     |
-+-----------------------+--------------------------+-------------------------------+
-| emqx_backend_pgsql    | emqx_backend_pgsql.conf  | PostgreSQL Message Persistence|
-+-----------------------+--------------------------+-------------------------------+
-| emqx_backend_mongo    | emqx_backend_mongo.conf  | MongoDB Message Persistence   |
-+-----------------------+--------------------------+-------------------------------+
-| emqx_backend_cassa    | emqx_backend_cassa.conf  | Cassandra Message Persistence |
-+-----------------------+--------------------------+-------------------------------+
++------------------------+-----------------------------+--------------------------------+
+| Persistence Plugins    | Config File                 | Description                    |
++========================+=============================+================================+
+| emqx_backend_redis     | emqx_backend_redis.conf     | Redis Message Persistence      |
++------------------------+-----------------------------+--------------------------------+
+| emqx_backend_mysql     | emqx_backend_mysql.conf     | MySQL Message Persistence      |
++------------------------+-----------------------------+--------------------------------+
+| emqx_backend_pgsql     | emqx_backend_pgsql.conf     | PostgreSQL Message Persistence |
++------------------------+-----------------------------+--------------------------------+
+| emqx_backend_mongo     | emqx_backend_mongo.conf     | MongoDB Message Persistence    |
++------------------------+-----------------------------+--------------------------------+
+| emqx_backend_cassa     | emqx_backend_cassa.conf     | Cassandra Message Persistence  |
++------------------------+-----------------------------+--------------------------------+
+| emqx_backend_dynamo    | emqx_backend_dynamo.conf    | DynamoDB Message Persistence   |
++------------------------+-----------------------------+--------------------------------+
+| emqx_backend_influxdb  | emqx_backend_influxdb.conf  | InfluxDB Message Persistence   |
++------------------------+-----------------------------+--------------------------------+
+| emqx_backend_opentsdb  | emqx_backend_opentsdb.conf  | OpenTSDB Message Persistence   |
++------------------------+-----------------------------+--------------------------------+
+| emqx_backend_timescale | emqx_backend_timescale.conf | Timescale Message Persistence  |
++------------------------+-----------------------------+--------------------------------+
 
 .. _redis_backend:
 
@@ -1639,3 +1647,840 @@ Enable Cassandra Backend
 
     ./bin/emqx_ctl plugins load emqx_backend_cassa
 
+----------------
+DynamoDB Backend
+----------------
+
+Configure DynamoDB Cluster
+--------------------------
+
+Config file: etc/plugins/emqx_backend_dynamo.conf
+
+.. code-block:: properties
+
+    ## DynamoDB Region
+    backend.dynamo.region = us-west-2
+
+    ## DynamoDB Server
+    backend.dynamo.pool1.server = http://localhost:8000
+
+    ## DynamoDB Pool Size
+    backend.dynamo.pool1.pool_size = 8
+
+    ## AWS ACCESS KEY ID
+    backend.dynamo.pool1.aws_access_key_id = AKIAU5IM2XOC7AQWG7HK
+
+    ## AWS SECRET ACCESS KEY
+    backend.dynamo.pool1.aws_secret_access_key = TZt7XoRi+vtCJYQ9YsAinh19jR1rngm/hxZMWR2P
+
+    ## DynamoDB Backend Hooks
+    backend.dynamo.hook.client.connected.1    = {"action": {"function": "on_client_connected"}, "pool": "pool1"}
+    backend.dynamo.hook.session.created.1     = {"action": {"function": "on_subscribe_lookup"}, "pool": "pool1"}
+    backend.dynamo.hook.client.disconnected.1 = {"action": {"function": "on_client_disconnected"}, "pool": "pool1"}
+    backend.dynamo.hook.session.subscribed.1  = {"topic": "#", "action": {"function": "on_message_fetch_for_queue"}, "pool": "pool1"}
+    backend.dynamo.hook.session.subscribed.2  = {"topic": "#", "action": {"function": "on_retain_lookup"}, "pool": "pool1"}
+    backend.dynamo.hook.session.unsubscribed.1= {"topic": "#", "action": {"function": "on_acked_delete"}, "pool": "pool1"}
+    backend.dynamo.hook.message.publish.1     = {"topic": "#", "action": {"function": "on_message_publish"}, "pool": "pool1"}
+    backend.dynamo.hook.message.publish.2     = {"topic": "#", "action": {"function": "on_message_retain"}, "pool": "pool1"}
+    backend.dynamo.hook.message.publish.3     = {"topic": "#", "action": {"function": "on_retain_delete"}, "pool": "pool1"}
+    backend.dynamo.hook.message.acked.1       = {"topic": "#", "action": {"function": "on_message_acked_for_queue"}, "pool": "pool1"}
+
+    # backend.dynamo.hook.message.publish.4   = {"topic": "#", "action": {"function": "on_message_store"}, "pool": "pool1"}
+
+Description of DynamoDB Persistence Hooks
+-----------------------------------------
+
++------------------------+------------------------+----------------------------+----------------------------------+
+| hook                   | topic                  | action                     | Description                      |
++========================+========================+============================+==================================+
+| client.connected       |                        | on_client_connected        | Store client connected state     |
++------------------------+------------------------+----------------------------+----------------------------------+
+| client.connected       |                        | on_subscribe_lookup        | Subscribed topics                |
++------------------------+------------------------+----------------------------+----------------------------------+
+| client.disconnected    |                        | on_client_disconnected     | Store client disconnected state  |
++------------------------+------------------------+----------------------------+----------------------------------+
+| session.subscribed     | #                      | on_message_fetch_for_queue | Fetch offline messages           |
++------------------------+------------------------+----------------------------+----------------------------------+
+| session.subscribed     | #                      | on_retain_lookup           | Lookup retained messages         |
++------------------------+------------------------+----------------------------+----------------------------------+
+| message.publish        | #                      | on_message_publish         | Store published messages         |
++------------------------+------------------------+----------------------------+----------------------------------+
+| message.publish        | #                      | on_message_retain          | Store retained messages          |
++------------------------+------------------------+----------------------------+----------------------------------+
+| message.publish        | #                      | on_retain_delete           | Delete retained messages         |
++------------------------+------------------------+----------------------------+----------------------------------+
+| message.acked          | #                      | on_message_acked_for_queue | Process ACK                      |
++------------------------+------------------------+----------------------------+----------------------------------+
+
+Create DynamoDB DB
+------------------
+
+.. code-block:: bash
+
+   ./test/dynamo_test.sh
+
+.. note:: DB name is free of choice
+
+DynamoDB Client Connection Table
+--------------------------------
+
+*mqtt_client* stores client connection states:
+
+.. code-block:: bash
+
+   {
+       "TableName": "mqtt_client",
+       "KeySchema": [
+           { "AttributeName": "clientid", "KeyType": "HASH" }
+       ],
+       "AttributeDefinitions": [
+           { "AttributeName": "clientid", "AttributeType": "S" }
+       ],
+       "ProvisionedThroughput": {
+           "ReadCapacityUnits": 5,
+           "WriteCapacityUnits": 5
+       }
+   }
+
+Query the client connection state:
+
+.. code-block:: bash
+
+   aws dynamodb scan --table-name mqtt_client --region us-west-2  --endpoint-url http://localhost:8000
+
+   {
+       "Items": [
+           {
+               "offline_at": { "N": "0" },
+               "node": { "S": "emqx@127.0.0.1" },
+               "clientid": { "S": "mqttjs_384b9c73a9" },
+               "connect_state": { "N": "1" },
+               "online_at": { "N": "1562224940" }
+           }
+       ],
+       "Count": 1,
+       "ScannedCount": 1,
+       "ConsumedCapacity": null
+   }
+
+DynamoDB Subscription Table
+---------------------------
+
+*mqtt_sub* table stores MQTT subscriptions of clients:
+
+.. code-block:: bash
+
+   {
+       "TableName": "mqtt_sub",
+       "KeySchema": [
+           { "AttributeName": "clientid", "KeyType": "HASH" },
+           { "AttributeName": "topic", "KeyType": "RANGE" }
+       ],
+       "AttributeDefinitions": [
+           { "AttributeName": "clientid", "AttributeType": "S" },
+           { "AttributeName": "topic", "AttributeType": "S" }
+       ],
+       "ProvisionedThroughput": {
+           "ReadCapacityUnits": 5,
+           "WriteCapacityUnits": 5
+       }
+   }
+
+Query topics subscribed by the client named "test-dynamo":
+
+.. code-block:: bash
+
+   aws dynamodb scan --table-name mqtt_sub --region us-west-2  --endpoint-url http://localhost:8000
+
+   {
+       "Items": [{"qos": { "N": "2" }, "topic": { "S": "test-dynamo-sub" }, "clientid": { "S": "test-dynamo" }},
+                  {"qos": { "N": "2" }, "topic": { "S": "test-dynamo-sub-1"}, "clientid": { "S": "test-dynamo" }},
+                  {"qos": { "N": "2" }, "topic": { "S": "test-dynamo-sub-2"}, "clientid": { "S": "test-dynamo" }}],
+       "Count": 3,
+       "ScannedCount": 3,
+       "ConsumedCapacity": null
+   }
+
+DynamoDB Message Table
+----------------------
+
+*mqtt_msg* stores MQTT messages:
+
+.. code-block:: bash
+
+   {
+       "TableName": "mqtt_msg",
+       "KeySchema": [
+           { "AttributeName": "msgid", "KeyType": "HASH" }
+       ],
+       "AttributeDefinitions": [
+           { "AttributeName": "msgid", "AttributeType": "S" }
+       ],
+       "ProvisionedThroughput": {
+           "ReadCapacityUnits": 5,
+           "WriteCapacityUnits": 5
+       }
+   }
+
+*mqtt_topic_msg_map* stores the mapping between topics and messages:
+
+.. code-block:: bash
+
+   {
+       "TableName": "mqtt_topic_msg_map",
+       "KeySchema": [
+           { "AttributeName": "topic", "KeyType": "HASH" }
+       ],
+       "AttributeDefinitions": [
+           { "AttributeName": "topic", "AttributeType": "S" }
+       ],
+       "ProvisionedThroughput": {
+           "ReadCapacityUnits": 5,
+           "WriteCapacityUnits": 5
+       }
+   }
+
+Query *mqtt_msg* and *mqtt_topic_msg_map* after a client publishes a message to the "test" topic:
+
+Query *mqtt_msg*:
+
+.. code-block:: bash
+
+    aws dynamodb scan --table-name mqtt_msg --region us-west-2  --endpoint-url http://localhost:8000
+
+   {
+       "Items": [
+           {
+                "arrived": { "N": "1562308553" },
+                "qos": { "N": "1" },
+                "sender": { "S": "mqttjs_231b962d5c" },
+                "payload": { "S": "{ \"msg\": \"Hello, World!\" }"},
+                "retain": { "N": "0" },
+                "msgid": { "S": "Mjg4MTk1MDYwNTk0NjYwNzYzMTg4MDk3OTQ2MDU2Nzg1OTD" },
+                "topic": { "S": "test" }
+           }
+       ],
+       "Count": 1,
+       "ScannedCount": 1,
+       "ConsumedCapacity": null
+   }
+
+Query *mqtt_topic_msg_map*:
+
+.. code-block:: bash
+
+    aws dynamodb scan --table-name mqtt_topic_msg_map --region us-west-2  --endpoint-url http://localhost:8000
+
+   {
+       "Items": [
+           {
+                "topic": { "S": "test" },
+                "MsgId": { "SS": [ "Mjg4MTk1MDYwNTk0NjYwNzYzMTg4MDk3OTQ2MDU2Nzg1OTD" ]}
+           }
+       ],
+       "Count": 1,
+       "ScannedCount": 1,
+       "ConsumedCapacity": null
+   }
+
+DynamoDB Retained Message Table
+-------------------------------
+
+*mqtt_retain* stores retained messages:
+
+.. code-block:: bash
+
+   {
+       "TableName": "mqtt_retain",
+       "KeySchema": [
+           { "AttributeName": "topic", "KeyType": "HASH" }
+       ],
+       "AttributeDefinitions": [
+           { "AttributeName": "topic", "AttributeType": "S" }
+       ],
+       "ProvisionedThroughput": {
+           "ReadCapacityUnits": 5,
+           "WriteCapacityUnits": 5
+       }
+   }
+
+Query *mqtt_retain* after a client publishes a message to the "test" topic:
+
+.. code-block:: bash
+
+   {
+       "Items": [
+           {
+               "arrived": { "N": "1562312113" },
+               "qos": { "N": "1" },
+               "sender": { "S": "mqttjs_d0513acfce" },
+               "payload": { "S": "test" },
+               "retain": { "N": "1" },
+               "msgid": { "S": "Mjg4MTk1NzE3MTY4MjYxMjA5MDExMDg0NTk5ODgzMjAyNTH" },
+               "topic": { "S": "testtopic" }
+           }
+       ],
+       "Count": 1,
+       "ScannedCount": 1,
+       "ConsumedCapacity": null
+   }
+
+DynamoDB Acknowledgement Table
+------------------------------
+
+*mqtt_acked* stores acknowledgements from the clients:
+
+.. code-block:: bash
+
+   {
+       "TableName": "mqtt_acked",
+       "KeySchema": [
+           { "AttributeName": "topic", "KeyType": "HASH" },
+           { "AttributeName": "clientid", "KeyType": "RANGE" }
+       ],
+       "AttributeDefinitions": [
+           { "AttributeName": "topic", "AttributeType": "S" },
+           { "AttributeName": "clientid", "AttributeType": "S" }
+       ],
+       "ProvisionedThroughput": {
+           "ReadCapacityUnits": 5,
+           "WriteCapacityUnits": 5
+       }
+   }
+
+Query *mqtt_acked* after a client publishes a message to the "test" topic:
+
+.. code-block:: bash
+
+    {
+        "Items": [
+            {
+                "topic": { "S": "test" },
+                "msgid": { "S": "Mjg4MTk1MDYwNTk0NjYwNzYzMTg4MDk3OTQ2MDU2Nzg1OTD" },
+                "clientid": { "S": "mqttjs_861e582a70" }
+            }
+        ],
+        "Count": 1,
+        "ScannedCount": 1,
+        "ConsumedCapacity": null
+    }
+
+Enable DynamoDB Backend
+-----------------------
+
+.. code-block:: bash
+
+   ./bin/emqx_ctl plugins load emqx_backend_dynamo
+
+----------------
+InfluxDB Backend
+----------------
+
+Configure InfluxDB Server
+-------------------------
+
+Config file: etc/plugins/emqx_backend_influxdb.conf:
+
+.. code-block:: properties
+
+    ## InfluxDB UDP Server
+    backend.influxdb.pool1.server = 127.0.0.1:8089
+
+    ## InfluxDB Pool Size
+    backend.influxdb.pool1.pool_size = 5
+
+    ## Wether to add timestamp automatically
+    backend.influxdb.pool1.set_timestamp = true
+
+    backend.influxdb.hook.message.publish.1 = {"topic": "#", "action": {"function": "on_message_publish"}, "pool": "pool1"}
+
+Parameters in hook rule:
+
++----------+-------------------------------------------------------------------------------------------------------------------+
+| Option   | Description                                                                                                       |
++==========+===================================================================================================================+
+| topic    | Configure which topics need to execute hooks                                                                      |
++----------+-------------------------------------------------------------------------------------------------------------------+
+| action   | Configure specific action for hook, ``function`` is a built-in function provided as Backend for general functions |
++----------+-------------------------------------------------------------------------------------------------------------------+
+| pool     | Pool Name, used to connect multiple InfluxDB servers                                                              |
++----------+-------------------------------------------------------------------------------------------------------------------+
+
+Example:
+
+.. code-block:: properties
+
+    ## Store PUBLISH message whose topic is "sensor/#"
+    backend.influxdb.hook.message.publish.1 = {"topic": "sensor/#", "action": {"function": "on_message_publish"}, "pool": "pool1"}
+
+    ## Store PUBLISH message whose topic is "stat/#"
+    backend.influxdb.hook.message.publish.2 = {"topic": "stat/#", "action": {"function": "on_message_publish"}, "pool": "pool1"}
+
+Description of InfluxDB Persistence Hooks
+-----------------------------------------
+
++------------------------+------------------------+----------------------------+----------------------------------+
+| hook                   | topic                  | action                     | Description                      |
++========================+========================+============================+==================================+
+| message.publish        | #                      | on_message_publish         | Store published messages         |
++------------------------+------------------------+----------------------------+----------------------------------+
+
+Since MQTT Message cannot be written directly to InfluxDB, InfluxDB Backend provides an `emqx_backend_influxdb.tmpl` template file to convert MQTT Message to DataPoint that can be written to InfluxDB.
+
+tmpl files use Json format, and users can define different templates for different topics, like:
+
+.. code-block:: bash
+
+    {
+        <Topic 1>: <Template 1>,
+        <Topic 2>: <Template 2>
+    }
+
+Template format:
+
+.. code-block:: bash
+
+    {
+        "measurement": <Where is value of measurement>,
+        "tags": {
+            <Tag Key>: <Where is value of tag>
+        },
+        "fields": {
+            <Field Key>: <Where is value of field>
+        },
+        "timestamp": <Where is value of timestamp>
+    }
+
+``measurement`` and ``fields`` are required options, ``tags`` and ``timestamp`` are optional. ``< Where is the value of * >`` supports placeholders that first letter is '$' ("$qos", "$from", "$topic", "$timestamp)" and Json Key List that head is "$payload". For example ``["$payload", "data", "temp"]`` will fetch 21.3 from the MQTT Message that payload is ``{"data": {"temp" : 21.3}}``.
+
+data/templates/emqx_backend_influxdb.tmpl provides a sample to user for reference:
+
+.. code-block:: bash
+
+    {
+        "sample": {
+            "measurement": "$topic",
+            "tags": {
+                "host": ["$payload", "data", "$0", "host"],
+                "region": ["$payload", "data", "$0", "region"],
+                "qos": "$qos",
+                "from": "$from"
+            },
+            "fields": {
+                "temperature": ["$payload", "data", "$0", "temp"]
+            },
+            "timestamp": "$timestamp"
+        }
+    }
+
+When an MQTT Message whose Topic is "sample" has the following Payload:
+
+.. code-block:: bash
+
+    {
+        "data": [
+            {
+                "temp": 1,
+                "host": "serverA",
+                "region": "hangzhou"
+            },
+            {
+                "temp": 2,
+                "host": "serverB",
+                "region": "ningbo"
+            }
+        ]
+    }
+
+Backend converts MQTT messages to:
+
+.. code-block:: bash
+
+    [
+        {
+            "measurement": "sample",
+            "tags": {
+                "from": "mqttjs_ebcc36079a",
+                "host": "serverA",
+                "qos": "0",
+                "region": "hangzhou",
+            },
+            "fields": {
+                "temperature": "1"
+            },
+            "timestamp": "1560743513626681000"
+        },
+        {
+            "measurement": "sample",
+            "tags": {
+                "from": "mqttjs_ebcc36079a",
+                "host": "serverB",
+                "qos": "0",
+                "region": "ningbo",
+            },
+            "fields": {
+                "temperature": "2"
+            },
+            "timestamp": "1560743513626681000"
+        }
+    ]
+
+The data was finally encoded and written to InfluxDB as follows:
+
+.. code-block:: bash
+
+    "sample,from=mqttjs_6990f0e886,host=serverA,qos=0,region=hangzhou temperature=\"1\" 1560745505429670000\nsample,from=mqttjs_6990f0e886,host=serverB,qos=0,region=ningbo temperature=\"2\" 1560745505429670000\n"
+
+Enable InfluxDB Backend
+-----------------------
+
+.. code-block:: bash
+
+   ./bin/emqx_ctl plugins load emqx_backend_influxdb
+
+----------------
+OpenTSDB Backend
+----------------
+
+Configure OpenTSDB Server
+-------------------------
+
+Config file: etc/plugins/emqx_backend_opentsdb.conf:
+
+.. code-block:: properties
+
+    ## OpenTSDB Server
+    backend.opentsdb.pool1.server = 127.0.0.1:4242
+
+    ## OpenTSDB Pool Size
+    backend.opentsdb.pool1.pool_size = 8
+
+    ## Whether to return summary info
+    backend.opentsdb.pool1.summary = true
+
+    ## Whether to return detailed info
+    ##
+    ## Value: true | false
+    backend.opentsdb.pool1.details = false
+
+    ## Synchronous write or not
+    ##
+    ## Value: true | false
+    backend.opentsdb.pool1.sync = false
+
+    ## Synchronous write timeout in milliseconds
+    ##
+    ## Value: Duration
+    ##
+    ## Default: 0
+    backend.opentsdb.pool1.sync_timeout = 0
+
+    ## Max batch size
+    ##
+    ## Value: Number >= 0
+    ## Default: 20
+    backend.opentsdb.pool1.max_batch_size = 20
+
+    ## Store PUBLISH Messages
+    backend.opentsdb.hook.message.publish.1 = {"topic": "#", "action": {"function": "on_message_publish"}, "pool": "pool1"}
+
+Parameters in hook rule:
+
++----------+-------------------------------------------------------------------------------------------------------------------+
+| Option   | Description                                                                                                       |
++==========+===================================================================================================================+
+| topic    | Configure which topics need to execute hooks                                                                      |
++----------+-------------------------------------------------------------------------------------------------------------------+
+| action   | Configure specific action for hook, ``function`` is a built-in function provided as Backend for general functions |
++----------+-------------------------------------------------------------------------------------------------------------------+
+| pool     | Pool Name, used to connect multiple OpenTSDB servers                                                              |
++----------+-------------------------------------------------------------------------------------------------------------------+
+
+Example:
+
+.. code-block:: properties
+
+    ## Store PUBLISH message whose topic is "sensor/#"
+    backend.influxdb.hook.message.publish.1 = {"topic": "sensor/#", "action": {"function": "on_message_publish"}, "pool": "pool1"}
+
+    ## Store PUBLISH message whose topic is "stat/#"
+    backend.influxdb.hook.message.publish.2 = {"topic": "stat/#", "action": {"function": "on_message_publish"}, "pool": "pool1"}
+
+Description of OpenTSDB Persistence Hooks
+-----------------------------------------
+
++------------------------+------------------------+----------------------------+----------------------------------+
+| hook                   | topic                  | action                     | Description                      |
++========================+========================+============================+==================================+
+| message.publish        | #                      | on_message_publish         | Store published messages         |
++------------------------+------------------------+----------------------------+----------------------------------+
+
+Since MQTT Message cannot be written directly to OpenTSDB, OpenTSDB Backend provides an `emqx_backend_opentsdb.tmpl` template file to convert MQTT Message to DataPoint that can be written to OpenTSDB.
+
+tmpl files use Json format, and users can define different templates for different topics, like:
+
+.. code-block:: bash
+
+    {
+        <Topic 1>: <Template 1>,
+        <Topic 2>: <Template 2>
+    }
+
+The template format is as follows:
+
+.. code-block:: bash
+
+    {
+        "measurement": <Where is value of measurement>,
+        "tags": {
+            <Tag Key>: <Where is value of tag>
+        },
+        "value": <Where is value of value>,
+        "timestamp": <Where is value of timestamp>
+    }
+
+
+``measurement`` and ``value`` are required options, ``tags`` and ``timestamp`` are optional. ``< Where is the value of * >`` supports placeholders that first letter is '$' ("$qos", "$from", "$topic", "$timestamp)" and Json Key List that head is "$payload". For example ``["$payload", "data", "temp"]`` will fetch 21.3 from the MQTT Message that payload is ``{"data": {"temp" : 21.3}}``.
+
+data/templates/emqx_backend_opentsdb.tmpl provides a sample to user for reference:
+
+.. code-block:: bash
+
+    {
+        "sample": {
+            "measurement": "$topic",
+            "tags": {
+                "host": ["$payload", "data", "$0", "host"],
+                "region": ["$payload", "data", "$0", "region"],
+                "qos": "$qos",
+                "from": "$from"
+            },
+            "value": ["$payload", "data", "$0", "temp"],
+            "timestamp": "$timestamp"
+        }
+    }
+
+When an MQTT Message whose Topic is "sample" has the following Payload:
+
+.. code-block:: bash
+
+    {
+        "data": [
+            {
+                "temp": 1,
+                "host": "serverA",
+                "region": "hangzhou"
+            },
+            {
+                "temp": 2,
+                "host": "serverB",
+                "region": "ningbo"
+            }
+        ]
+    }
+
+Backend converts MQTT messages into the following data and writes it to OpenTSDB:
+
+.. code-block:: bash
+
+    [
+        {
+            "measurement": "sample",
+            "tags": {
+                "from": "mqttjs_ebcc36079a",
+                "host": "serverA",
+                "qos": "0",
+                "region": "hangzhou",
+            },
+            "value": "1",
+            "timestamp": "1560743513626681000"
+        },
+        {
+            "measurement": "sample",
+            "tags": {
+                "from": "mqttjs_ebcc36079a",
+                "host": "serverB",
+                "qos": "0",
+                "region": "ningbo",
+            },
+            "value": "2",
+            "timestamp": "1560743513626681000"
+        }
+    ]
+
+Enable OpenTSDB Backend
+-----------------------
+
+.. code-block:: bash
+
+   ./bin/emqx_ctl plugins load emqx_backend_opentsdb
+
+-----------------
+Timescale Backend
+-----------------
+
+Configure Timescale Server
+--------------------------
+
+Config file: etc/plugins/emqx_backend_timescale.conf:
+
+.. code-block:: properties
+
+    ## Timescale Server
+    backend.timescale.pool1.server = 127.0.0.1:5432
+    ## Timescale Pool Size
+    backend.timescale.pool1.pool_size = 8
+    ## Timescale Username
+    backend.timescale.pool1.username = postgres
+    ## Timescale Password
+    backend.timescale.pool1.password = password
+    ## Timescale Database
+    backend.timescale.pool1.database = tutorial
+    ## Timescale SSL
+    backend.timescale.pool1.ssl = false
+
+    ## SSL keyfile.
+    ##
+    ## Value: File
+    ## backend.timescale.pool1.keyfile =
+
+    ## SSL certfile.
+    ##
+    ## Value: File
+    ## backend.timescale.pool1.certfile =
+
+    ## SSL cacertfile.
+    ##
+    ## Value: File
+    ## backend.timescale.pool1.cacertfile =
+
+    ## Store Publish Message
+    backend.timescale.hook.message.publish.1 = {"topic": "#", "action": {"function": "on_message_publish"}, "pool": "pool1"}
+
+Parameters in hook rule:
+
++----------+-------------------------------------------------------------------------------------------------------------------+
+| Option   | Description                                                                                                       |
++==========+===================================================================================================================+
+| topic    | Configure which topics need to execute hooks                                                                      |
++----------+-------------------------------------------------------------------------------------------------------------------+
+| action   | Configure specific action for hook, ``function`` is a built-in function provided as Backend for general functions |
++----------+-------------------------------------------------------------------------------------------------------------------+
+| pool     | Pool Name, used to connect multiple Timescale servers                                                             |
++----------+-------------------------------------------------------------------------------------------------------------------+
+
+Example:
+
+.. code-block:: properties
+
+    ## Store PUBLISH message whose topic is "sensor/#"
+    backend.influxdb.hook.message.publish.1 = {"topic": "sensor/#", "action": {"function": "on_message_publish"}, "pool": "pool1"}
+
+    ## Store PUBLISH message whose topic is "stat/#"
+    backend.influxdb.hook.message.publish.2 = {"topic": "stat/#", "action": {"function": "on_message_publish"}, "pool": "pool1"}
+
+Description of Timescale Persistence Hooks
+------------------------------------------
+
++------------------------+------------------------+----------------------------+----------------------------------+
+| hook                   | topic                  | action                     | Description                      |
++========================+========================+============================+==================================+
+| message.publish        | #                      | on_message_publish         | Store published messages         |
++------------------------+------------------------+----------------------------+----------------------------------+
+
+Timescale Backend provides the template file named ``emqx_backend_timescale.tmpl``, which is used to extract data from MQTT messages with different topics for writing to Timescale.
+
+.. code-block:: json
+
+    {
+        <Topic 1>: <Template 1>,
+        <Topic 2>: <Template 2> 
+    }
+
+The template format is as follows:
+
+.. code-block:: json
+
+    {
+        "name": <Name of template>,
+        "sql": <SQL INSERT INTO>,
+      	"param_keys": <Param Keys>
+    }
+
+``name``, ``sql`` and ``param_keys`` are required options. ``name`` can be any string, just make sure there are no duplicates. ``sql`` is SQL INSERT INTO statement for Timescale, like ``insert into sensor_data(time, location, temperature, humidity) values (NOW(), $1, $2, $3)``. ``param_keys`` is a array, its first element corresponds to ``$1`` appearing in ``sql`` and so on, it mainly used to extract data from MQTT Mesage to replace placeholders in ``sql``.
+
+emqx/data/templates/emqx_backend_timescale_example.tmpl provides a sample to user for reference:
+
+.. code-block:: json
+
+    {
+        "sensor_data": {
+            "name": "insert_sensor_data",
+            "sql": "insert into sensor_data(time, location, temperature, humidity) values (NOW(), $1, $2, $3)",
+            "param_keys": [
+                ["$payload", "data", "$0", "location"],
+                ["$payload", "data", "$0", "temperature"],
+                ["$payload", "data", "$0", "humidity"]
+            ]
+        },
+        "sensor_data2/#": {
+            "name": "insert_sensor_data2",
+            "sql": "insert into sensor_data(time, location, temperature, humidity) values (NOW(), $1, $2, $3)",
+            "param_keys": [
+                ["$payload", "location"],
+                ["$payload", "temperature"],
+                ["$payload", "humidity"]
+            ]
+        },
+        "easy_data": {
+            "name": "insert_easy_data",
+            "sql": "insert into easy_data(time, data) values (NOW(), $1)",
+            "param_keys": [
+                "$payload"
+            ]
+        }
+    }
+
+When an MQTT Message whose Topic is "sensor_data" has the following Payload:
+
+.. code-block:: json
+
+    {
+        "data":[
+            {
+                "location":"bedroom",
+                "temperature":21.3,
+                "humidity":40.3
+            },
+            {
+                "location":"bathroom",
+                "temperature":22.3,
+                "humidity":61.8
+            },
+            {
+                "location":"kitchen",
+                "temperature":29.5,
+                "humidity":58.7
+            }
+        ]
+    }
+
+``["$payload", "data", "$0", "location"]`` will extract Payload from MQTT Message first. 
+
+If the format of Payload is json, backend continue to extract ``data`` from Payload. 
+
+And the value of ``data`` is an array, we use ``$0`` to gets all elements in the array. 
+
+``["$payload", "data", "$0", "location"]`` will help us get ``["bedroom", "bathroom", "kitchen"]`` finally. 
+
+Accordingly if you replace ``$0`` with ``$1``, you get only ``["bedroom"]``.
+
+So in this scene, we will get the following SQL statement:
+
+.. code-block:: json
+
+    insert into sensor_data(time, location, temperature, humidity) values (NOW(), 'bedroom', 21.3, 40.3)
+    insert into sensor_data(time, location, temperature, humidity) values (NOW(), 'bathroom', 22.3, 61.8)
+    insert into sensor_data(time, location, temperature, humidity) values (NOW(), 'kitchen', 29.5, 58.7)
+
+Eventually Timescale Backend executes these SQL statements to write data to Timescale.

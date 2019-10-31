@@ -9,7 +9,7 @@ AuthN/AuthZ
 Design of MQTT Auth
 --------------------
 
-EMQ X utilizes plugins to provide various Authentication mechanism. EMQ X supports username / password, ClientID and anonymous Auth. It also supports Auth integration with MySQL, PostgreSQL, Redis, MongoDB, HTTP and LDAP.
+EMQ X utilizes plugins to provide various Authentication mechanism. EMQ X supports username / password, ClientID and anonymous authentication. It also supports Auth integration with MySQL, PostgreSQL, Redis, MongoDB, HTTP, OpenLDAP and JWT.
 
 Anonymous Auth is enabled by default. An Auth chain can be built of multiple Auth plugins:
 
@@ -19,7 +19,7 @@ Anonymous Auth is enabled by default. An Auth chain can be built of multiple Aut
 Anonymous Auth
 ---------------
 
-Anonymous Auth is the last validation of Auth chain. By default, it is enabled in file 'etc/emqx.conf'. Recommended to disable it in production deployment:
+Anonymous Auth is the last validation of Auth chain. By default, it is enabled in file `etc/emqx.conf`. Recommended to disable it in production deployment:
 
 .. code-block:: properties
 
@@ -49,12 +49,24 @@ The default access control of EMQ X server is configured by the file acl.conf:
 .. code-block:: properties
 
     ## ACL nomatch
-    mqtt.acl_nomatch = allow
+    acl_nomatch = allow
 
     ## Default ACL File
-    mqtt.acl_file = etc/acl.conf
+    acl_file = etc/acl.conf
 
-ACL is defined in ‘etc/acl.conf’, and is loaded when EMQ X starts:
+    ## Whether to enable ACL cache.
+    enable_acl_cache = on
+
+    ## The maximum count of ACL entries can be cached for a client.
+    acl_cache_max_size = 32
+
+    ## The time after which an ACL cache entry will be deleted
+    acl_cache_ttl = 1m
+
+    ## The action when acl check reject current operation
+    acl_deny_action = ignore
+
+ACL is defined in `etc/acl.conf`, and is loaded when EMQ X starts:
 
 .. code-block:: erlang
 
@@ -66,6 +78,9 @@ ACL is defined in ‘etc/acl.conf’, and is loaded when EMQ X starts:
 
     %% Deny clients to subscribe '$SYS#' and '#'
     {deny, all, subscribe, ["$SYS/#", {eq, "#"}]}.
+
+    %% Allow all
+    {allow, all}.
 
 If ACL is modified, it can be reloaded using CLI:
 
@@ -79,9 +94,9 @@ If ACL is modified, it can be reloaded using CLI:
 List of AuthN/ACL Plugins
 -------------------------
 
-EMQ X supports integrated authentications by using ClientId, Username, HTTP, LDAP, MySQL, Redis, PostgreSQL and MongoDB. Multiple Auth plugins can be loaded simultaneously to build an authentication chain.
+EMQ X supports integrated authentications by using ClientId, Username, HTTP, OpenLDAP, MySQL, Redis, PostgreSQL, MongoDB and JWT. Multiple Auth plugins can be loaded simultaneously to build an authentication chain.
 
-The config files of Auth plugins are located in '/etc/emqx/plugins/'(RPM/DEB installation) or in 'etc/plugins/'(standalone installation):
+The config files of Auth plugins are located in `/etc/emqx/plugins/`(RPM/DEB installation) or in `etc/plugins/`(standalone installation)
 
 +-------------------------+---------------------------+---------------------------------------+
 | Auth Plugin             | Config file               | Description                           |
@@ -90,39 +105,31 @@ The config files of Auth plugins are located in '/etc/emqx/plugins/'(RPM/DEB ins
 +-------------------------+---------------------------+---------------------------------------+
 | emqx_auth_username      | emqx_auth_username.conf   | Username/Password AuthN Plugin        |
 +-------------------------+---------------------------+---------------------------------------+
-| emqx_auth_ldap          | emqx_auth_ldap.conf       | LDAP AuthN/AuthZ Plugin               |
+| emqx_auth_ldap          | emqx_auth_ldap.conf       | OpenLDAP AuthN/AuthZ Plugin           |
 +-------------------------+---------------------------+---------------------------------------+
 | emqx_auth_http          | emqx_auth_http.conf       | HTTP AuthN/AuthZ                      |
 +-------------------------+---------------------------+---------------------------------------+
 | emqx_auth_mysql         | emqx_auth_redis.conf      | MySQL AuthN/AuthZ                     |
 +-------------------------+---------------------------+---------------------------------------+
-| emqx_auth_pgsql         | emqx_auth_mysql.conf      | Postgre AuthN/AuthZ                   |
+| emqx_auth_pgsql         | emqx_auth_mysql.conf      | PostgreSQL AuthN/AuthZ                |
 +-------------------------+---------------------------+---------------------------------------+
 | emqx_auth_redis         | emqx_auth_pgsql.conf      | Redis AuthN/AuthZ                     |
 +-------------------------+---------------------------+---------------------------------------+
 | emqx_auth_mongo         | emqx_auth_mongo.conf      | MongoDB AuthN/AuthZ                   |
++-------------------------+---------------------------+---------------------------------------+
+| emqx_auth_jwt           | emqx_auth_jwt.conf        | JWT AuthN/AuthZ                       |
 +-------------------------+---------------------------+---------------------------------------+
 
 ---------------------
 ClientID Auth Plugin
 ---------------------
 
-Configure the ClientID / Password list in the 'emqx_auth_clientid.conf':
+Configure the password hash in the `emqx_auth_clientid.conf`:
 
 .. code-block:: properties
 
-    ## auth.client.${id}.clientid = ${clientid}
-    ## auth.client.${id}.password = ${password}
-
-    ## Examples
-    auth.client.1.clientid = id
-    auth.client.1.password = passwd
-    auth.client.2.clientid = dev:devid
-    auth.client.2.password = passwd2
-    auth.client.3.clientid = app:appid
-    auth.client.3.password = passwd3
-    auth.client.4.clientid = client~!@#$%^&*()_+
-    auth.client.4.password = passwd~!@#$%^&*()_+
+    ## Password hash: plain | md5 | sha | sha256
+    auth.client.password_hash = sha256
 
 Load ClientId Auth plugin:
 
@@ -130,24 +137,32 @@ Load ClientId Auth plugin:
 
     ./bin/emqx_ctl plugins load emqx_auth_clientid
 
----------------------------
-Username/Passwd Auth Plugin
----------------------------
+After the plugin is loaded, there are two possible ways to add users:
 
-Configure the Username / Password list in the 'emqx_auth_username.conf':
+1. Use the './bin/emqx_ctl' CLI tool to add clients:
+
+.. code-block:: console
+
+   $ ./bin/emqx_ctl clientid add <ClientId> <Password>
+
+2. Use the HTTP API to add clients::
+
+    POST api/v3/auth_clientid
+    {
+        "clientid": "clientid",
+        "password": "password"
+    }
+
+------------------------------
+Username/Passwordd Auth Plugin
+------------------------------
+
+Configure the password hash in the `emqx_auth_username.conf`:
 
 .. code-block:: properties
 
-    ##auth.user.$N.username = admin
-    ##auth.user.$N.password = public
-
-    ## Examples:
-    ##auth.user.1.username = admin
-    ##auth.user.1.password = public
-    ##auth.user.2.username = feng@emqx.io
-    ##auth.user.2.password = public
-    ##auth.user.3.username = name~!@#$%^&*()_+
-    ##auth.user.3.password = pwsswd~!@#$%^&*()_+
+    ## Password hash: plain | md5 | sha | sha256
+    auth.user.password_hash = sha256
 
 Load Username Auth plugin:
 
@@ -157,36 +172,62 @@ Load Username Auth plugin:
 
 After the plugin is loaded, there are two possible ways to add users:
 
-1. Modify the 'emqx_auth_username.conf' and add user in plain text::
-
-    auth.user.1.username = admin
-    auth.user.1.password = public
-
-2. Use the './bin/emqx_ctl' CLI tool to add users:
+1. Use the './bin/emqx_ctl' CLI tool to add users:
 
 .. code-block:: console
 
    $ ./bin/emqx_ctl users add <Username> <Password>
 
------------------
-LDAP Auth Plugin
------------------
+2. Use the HTTP API to add users::
 
-Configure the LDAP Auth Plugin in the 'emqx_auth_ldap.conf' file:
+    POST api/v3/auth_username
+    {
+        "username": "username",
+        "password": "password"
+    }
+
+--------------------
+OpenLDAP Auth Plugin
+--------------------
+
+Configure the OpenLDAP Auth Plugin in the `emqx_auth_ldap.conf`:
 
 .. code-block:: properties
 
+    ## OpenLDAP servers list
     auth.ldap.servers = 127.0.0.1
 
+    ## OpenLDAP server port
     auth.ldap.port = 389
 
-    auth.ldap.timeout = 30
+    ## OpenLDAP pool size
+    auth.ldap.pool = 8
 
-    auth.ldap.user_dn = uid=%u,ou=People,dc=example,dc=com
+    ## OpenLDAP Bind DN
+    auth.ldap.bind_dn = cn=root,dc=emqx,dc=io
 
+    ## OpenLDAP Bind Password
+    auth.ldap.bind_password = public
+
+    ## OpenLDAP query timeout
+    auth.ldap.timeout = 30s
+
+    ## OpenLDAP Device DN
+    auth.ldap.device_dn = ou=device,dc=emqx,dc=io
+
+    ## Specified ObjectClass
+    auth.ldap.match_objectclass = mqttUser
+
+    ## attributetype for username
+    auth.ldap.username.attributetype = uid
+
+    ## attributetype for password
+    auth.ldap.password.attributetype = userPassword
+
+    ## Whether to enable SSL
     auth.ldap.ssl = false
 
-Load the LDAP Auth plugin:
+Load the OpenLDAP Auth plugin:
 
 .. code-block:: console
 
@@ -196,7 +237,28 @@ Load the LDAP Auth plugin:
 HTTP Auth/ACL Plugin
 ---------------------
 
-Configure the HTTP Auth/ACL in the 'emqx_auth_http.conf' file:
+Configure the HTTP Auth/ACL Plugin in the `emqx_auth_http.conf`:
+
+.. code-block:: properties
+
+    ## Time-out time for the http request, 0 is never timeout
+    ## auth.http.request.timeout = 0
+
+    ## Connection time-out time, used during the initial request
+    ## when the client is connecting to the server
+    ## auth.http.request.connect_timout = 0
+
+    ## Re-send http reuqest times
+    auth.http.request.retry_times = 3
+
+    ## The interval for re-sending the http request
+    auth.http.request.retry_interval = 1s
+
+    ## The 'Exponential Backoff' mechanism for re-sending request. The actually
+    ## re-send time interval is `interval * backoff ^ times`
+    auth.http.request.retry_backoff = 2.0
+
+Setup the Auth URL and parameters:
 
 .. code-block:: properties
 
@@ -239,7 +301,7 @@ Load HTTP Auth/ACL plugin:
 MySQL Auth/ACL Plugin
 ---------------------
 
-Create MQTT users' ACL database, and configure the ACL and Auth queries in the 'emqx_auth_mysql.conf' file:
+Create MQTT users' ACL database, and configure the ACL and Auth queries in the `emqx_auth_mysql.conf`:
 
 MQTT Auth User List
 -------------------
@@ -257,7 +319,7 @@ MQTT Auth User List
       UNIQUE KEY `mqtt_username` (`username`)
     ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
-.. NOTE:: User can define the user list table and configure it in the 'authquery' statement.
+.. NOTE:: User can define the user list table and configure it in the ``auth_query`` statement.
 
 MQTT Access Control List
 ------------------------
@@ -280,50 +342,72 @@ MQTT Access Control List
         (1,1,NULL,'$all',NULL,2,'#'),
         (2,0,NULL,'$all',NULL,1,'$SYS/#'),
         (3,0,NULL,'$all',NULL,1,'eq #'),
-        (5,1,'127.0.0.1',NULL,NULL,2,'$SYS/#'),
-        (6,1,'127.0.0.1',NULL,NULL,2,'#'),
-        (7,1,NULL,'dashboard',NULL,1,'$SYS/#');
+        (4,1,'127.0.0.1',NULL,NULL,2,'$SYS/#'),
+        (5,1,'127.0.0.1',NULL,NULL,2,'#'),
+        (6,1,NULL,'dashboard',NULL,1,'$SYS/#');
 
 MySQL Server Address
 --------------------
 
 .. code-block:: properties
 
-    ## Mysql Server 3306, 127.0.0.1:3306, localhost:3306
+    ## MySQL Server
     auth.mysql.server = 127.0.0.1:3306
 
-    ## Mysql Pool Size
+    ## MySQL Pool Size
     auth.mysql.pool = 8
 
-    ## Mysql Username
+    ## MySQL Username
     ## auth.mysql.username =
 
-    ## Mysql Password
+    ## MySQL Password
     ## auth.mysql.password =
 
-    ## Mysql Database
+    ## MySQL Database
     auth.mysql.database = mqtt
+
+    ## MySQL query timeout
+    ## auth.mysql.query_timeout = 5s
 
 Configure MySQL Auth Query Statement
 ------------------------------------
 
 .. code-block:: properties
 
-    ## Variables: %u = username, %c = clientid
-
-    ## Authentication Query: select password or password,salt
+    ## Authentication query
+    ##
+    ## Variables:
+    ##  - %u: username
+    ##  - %c: clientid
+    ##  - %C: common name of client TLS cert
+    ##  - %d: subject of client TLS cert
+    ##
     auth.mysql.auth_query = select password from mqtt_user where username = '%u' limit 1
+    ## auth.mysql.auth_query = select password_hash as password from mqtt_user where username = '%u' limit 1
 
-    ## Password hash: plain, md5, sha, sha256, pbkdf2, bcrypt
+    ## Password hash: plain | md5 | sha | sha256 | bcrypt
     auth.mysql.password_hash = sha256
 
     ## sha256 with salt prefix
-    ## auth.mysql.password_hash = salt sha256
+    ## auth.mysql.password_hash = salt,sha256
+
+    ## bcrypt with salt only prefix
+    ## auth.mysql.password_hash = salt,bcrypt
 
     ## sha256 with salt suffix
-    ## auth.mysql.password_hash = sha256 salt
+    ## auth.mysql.password_hash = sha256,salt
 
-    ## %% Superuser Query
+    ## pbkdf2 with macfun iterations dklen
+    ## macfun: md4, md5, ripemd160, sha, sha224, sha256, sha384, sha512
+    ## auth.mysql.password_hash = pbkdf2,sha256,1000,20
+
+    ## Superuser query
+    ##
+    ## Variables:
+    ##  - %u: username
+    ##  - %c: clientid
+    ##  - %C: common name of client TLS cert
+    ##  - %d: subject of client TLS cert
     auth.mysql.super_query = select is_superuser from mqtt_user where username = '%u' limit 1
 
 Configure MySQL ACL Query Statement
@@ -331,7 +415,12 @@ Configure MySQL ACL Query Statement
 
 .. code-block:: properties
 
-    ## ACL Query Command
+    ## ACL query
+    ##
+    ## Variables:
+    ##  - %a: ipaddr
+    ##  - %u: username
+    ##  - %c: clientid
     auth.mysql.acl_query = select allow, ipaddr, username, clientid, access, topic from mqtt_acl where ipaddr = '%a' or username = '%u' or username = '$all' or clientid = '%c'
 
 Load MySQL Auth Plugin
@@ -345,10 +434,10 @@ Load MySQL Auth Plugin
 PostgreSQL Auth/ACL Plugin
 --------------------------
 
-Create MQTT users' ACL tables, and configure Auth, ACL queries in the 'emqx_auth_pgsql.conf' file:
+Create MQTT users' ACL tables, and configure Auth, ACL queries in the `emqx_auth_pgsql.conf`:
 
-Postgre MQTT User Table
------------------------
+PostgreSQL MQTT User Table
+--------------------------
 
 .. code-block:: sql
 
@@ -360,10 +449,10 @@ Postgre MQTT User Table
       salt character varying(40)
     );
 
-.. NOTE:: User can define the user list table and configure it in the 'authquery' statement.
+.. NOTE:: User can define the user list table and configure it in the `auth_query` statement.
 
-Postgre MQTT ACL Table
-----------------------
+PostgreSQL MQTT ACL Table
+-------------------------
 
 .. code-block:: sql
 
@@ -382,50 +471,82 @@ Postgre MQTT ACL Table
         (1,1,NULL,'$all',NULL,2,'#'),
         (2,0,NULL,'$all',NULL,1,'$SYS/#'),
         (3,0,NULL,'$all',NULL,1,'eq #'),
-        (5,1,'127.0.0.1',NULL,NULL,2,'$SYS/#'),
-        (6,1,'127.0.0.1',NULL,NULL,2,'#'),
-        (7,1,NULL,'dashboard',NULL,1,'$SYS/#');
+        (4,1,'127.0.0.1',NULL,NULL,2,'$SYS/#'),
+        (5,1,'127.0.0.1',NULL,NULL,2,'#'),
+        (6,1,NULL,'dashboard',NULL,1,'$SYS/#');
 
-Postgre Server Address
-----------------------
+PostgreSQL Server Address
+-------------------------
 
 .. code-block:: properties
 
-    ## Postgre Server
+    ## PostgreSQL Server
     auth.pgsql.server = 127.0.0.1:5432
 
+    ## PostgreSQL pool size
     auth.pgsql.pool = 8
 
+    ## PostgreSQL username
     auth.pgsql.username = root
 
+    ## PostgreSQL password
     #auth.pgsql.password =
 
+    ## PostgreSQL database
     auth.pgsql.database = mqtt
 
+    ## PostgreSQL database encoding
     auth.pgsql.encoding = utf8
 
+    ## Whether to enable SSL connection
     auth.pgsql.ssl = false
+
+    ## SSL keyfile
+    ## auth.pgsql.ssl_opts.keyfile =
+
+    ## SSL certfile
+    ## auth.pgsql.ssl_opts.certfile =
+
+    ## SSL cacertfile
+    ## auth.pgsql.ssl_opts.cacertfile =
 
 Configure PostgreSQL Auth Query Statement
 -----------------------------------------
 
 .. code-block:: properties
 
-    ## Variables: %u = username, %c = clientid, %a = ipaddress
-
-    ## Authentication Query: select password or password,salt
+    ## Authentication query
+    ##
+    ## Variables:
+    ##  - %u: username
+    ##  - %c: clientid
+    ##  - %C: common name of client TLS cert
+    ##  - %d: subject of client TLS cert
     auth.pgsql.auth_query = select password from mqtt_user where username = '%u' limit 1
 
-    ## Password hash: plain, md5, sha, sha256, pbkdf2, bcrypt
+    ## Password hash: plain | md5 | sha | sha256 | bcrypt
     auth.pgsql.password_hash = sha256
 
     ## sha256 with salt prefix
-    ## auth.pgsql.password_hash = salt sha256
+    ## auth.pgsql.password_hash = salt,sha256
 
     ## sha256 with salt suffix
-    ## auth.pgsql.password_hash = sha256 salt
+    ## auth.pgsql.password_hash = sha256,salt
 
-    ## Superuser Query
+    ## bcrypt with salt prefix
+    ## auth.pgsql.password_hash = salt,bcrypt
+
+    ## pbkdf2 with macfun iterations dklen
+    ## macfun: md4, md5, ripemd160, sha, sha224, sha256, sha384, sha512
+    ## auth.pgsql.password_hash = pbkdf2,sha256,1000,20
+
+    ## Superuser query
+    ##
+    ## Variables:
+    ##  - %u: username
+    ##  - %c: clientid
+    ##  - %C: common name of client TLS cert
+    ##  - %d: subject of client TLS cert
     auth.pgsql.super_query = select is_superuser from mqtt_user where username = '%u' limit 1
 
 Configure PostgreSQL ACL Query Statement
@@ -433,11 +554,16 @@ Configure PostgreSQL ACL Query Statement
 
 .. code-block:: properties
 
-    ## ACL Query. Comment this query, the acl will be disabled.
+    ## ACL query. Comment this query, the ACL will be disabled
+    ##
+    ## Variables:
+    ##  - %a: ipaddress
+    ##  - %u: username
+    ##  - %c: clientid
     auth.pgsql.acl_query = select allow, ipaddr, username, clientid, access, topic from mqtt_acl where ipaddr = '%a' or username = '%u' or username = '$all' or clientid = '%c'
 
-Load Postgre Auth Plugin
-------------------------
+Load PostgreSQL Auth Plugin
+---------------------------
 
 .. code-block:: bash
 
@@ -447,46 +573,71 @@ Load Postgre Auth Plugin
 Redis/ACL Auth Plugin
 ---------------------
 
-Config file: 'emqx_auth_redis.conf':
+Config file: `emqx_auth_redis.conf`:
 
 Redis Server Address
 --------------------
 
 .. code-block:: properties
 
-    ## Redis Server
+    ## Redis Server cluster type: single | sentinel | cluster
+    auth.redis.type = single
+
+    ## Redis server address
     auth.redis.server = 127.0.0.1:6379
 
-    ## Redis Sentinel
-    ## auth.redis.server = 127.0.0.1:26379
-
-    ## Redis Sentinel Cluster name
+    ## Redis sentinel cluster name.
     ## auth.redis.sentinel = mymaster
 
-    ## Redis Pool Size
+    ## Redis pool size.
     auth.redis.pool = 8
 
-    ## Redis Database
+    ## Redis database no.
     auth.redis.database = 0
 
-    ## Redis Password
+    ## Redis password
     ## auth.redis.password =
+
+    ## Redis query timeout
+    ## auth.redis.query_timeout = 5s
 
 Configure Auth Query Command
 ----------------------------
 
 .. code-block:: properties
 
-    ## Variables: %u = username, %c = clientid
+    ## Authentication query command
+    ##
+    ## Variables:
+    ##  - %u: username
+    ##  - %c: clientid
+    ##  - %C: common name of client TLS cert
+    ##  - %d: subject of client TLS cert
+    auth.redis.auth_cmd = HMGET mqtt_user:%u password
 
-    ## Authentication Query Command
-    ## HMGET mqtt_user:%u password or HMGET mqtt_user:%u password salt or HGET mqtt_user:%u password
-    auth.redis.auth_cmd = HGET mqtt_user:%u password
+    ## Password hash: plain | md5 | sha | sha256 | bcrypt
+    auth.redis.password_hash = plain
 
-    ## Password hash: plain, md5, sha, sha256, pbkdf2, bcrypt
-    auth.redis.passwd.hash = sha256
+    ## sha256 with salt prefix
+    ## auth.redis.password_hash = salt,sha256
 
-    ## Superuser Query Command
+    ## sha256 with salt suffix
+    ## auth.redis.password_hash = sha256,salt
+
+    ## bcrypt with salt prefix
+    ## auth.redis.password_hash = salt,bcrypt
+
+    ## pbkdf2 with macfun iterations dklen
+    ## macfun: md4, md5, ripemd160, sha, sha224, sha256, sha384, sha512
+    ## auth.redis.password_hash = pbkdf2,sha256,1000,20
+
+    ## Superuser query command
+    ##
+    ## Variables:
+    ##  - %u: username
+    ##  - %c: clientid
+    ##  - %C: common name of client TLS cert
+    ##  - %d: subject of client TLS cert
     auth.redis.super_cmd = HGET mqtt_user:%u is_superuser
 
 Configure ACL Query Command
@@ -495,6 +646,10 @@ Configure ACL Query Command
 .. code-block:: properties
 
     ## ACL Query Command
+    ##
+    ## Variables:
+    ##  - %u: username
+    ##  - %c: clientid
     auth.redis.acl_cmd = HGETALL mqtt_acl:%u
 
 Redis Authed Users Hash
@@ -527,63 +682,136 @@ Load Redis Auth Plugin
 MongoDB Auth/ACL Plugin
 -----------------------
 
-Configure MongoDB, MQTT users and ACL Collection in the 'emqx_auth_mongo.conf' file:
+Configure MongoDB, MQTT users and ACL Collection in the `emqx_auth_mongo.conf`:
 
 MongoDB Server
 --------------
 
 .. code-block:: properties
 
-    ## Mongo Server
+    ## MongoDB Topology Type: single | unknown | sharded | rs
+    auth.mongo.type = single
+
+    ## The set name if type is rs
+    ## auth.mongo.rs_set_name =
+
+    ## MongoDB server list.
     auth.mongo.server = 127.0.0.1:27017
 
-    ## Mongo Pool Size
+    ## MongoDB pool size
     auth.mongo.pool = 8
 
-    ## Mongo User
-    ## auth.mongo.user =
+    ## MongoDB login user
+    ## auth.mongo.login =
 
-    ## Mongo Password
+    ## MongoDB password
     ## auth.mongo.password =
 
-    ## Mongo Database
+    ## MongoDB AuthSource
+    ## auth.mongo.auth_source = admin
+
+    ## MongoDB database
     auth.mongo.database = mqtt
+
+    ## MongoDB query timeout
+    ## auth.mongo.query_timeout = 5s
+
+    ## Whether to enable SSL connection
+    ## auth.mongo.ssl = false
+
+    ## SSL keyfile
+    ## auth.mongo.ssl_opts.keyfile =
+
+    ## SSL certfile
+    ## auth.mongo.ssl_opts.certfile =
+
+    ## SSL cacertfile
+    ## auth.mongo.ssl_opts.cacertfile =
+
+    ## MongoDB write mode
+    ## auth.mongo.w_mode =
+
+    ## Mongo read mode
+    ## auth.mongo.r_mode =
+
+    ## MongoDB topology options
+    auth.mongo.topology.pool_size = 1
+    auth.mongo.topology.max_overflow = 0
+    ## auth.mongo.topology.overflow_ttl = 1000
+    ## auth.mongo.topology.overflow_check_period = 1000
+    ## auth.mongo.topology.local_threshold_ms = 1000
+    ## auth.mongo.topology.connect_timeout_ms = 20000
+    ## auth.mongo.topology.socket_timeout_ms = 100
+    ## auth.mongo.topology.server_selection_timeout_ms = 30000
+    ## auth.mongo.topology.wait_queue_timeout_ms = 1000
+    ## auth.mongo.topology.heartbeat_frequency_ms = 10000
+    ## auth.mongo.topology.min_heartbeat_frequency_ms = 1000
 
 Configure Auth Query Collection
 -------------------------------
 
 .. code-block:: properties
 
-    ## authquery
-    auth.mongo.authquery.collection = mqtt_user
+    ## Authentication query
+    auth.mongo.auth_query.collection = mqtt_user
 
-    auth.mongo.authquery.password_field = password
+    ## password with salt prefix
+    ## auth.mongo.auth_query.password_hash = salt,sha256
+    auth.mongo.auth_query.password_field = password
 
-    auth.mongo.authquery.password_hash = sha256
+    ## Password hash: plain | md5 | sha | sha256 | bcrypt
+    auth.mongo.auth_query.password_hash = sha256
 
-    auth.mongo.authquery.selector = username=%u
+    ## sha256 with salt suffix
+    ## auth.mongo.auth_query.password_hash = sha256,salt
 
-    ## superquery
-    auth.mongo.superquery.collection = mqtt_user
+    ## sha256 with salt prefix
+    ## auth.mongo.auth_query.password_hash = salt,sha256
 
-    auth.mongo.superquery.super_field = is_superuser
+    ## bcrypt with salt prefix
+    ## auth.mongo.auth_query.password_hash = salt,bcrypt
 
-    auth.mongo.superquery.selector = username=%u
+    ## pbkdf2 with macfun iterations dklen
+    ## macfun: md4, md5, ripemd160, sha, sha224, sha256, sha384, sha512
+    ## auth.mongo.auth_query.password_hash = pbkdf2,sha256,1000,20
 
-    ## acl_query
-    auth.mongo.acl_query.collection = mqtt_user
+    ## Authentication Selector
+    ##
+    ## Variables:
+    ##  - %u: username
+    ##  - %c: clientid
+    ##  - %C: common name of client TLS cert
+    ##  - %d: subject of client TLS cert
+    auth.mongo.auth_query.selector = username=%u
 
-    auth.mongo.acl_query.selector = username=%u
+    ## Enable superuser query
+    auth.mongo.super_query = on
+
+    auth.mongo.super_query.collection = mqtt_user
+
+    auth.mongo.super_query.super_field = is_superuser
+
+    #auth.mongo.super_query.selector = username=%u, clientid=%c
+    auth.mongo.super_query.selector = username=%u
 
 Configure ACL Query Collection
 ------------------------------
 
 .. code-block:: properties
 
-    ## aclquery
-    auth.mongo.aclquery.collection = mqtt_acl
+    ## Enable ACL query
+    auth.mongo.acl_query = on
 
-    auth.mongo.aclquery.selector = username=%u
+    auth.mongo.acl_query.collection = mqtt_acl
+
+    ## ACL Selector
+    ##
+    ## Variables:
+    ##  - %u: username
+    ##  - %c: clientid
+    ## auth.mongo.acl_query.selector.3 = clientid=$all
+
+    auth.mongo.acl_query.selector = username=%u
 
 MongoDB Database
 ----------------
@@ -629,11 +857,46 @@ Example of a MongoDB ACL Collection
     db.mqtt_acl.insert({username: "admin", pubsub: ["#"]})
 
 Load Mognodb Auth Plugin
--------------------------
+------------------------
 
 .. code-block:: bash
 
     ./bin/emqx_ctl plugins load emqx_auth_mongo
+
+---------------
+JWT Auth Plugin
+---------------
+
+Configure JWT Auth
+------------------
+
+.. code-block:: properties
+
+    ## HMAC Hash Secret
+    auth.jwt.secret = emqxsecret
+
+    ## From where the JWT string can be got
+    auth.jwt.from = password
+
+    ## RSA or ECDSA public key file
+    ## auth.jwt.pubkey = etc/certs/jwt_public_key.pem
+
+    ## Enable to verify claims fields
+    auth.jwt.verify_claims = off
+
+    ## The checklist of claims to validate
+    ##
+    ## Variables:
+    ##  - %u: username
+    ##  - %c: clientid
+    # auth.jwt.verify_claims.username = %u
+
+Load JWT Auth Plugin
+--------------------
+
+.. code-block:: bash
+
+    ./bin/emqx_ctl plugins load emqx_auth_jwt
 
 .. _recon: http://ferd.github.io/recon/
 

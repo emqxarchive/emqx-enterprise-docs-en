@@ -12,7 +12,7 @@ EMQ X supports persistence MQTT messages to Redis, MySQL, PostgreSQL, MongoDB, C
 
 EMQ X can be used as a scalable, reliable, enterprise-grade access platform for IoT, M2M, smart hardware, smart home and mobile messaging applications that serve millions of device terminals.
 
-.. image:: _static/images/emqx_enterprise.png
+.. image:: _static/images/ee.png
 
 ----------------
 Design Objective
@@ -36,19 +36,31 @@ Features
 
 1. Scalable RPC Architecture: segregated cluster management channel and data channel between nodes.
 
-2. Fastlane subscription: dedicated Fastlane message routing for IoT data collection.
+2. Persistence to Redis: subscriptions, client connection status, MQTT messages, retained messages, SUB/UNSUB events.
 
-3. Persistence to Redis: subscriptions, client connection status, MQTT messages, retained messages, SUB/UNSUB events.
+3. Persistence to MySQL: subscriptions, client connection status, MQTT messages, retained messages.
 
-4. Persistence to MySQL: subscriptions, client connection status, MQTT messages, retained messages.
+4. Persistence to PostgreSQL: subscriptions, client connection status, MQTT messages, retained messages.
 
-5. Persistence to PostgreSQL: subscriptions, client connection status, MQTT messages, retained messages.
+5. Persistence to MongoDB: subscriptions, client connection status, MQTT messages, retained messages.
 
-6. Persistence to MongoDB: subscriptions, client connection status, MQTT messages, retained messages.
+6. Persistence to Cassandra: subscriptions, client connection status, MQTT messages, retained messages.
 
-7. Bridge to Kafka: EMQ X forwards MQTT messages, client connected/disconnected event to Kafka.
+7. Persistence to DynamoDB: subscriptions, client connection status, MQTT messages, retained messages.
 
-8. Bridge to RabbitMQ: EMQ X forwards MQTT messages, client connected/disconnected event to RabbitMQ.
+8. Persistence to InfluxDB: MQTT messages.
+
+9. Persistence to OpenTDSB: MQTT messages.
+
+10. Persistence to TimescaleDB: MQTT messages.
+
+11. Bridge to Kafka: EMQ X forwards MQTT messages, client connected/disconnected event to Kafka.
+
+12. Bridge to RabbitMQ: EMQ X forwards MQTT messages, client connected/disconnected event to RabbitMQ.
+
+13. Bridge to Pulsar: EMQ X forwards MQTT messages, client connected/disconnected event to Pulsar.
+
+14. Rule Engine：Convert EMQ X events and messages to a specified format, then save them to a database table, or send them to a message queue.
 
 .. _scalable_rpc:
 
@@ -93,27 +105,6 @@ Scalable RPC configuration::
 
 .. NOTE:: If firewalls are deployed between nodes, the 5369 port on each node must be opened.
 
-.. _fastlane:
-
----------------------
-Fastlane Subscription
----------------------
-
-EMQ X supports Fastlane Subscription, it can greatly enhance the message routing efficiency and is thus very suitable for big data collection of IoT applications.
-
-.. image:: _static/images/overview_2.png
-
-Fastlane usage: *$fastlane/<Topic>*
-
-Fastlane limitations:
-
-1. CleanSession = true
-2. Qos = 0
-
-Fastlane subscription is suitable for IoT sensor data collection:
-
-.. image:: _static/images/overview_3.png
-
 ----------------------
 Subscription by Broker
 ----------------------
@@ -140,3 +131,20 @@ EMQ X allows bridging and forwarding MQTT messages to message-oriented middlewar
 
 .. image:: _static/images/overview_5.png
 
+------------
+Rule Engine
+------------
+
+The EMQ X rules engine has the flexibility to handle messages and events.
+
+1. Message Republish.
+
+2. Bridges data to Kafka, Pulsar, RabbitMQ, MQTT Broker.
+
+3. Persistence data to MySQL, PostgreSQL, Redis, MongoDB, DynamoDB, Cassandra, InfluxDB, OpenTSDB, TimescaleDB.
+
+4. Sends data to WebServer.
+
+.. image:: _static/images/overview_6.png
+
+For details please refer to the "Rule Engine" chapter.
