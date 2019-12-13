@@ -330,6 +330,12 @@ Erlang communication cookie within distributed nodes:
 
     node.cookie = emqxsecretcookie
 
+Erlang Maximum number of clients allowed by a node:
+
+.. code-block:: properties
+
+    node.max_clients = 1024000
+
 .. NOTE::
 
     The Erlang/OTP platform application is composed of distributed Erlang nodes (processes). Each Erlang node (process) needs to be assigned a node name for mutual communication between nodes.
