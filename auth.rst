@@ -128,6 +128,15 @@ Configure the password hash in the `emqx_auth_clientid.conf`:
 
 .. code-block:: properties
 
+    ## Default usernames Examples
+    ##auth.client.1.clientid = id
+    ##auth.client.1.password = passwd
+    ##auth.client.2.clientid = dev:devid
+    ##auth.client.2.password = passwd2
+    ##auth.client.3.clientid = app:appid
+    ##auth.client.3.password = passwd3
+    ##auth.client.4.clientid = client~!@#$%^&*()_+
+    ##auth.client.4.password = passwd~!@#$%^&*()_+
     ## Password hash: plain | md5 | sha | sha256
     auth.client.password_hash = sha256
 
@@ -161,6 +170,13 @@ Configure the password hash in the `emqx_auth_username.conf`:
 
 .. code-block:: properties
 
+    ## Default usernames Examples:
+    ##auth.user.1.username = admin
+    ##auth.user.1.password = public
+    ##auth.user.2.username = feng@emqtt.io
+    ##auth.user.2.password = public
+    ##auth.user.3.username = name~!@#$%^&*()_+
+    ##auth.user.3.password = pwsswd~!@#$%^&*()_+
     ## Password hash: plain | md5 | sha | sha256
     auth.user.password_hash = sha256
 

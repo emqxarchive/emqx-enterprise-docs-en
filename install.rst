@@ -110,6 +110,14 @@ Install via Repository
 
                 $ sudo service emqx start
 
+8.  Configuration file path
+
+    + Configuration file path: ``/etc/emqx``
+
+    + Log file path: ``/var/log/emqx``
+
+    + Data file path: ``/var/lib/emqx`
+
 Install via rpm
 >>>>>>>>>>>>>>>>
 
@@ -151,6 +159,14 @@ Install via rpm
         .. code-block:: console
 
                 $ sudo service emqx start
+
+5.  Configuration file path
+
+    + Configuration file path: ``/etc/emqx``
+
+    + Log file path: ``/var/log/emqx``
+
+    + Data file path: ``/var/lib/emqx`
 
 Install via zip Package
 >>>>>>>>>>>>>>>>>>>>>>>>
@@ -264,13 +280,13 @@ Install via Repository
 
             $ sudo apt install emqx-ee=3.2.0
 
-7.  Import License file
+8.  Import License file
 
     .. code-block:: console
 
         $ cp /path/to/emqx.lic /etc/emqx/emqx.lic
 
-8.  Start EMQ X
+9.  Start EMQ X
 
     +   Directly start
 
@@ -294,6 +310,14 @@ Install via Repository
         .. code-block:: console
 
                 $ sudo service emqx start
+
+10.  Configuration file path
+
+    + Configuration file path: ``/etc/emqx``
+
+    + Log file path: ``/var/log/emqx``
+
+    + Data file path: ``/var/lib/emqx`
 
 Install via deb Package
 >>>>>>>>>>>>>>>>>>>>>>>>
@@ -336,6 +360,14 @@ Install via deb Package
         .. code-block:: console
 
                 $ sudo service emqx start
+
+5.  Configuration file path
+
+    + Configuration file path: ``/etc/emqx``
+
+    + Log file path: ``/var/log/emqx``
+
+    + Data file path: ``/var/lib/emqx`
 
 Install via zip Package
 >>>>>>>>>>>>>>>>>>>>>>>>
@@ -416,13 +448,13 @@ Install via Repository
             $(lsb_release -cs) \
             stable"
 
-4.  Update apt package index
+5.  Update apt package index
 
     .. code-block:: console
 
         $ sudo apt update
 
-5.  Install the latest version of EMQ X
+6.  Install the latest version of EMQ X
 
     .. code-block:: console
 
@@ -430,7 +462,7 @@ Install via Repository
 
     .. NOTE:: In the case where multiple EMQ X repositories are enabled, and the apt install and apt update commands is not specified with a version number, the latest version of EMQ X is installed. This is a problem for users with stability needs.
 
-6.  Install a specific version of EMQ X
+7.  Install a specific version of EMQ X
 
     1.  Query available version
 
@@ -446,13 +478,13 @@ Install via Repository
 
             $ sudo apt install emqx-ee=3.2.0
 
-7.  Import License file
+8.  Import License file
 
     .. code-block:: console
 
         $ cp /path/to/emqx.lic /etc/emqx/emqx.lic
 
-8.  Start EMQ X
+9.  Start EMQ X
 
     +   Directly start
 
@@ -476,6 +508,14 @@ Install via Repository
         .. code-block:: console
 
                 $ sudo service emqx start
+
+10.  Configuration file path
+
+    + Configuration file path: ``/etc/emqx``
+
+    + Log file path: ``/var/log/emqx``
+
+    + Data file path: ``/var/lib/emqx`
 
 Install via deb Package
 >>>>>>>>>>>>>>>>>>>>>>>>
@@ -518,6 +558,14 @@ Install via deb Package
         .. code-block:: console
 
                 $ sudo service emqx start
+
+5.  Configuration file path
+
+    + Configuration file path: ``/etc/emqx``
+
+    + Log file path: ``/var/log/emqx``
+
+    + Data file path: ``/var/lib/emqx`
 
 Install via zip Package
 >>>>>>>>>>>>>>>>>>>>>>>>
@@ -684,6 +732,14 @@ Install via Repository
 
                 $ sudo service emqx start
 
+8.  Configuration file path
+
+    + Configuration file path: ``/etc/emqx``
+
+    + Log file path: ``/var/log/emqx``
+
+    + Data file path: ``/var/lib/emqx`
+
 Install via rpm Package
 >>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -725,6 +781,14 @@ Install via rpm Package
         .. code-block:: console
 
                 $ sudo service emqx start
+
+5.  Configuration file path
+
+    + Configuration file path: ``/etc/emqx``
+
+    + Log file path: ``/var/log/emqx``
+
+    + Data file path: ``/var/lib/emqx`
 
 Install via zip Package
 >>>>>>>>>>>>>>>>>>>>>>>>

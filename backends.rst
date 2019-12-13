@@ -430,6 +430,16 @@ Configure MySQL Persistence Hooks
     ## Store Ack
     backend.mysql.hook.message.acked.1       = {"topic": "#", "action": {"function": "on_message_acked"}, "pool": "pool1"}
 
+    ## Get offline messages
+    ##  "offline_opts": Get configuration for offline messages
+    ##  max_returned_count: Maximum number of offline messages get at a time
+    ##  time_range: Get only messages in the current time range
+    ## backend.mysql.hook.session.subscribed.1  = {"topic": "#", "action": {"function": "on_message_fetch"}, "offline_opts": {"max_returned_count": 500, "time_range": "2h"}, "pool": "pool1"}
+
+    ## If you need to store Qos0 messages, you can enable the following configuration
+    ## Warning: When the following configuration is enabled, 'on_message_fetch' needs to be disabled, otherwise qos1, qos2 messages will be stored twice
+    ## backend.mysql.hook.message.publish.4     = {"topic": "#", "action": {"function": "on_message_store"}, "pool": "pool1"}
+
 Description of MySQL Persistence Hooks
 --------------------------------------
 
@@ -782,6 +792,15 @@ Configure PostgreSQL Persistence Hooks
     ## Store Ack
     backend.pgsql.hook.message.acked.1       = {"topic": "#", "action": {"function": "on_message_acked"}, "pool": "pool1"}
 
+    ## Get offline messages
+    ##  "offline_opts": Get configuration for offline messages
+    ##  max_returned_count: Maximum number of offline messages get at a time
+    ##  time_range: Get only messages in the current time range
+    ## backend.pgsql.hook.session.subscribed.1  = {"topic": "#", "action": {"function": "on_message_fetch"}, "offline_opts": {"max_returned_count": 500, "time_range": "2h"}, "pool": "pool1"}
+
+    ## If you need to store Qos0 messages, you can enable the following configuration
+    ## Warning: When the following configuration is enabled, 'on_message_fetch' needs to be disabled, otherwise qos1, qos2 messages will be stored twice
+    ## backend.pgsql.hook.message.publish.4     = {"topic": "#", "action": {"function": "on_message_store"}, "pool": "pool1"}
 Description of PostgreSQL Persistence Hooks
 -------------------------------------------
 
@@ -1134,6 +1153,15 @@ Configure MongoDB Persistence Hooks
     ## Store Ack
     backend.mongo.hook.message.acked.1       = {"topic": "#", "action": {"function": "on_message_acked"}, "pool": "pool1"}
 
+    ## Get offline messages
+    ##  "offline_opts": Get configuration for offline messages
+    ##  max_returned_count: Maximum number of offline messages get at a time
+    ##  time_range: Get only messages in the current time range
+    ## backend.mongo.hook.session.subscribed.1  = {"topic": "#", "action": {"function": "on_message_fetch"}, "offline_opts": {"max_returned_count": 500, "time_range": "2h"}, "pool": "pool1"}
+
+    ## If you need to store Qos0 messages, you can enable the following configuration
+    ## Warning: When the following configuration is enabled, 'on_message_fetch' needs to be disabled, otherwise qos1, qos2 messages will be stored twice
+    ## backend.mongo.hook.message.publish.4     = {"topic": "#", "action": {"function": "on_message_store"}, "pool": "pool1"}
 Description of MongoDB Persistence Hooks
 ----------------------------------------
 
@@ -1435,6 +1463,16 @@ Configure Cassandra Persistence Hooks
 
     ## Store Ack
     backend.cassa.hook.message.acked.1       = {"topic": "#", "action": {"function": "on_message_acked"}, "pool": "pool1"}
+
+    ## Get offline messages
+    ##  "offline_opts": Get configuration for offline messages
+    ##  max_returned_count: Maximum number of offline messages get at a time
+    ##  time_range: Get only messages in the current time range
+    ## backend.cassa.hook.session.subscribed.1  = {"topic": "#", "action": {"function": "on_message_fetch"}, "offline_opts": {"max_returned_count": 500, "time_range": "2h"}, "pool": "pool1"}
+
+    ## If you need to store Qos0 messages, you can enable the following configuration
+    ## Warning: When the following configuration is enabled, 'on_message_fetch' needs to be disabled, otherwise qos1, qos2 messages will be stored twice
+    ## backend.cassa.hook.message.publish.4     = {"topic": "#", "action": {"function": "on_message_store"}, "pool": "pool1"}
 
 Description of Cassandra Persistence Hooks
 ------------------------------------------
