@@ -47,7 +47,7 @@ Create MySQL Rules
 
   Select "message.publish", then type in the following SQL::
 
-    SELECT * FROM "message.publish"
+    SELECT * FROM "#"
 
   .. image:: ./_static/images/mysql_sql_1.png
 
@@ -152,10 +152,7 @@ Create PostgreSQL Rules
 
   Select "message.publish", then type in the following SQL::
 
-    SELECT
-      *
-    FROM
-      "message.publish"
+    SELECT * FROM "#"
 
   .. image:: ./_static/images/mysql_sql_1.png
 
@@ -267,10 +264,7 @@ Create Cassandra Rules
 
   Select "message.publish", then type in the following SQL::
 
-    SELECT
-      *
-    FROM
-      "message.publish"
+    SELECT * FROM "#"
 
   .. image:: ./_static/images/mysql_sql_1.png
 
@@ -361,10 +355,7 @@ Create MongoDB Rules
 
   Select "message.publish", then type in the following SQL::
 
-    SELECT
-      *
-    FROM
-      "message.publish"
+    SELECT * FROM "#"
 
   .. image:: ./_static/images/mysql_sql_1.png
 
@@ -462,10 +453,7 @@ Create DynamoDB Rules
 
   Select "message.publish", then type in the following SQL::
 
-    SELECT
-     msgid as id, topic, payload
-    FROM
-      "message.pubish"
+    SELECT msgid as id, topic, payload FROM "#"
 
   .. image:: ./_static/images/mysql_sql_1.png
 
@@ -552,10 +540,7 @@ Create Redis Rules
 
   Select "message.publish", then type in the following SQL::
 
-    SELECT
-      *
-    FROM
-      "message.publish"
+    SELECT * FROM "#"
 
   .. image:: ./_static/images/mysql_sql_1.png
 
@@ -636,9 +621,10 @@ Create OpenTSDB Rules
   Select "message.publish", then type in the following SQL::
 
     SELECT
-      payload.metric as metric, payload.tags as tags, payload.value as value
+      json_decode(payload) as p,
+      p.metric as metric, p.tags as tags, p.value as value
     FROM
-      "message.publish"
+      "#"
 
   .. image:: ./_static/images/opentsdb_sql_1.png
 
@@ -809,7 +795,7 @@ Create TimescaleDB Rules
       payload.humidity as humidity,
       payload.location as location
     FROM
-      "message.publish"
+      "#"
 
   .. image:: ./_static/images/timescaledb_sql_1.png
 
@@ -900,7 +886,7 @@ Create InfluxDB Rules
       payload.internal as internal,
       payload.external as external
     FROM
-      "message.publish"
+      "#"
 
   .. image:: ./_static/images/influxdb_sql_1.png
 
@@ -985,10 +971,7 @@ Creat WebHook Rules
 
   Select "message.publish", then type in the following SQL::
 
-    SELECT
-      *
-    FROM
-      "message.publish"
+    SELECT * FROM "#"
 
   .. image:: ./_static/images/mysql_sql_1.png
 
@@ -1071,10 +1054,7 @@ Create Kafka Rules
 
   Select "message.publish", then type in the following SQL::
 
-    SELECT
-      *
-    FROM
-      "message.publish"
+    SELECT * FROM "#"
 
   .. image:: ./_static/images/mysql_sql_1.png
 
@@ -1152,10 +1132,7 @@ Create Pulsar Rules
 
   Select "message.publish", then type in the following SQL::
 
-    SELECT
-      *
-    FROM
-      "message.publish"
+    SELECT * FROM "#"
 
   .. image:: ./_static/images/mysql_sql_1.png
 
@@ -1225,10 +1202,7 @@ Create RabbitMQ Rules
 
   Select "message.publish", then type in the following SQL::
 
-    SELECT
-      *
-    FROM
-      "message.publish"
+    SELECT * FROM "#"
 
   .. image:: ./_static/images/mysql_sql_1.png
 
@@ -1332,10 +1306,7 @@ Create BridgeMQTT Rules
 
   Select "message.publish", then type in the following SQL::
 
-    SELECT
-      *
-    FROM
-      "message.publish"
+    SELECT * FROM "#"
 
   .. image:: ./_static/images/mysql_sql_1.png
 
@@ -1401,10 +1372,7 @@ Create EMQX Bridge Rules
 
   Select "message.publish", then type in the following SQL::
 
-    SELECT
-      *
-    FROM
-      "message.publish"
+    SELECT * FROM "#"
 
   .. image:: ./_static/images/mysql_sql_1.png
 
@@ -1462,13 +1430,13 @@ Create Inspect Rules
 
 Create a rule for testing: print the content of the message and all the args of the action, when a MQTT message is sent to topic 't/a'.
 
-- The filter SQL is: SELECT * FROM "message.publish" WHERE topic = 't/a';
+- The filter SQL is: SELECT * FROM "t/a";
 - The action is: "print the content of the message and all the args of the action", the action we need is 'inspect'.
 
 .. code-block:: shell
 
     $ ./bin/emqx_ctl rules create \
-      "SELECT * FROM \"message.publish\" WHERE topic = 't/a'" \
+      "SELECT * FROM \"t/a\" WHERE " \
       '[{"name":"inspect", "params": {"a": 1}}]' \
       -d 'Rule for debug'
 
@@ -1478,7 +1446,7 @@ The CLI above created a rule with ID='Rule rule:803de6db'.
 
 The first two args are mandatory:
 
-- SQL: SELECT * FROM "message.publish" WHERE topic = 't/a'
+- SQL: SELECT * FROM "t/a"
 - Action List: [{"name":"inspect", "params": {"a": 1}}]. Action List is of tye JSON Array. "name" is the name of the action, "params" is the parameters of the action. Note that the action ``inspect`` does not need a resource.
 
 The last arg is an optional description of the rule: 'Rule for debug'.
@@ -1519,7 +1487,7 @@ Create WebHook Rule
 
 Create a rule: Forward all the messages that send from client_id='Steven', to the Web Server at 'http://127.0.0.1:9910':
 
-- The filter SQL: SELECT username as u, payload FROM "message.publish" where u='Steven';
+- The filter SQL: SELECT username as u, payload FROM "#" where u='Steven';
 - Actions: "Forward to 'http://127.0.0.1:9910'";
 - Resource Type: web_hook;
 - Resource: "The WebHook resource at 'http://127.0.0.1:9910'".
@@ -1559,7 +1527,7 @@ Create a rule: Forward all the messages that send from client_id='Steven', to th
    2). Create the rule, bind the action data_to_webserver, and bind resource resource:691c29ba to the action via the arg "$resource"::
 
     $ ./bin/emqx_ctl rules create \
-     "SELECT username as u, payload FROM \"message.publish\" where u='Steven'" \
+     "SELECT username as u, payload FROM \"#\" where u='Steven'" \
      '[{"name":"data_to_webserver", "params": {"$resource":  "resource:691c29ba"}}]' \
      -d "Forward publish msgs from steven to webserver"
 

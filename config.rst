@@ -10,7 +10,7 @@ The main configuration files of the *EMQ X* broker are under 'etc/' folder:
 +----------------------+-----------------------------------+
 | File                 | Description                       |
 +----------------------+-----------------------------------+
-| etc/emqx.conf        | *EMQ X* 3.0 Configuration File    |
+| etc/emqx.conf        | *EMQ X* Configuration File        |
 +----------------------+-----------------------------------+
 | etc/acl.conf         | The default ACL File              |
 +----------------------+-----------------------------------+
@@ -81,7 +81,11 @@ The simplified Erlang native configuration format is user-friendly, but plug-in 
 
  Configuration file processing flow during EMQ X start-up::
 
-.. image:: _static/images/config.png
+    ----------------------                                          3.0/schema/*.schema      -------------------
+    | etc/emqx.conf      |                   -----------------              \|/              | data/app.config |
+    |       +            | --> mergeconf --> | data/app.conf | -->  cuttlefish generate  --> |                 |
+    | etc/plugins/*.conf |                   -----------------                               | data/vm.args    |
+    ----------------------                                                                   -------------------
 
 ------------------------
 OS Environment Variables
@@ -113,6 +117,12 @@ Cluster name:
 
     cluster.name = emqxcl
 
+Specify the Erlang distributed protocol:
+
+.. code-block:: properties
+
+    cluster.proto_dist = inet_tcp
+
 Cluster discovery strategy:
 
 .. code-block:: properties
@@ -134,7 +144,7 @@ Cluster Autoclean:
 EMQ X Autodiscovery Strategy
 ----------------------------
 
-*EMQ X* 3.0 supports node discovery and autocluster with various strategies:
+*EMQ X* supports node discovery and autocluster with various strategies:
 
 +------------+---------------------------------+
 | Strategy   | Description                     |
@@ -330,12 +340,6 @@ Erlang communication cookie within distributed nodes:
 
     node.cookie = emqxsecretcookie
 
-Erlang Maximum number of clients allowed by a node:
-
-.. code-block:: properties
-
-    node.max_clients = 1024000
-
 .. NOTE::
 
     The Erlang/OTP platform application is composed of distributed Erlang nodes (processes). Each Erlang node (process) needs to be assigned a node name for mutual communication between nodes.
@@ -350,7 +354,7 @@ The EMQ X node is based on IPv4, IPv6 or TLS protocol of Erlang/OTP platform for
 .. code-block:: properties
 
     ##  Specify the Erlang Distributed Communication Protocol: inet_tcp | inet6_tcp | inet_tls
-    node.proto_dist = inet_tcp
+    cluster.proto_dist = inet_tcp
 
     ## Specify the parameter configuration of Erlang Distributed Communication SSL
     ## node.ssl_dist_optfile = etc/ssl_dist.conf
@@ -406,12 +410,6 @@ Crash dump log file location:
 .. code-block:: properties
 
     node.crash_dump = log/crash.dump
-
-Specify the Erlang distributed protocol:
-
-.. code-block:: properties
-
-    node.proto_dist = inet_tcp
 
 Files for storing SSL/TLS options when Erlang  distributed using TLS:
 
@@ -494,7 +492,7 @@ Maximum keep-alive time when socket is idle:
 
 .. code-block:: properties
 
-    rpc.socket_keepalive_idle = 900
+    rpc.socket_keepalive_idle = 900s
 
 Socket keep-alive detection interval:
 
@@ -540,7 +538,7 @@ Set the log level:
 
 .. code-block:: properties
 
-    log.level = error
+    log.level = warning
 
 Set the primary logger level and the log level of all logger handlers to the file and terminal.
 
@@ -622,9 +620,9 @@ Etc/acl.conf access control rule definition::
 
     Allow|Deny User|IP Address|ClientID Publish|Subscribe Topic List
 
-The access control rules are in the Erlang tuple format, and the access control module matches the rules one by one::
+The access control rules are in the Erlang tuple format, and the access control module matches the rules one by one:
 
-.. image:: _static/images/zone.png
+.. image:: _static/images/config_1.png
 
 ``etc/acl.conf`` default access rule settings:
 
@@ -656,6 +654,16 @@ Allow any access other than the above rules:
 
 When the EMQ X broker receives an Publish or Subscribe request from MQTT client, it will match the ACL rule one by one until the match returns to allow or deny.
 
+Set the detection strategy of flapping:
+
+.. code-block:: properties
+
+    ## flapping_detect_policy = <Threshold>, <Duration>, <Banned Interval>
+    ## <Threshold>: Specify the maximum number of times the MQTT client can connect repeatedly in <Duration> time
+    ## <Duration>: Specify the time window for flapping detection
+    ## <Banned Interval>: Specify the interval that the MQTT client is refused to connect after exceeding the connection limit
+    flapping_detect_policy = 30, 1m, 5m
+
 -------------------------------------
 MQTT Protocol Parameter Configuration
 -------------------------------------
@@ -666,13 +674,13 @@ MQTT maximum packet size:
 
     mqtt.max_packet_size = 1MB
 
- Maximum length of ClientId:
+Maximum length of ClientId:
 
 .. code-block:: properties
 
     mqtt.max_clientid_len = 65535
 
- Maximum level of Topic, 0 means no limit:
+Maximum level of Topic, 0 means no limit:
 
 .. code-block:: properties
 
@@ -716,6 +724,12 @@ Whether to allow the loop deliver of the message:
 
 This configuration is mainly used to implement (backporting) the No Local feature in MQTT v3.1.1. This feature is standardized in MQTT 5.
 
+Whether to parse MQTT frame with strict mode:
+
+.. code-block:: properties
+
+    mqtt.strict_mode = false
+
 ----------------------------------
 MQTT Zones Parameter Configuration
 ----------------------------------
@@ -749,23 +763,42 @@ Message Publish rate limit:
 
     ## zone.external.publish_limit = 10,100
 
-Enable blacklist checking:
-
-.. code-block:: properties
-
-    zone.external.enable_ban = on
-
 Enable ACL check:
 
 .. code-block:: properties
 
     zone.external.enable_acl = on
 
+Enable blacklist checking:
+
+.. code-block:: properties
+
+    zone.external.enable_ban = on
+
 Whether to statistics the information of each connection:
 
 .. code-block:: properties
 
     zone.external.enable_stats = on
+
+The action when acl check reject current operation:
+
+.. code-block:: properties
+
+    ## Value: ignore | disconnect
+    zone.external.acl_deny_action = ignore
+
+Force MQTT connection/session process GC after this number of messages | bytes passed through.:
+
+.. code-block:: properties
+
+    zone.external.force_gc_policy = 1000|1MB
+
+Max message queue length and total heap size to force shutdown connection/session process.:
+
+.. code-block:: properties
+
+    ## zone.external.force_shutdown_policy = 8000|800MB
 
 MQTT maximum packet size:
 
@@ -849,7 +882,7 @@ Resend interval for QoS 1/2 messages:
 
 .. code-block:: properties
 
-    zone.external.retry_interval = 20s
+    zone.external.retry_interval = 30s
 
 The maximum number of QoS2 messages waiting for PUBREL (Client -> Broker), 0 means no limit:
 
@@ -868,12 +901,6 @@ Default session expiration time used in MQTT v3.1.1 connections:
 .. code-block:: properties
 
     zone.external.session_expiry_interval = 2h
-
-Message queue type:
-
-.. code-block:: properties
-
-    zone.external.mqueue_type = simple
 
 Maximum length of the message queue:
 
@@ -899,17 +926,29 @@ Whether to enable flapping detection:
 
     zone.external.enable_flapping_detect = off
 
-The maximum number of state changes allowed during the specified time:
+mountpoint:
 
 .. code-block:: properties
 
-    zone.external.flapping_threshold = 10, 1m
+    ## zone.external.mountpoint = devicebound/
 
-Flapping prohibited time:
+Whether use username replace client id:
 
 .. code-block:: properties
 
-    zone.external.flapping_banned_expiry_interval = 1h
+    zone.external.use_username_as_clientid = false
+
+Whether to allow the loop deliver of the message:
+
+.. code-block:: properties
+
+    zone.external.ignore_loop_deliver = false
+
+Whether to parse MQTT frame with strict mode:
+
+.. code-block:: properties
+
+    zone.external.strict_mode = false
 
 Internal Zone Parameter Settings
 --------------------------------
@@ -931,6 +970,13 @@ Close ACL checking:
 .. code-block:: properties
 
     zone.internal.enable_acl = off
+
+The action when acl check reject current operation:
+
+.. code-block:: properties
+
+    ## Value: ignore | disconnect
+    zone.internal.acl_deny_action = ignore
 
 Whether to support MQTT wildcard subscriptions:
 
@@ -980,17 +1026,29 @@ Whether to enable flapping detection:
 
     zone.internal.enable_flapping_detect = off
 
-The maximum number of state changes allowed during the specified time:
+mountpoint:
 
 .. code-block:: properties
 
-    zone.internal.flapping_threshold = 10, 1m
+    ## zone.internal.mountpoint = devicebound/
 
-Flapping banned time:
+Whether use username replace client id:
 
 .. code-block:: properties
 
-    zone.internal.flapping_banned_expiry_interval = 1h
+    zone.internal.use_username_as_clientid = false
+
+Whether to allow the loop deliver of the message:
+
+.. code-block:: properties
+
+    zone.internal.ignore_loop_deliver = false
+
+Whether to parse MQTT frame with strict mode:
+
+.. code-block:: properties
+
+    zone.internal.strict_mode = false
 
 ------------------------------------
 MQTT Listeners Parameter Description
@@ -1060,23 +1118,15 @@ Zone used by the listener:
 
     listener.tcp.external.zone = external
 
-Mountpoint:
-
-.. code-block:: properties
-
-    ## listener.tcp.external.mountpoint = devicebound/
-
 TCP data receive rate limit:
 
 .. code-block:: properties
 
-    ## listener.tcp.external.rate_limit = 1024,4096
+    ## listener.tcp.external.rate_limit = 100KB,10s
 
 Access control rules:
 
 .. code-block:: properties
-
-    ## listener.tcp.external.access.1 = allow 192.168.0.0/24
 
     listener.tcp.external.access.1 = allow all
 
@@ -1182,29 +1232,29 @@ Maximum number of connections created per second:
 
     listener.ssl.external.max_conn_rate = 500
 
+Specify the {active, N} options for SSL:
+
+.. code-block:: properties
+
+    listener.ssl.external.active_n = 100
+
 Zone used by the listener:
 
 .. code-block:: properties
 
     listener.ssl.external.zone = external
 
-Mountpoint:
+TCP data receive rate limit:
 
 .. code-block:: properties
 
-    ## listener.ssl.external.mountpoint = devicebound/
+    ## listener.ssl.external.rate_limit = 100KB,10s
 
 Access control rules:
 
 .. code-block:: properties
 
     listener.ssl.external.access.1 = allow all
-
-TCP data receive rate limit:
-
-.. code-block:: properties
-
-    ## listener.ssl.external.rate_limit = 1024,4096
 
 Whether the proxy protocol V1/2 is enabled when the EMQ X cluster is deployed with HAProxy or Nginx:
 
@@ -1271,6 +1321,12 @@ SSL cipher suites:
 .. code-block:: properties
 
     listener.ssl.external.ciphers = ECDHE-ECDSA-AES256-GCM-SHA384,ECDHE-RSA-AES256-GCM-SHA384,ECDHE-ECDSA-AES256-SHA384,ECDHE-RSA-AES256-SHA384,ECDHE-ECDSA-DES-CBC3-SHA,ECDH-ECDSA-AES256-GCM-SHA384,ECDH-RSA-AES256-GCM-SHA384,ECDH-ECDSA-AES256-SHA384,ECDH-RSA-AES256-SHA384,DHE-DSS-AES256-GCM-SHA384,DHE-DSS-AES256-SHA256,AES256-GCM-SHA384,AES256-SHA256,ECDHE-ECDSA-AES128-GCM-SHA256,ECDHE-RSA-AES128-GCM-SHA256,ECDHE-ECDSA-AES128-SHA256,ECDHE-RSA-AES128-SHA256,ECDH-ECDSA-AES128-GCM-SHA256,ECDH-RSA-AES128-GCM-SHA256,ECDH-ECDSA-AES128-SHA256,ECDH-RSA-AES128-SHA256,DHE-DSS-AES128-GCM-SHA256,DHE-DSS-AES128-SHA256,AES128-GCM-SHA256,AES128-SHA256,ECDHE-ECDSA-AES256-SHA,ECDHE-RSA-AES256-SHA,DHE-DSS-AES256-SHA,ECDH-ECDSA-AES256-SHA,ECDH-RSA-AES256-SHA,AES256-SHA,ECDHE-ECDSA-AES128-SHA,ECDHE-RSA-AES128-SHA,DHE-DSS-AES128-SHA,ECDH-ECDSA-AES128-SHA,ECDH-RSA-AES128-SHA,AES128-SHA
+
+SSL PSK cipher suites:
+
+.. code-block:: properties
+
+    ## listener.ssl.external.psk_ciphers = PSK-AES128-CBC-SHA,PSK-AES256-CBC-SHA,PSK-3DES-EDE-CBC-SHA,PSK-RC4-SHA
 
 Whether to start a more secure renegotiation mechanism:
 
@@ -1362,6 +1418,12 @@ MQTT/WebSocket listening port:
 
     listener.ws.external = 8083
 
+The path of WebSocket MQTT endpoint:
+
+.. code-block:: properties
+
+    listener.ws.external.mqtt_path = /mqtt
+
 Acceptors size:
 
 .. code-block:: properties
@@ -1384,19 +1446,13 @@ TCP data receive rate limit:
 
 .. code-block:: properties
 
-    ## listener.ws.external.rate_limit = 1024,4096
+    ## listener.ws.external.rate_limit = 100KB,10s
 
 Zone used by the listener:
 
 .. code-block:: properties
 
     listener.ws.external.zone = external
-
-Mountpoint:
-
-.. code-block:: properties
-
-    ## listener.ws.external.mountpoint = devicebound/
 
 Access control rules:
 
@@ -1506,7 +1562,7 @@ Maximum idle time:
 
 .. code-block:: properties
 
-    ## listener.ws.external.idle_timeout = 2h
+    ## listener.ws.external.idle_timeout = 60s
 
 Maximum packet size, 0 means no limit:
 
@@ -1523,6 +1579,12 @@ MQTT/WebSocket with SSL listening port:
 .. code-block:: properties
 
     listener.wss.external = 8084
+
+The path of WebSocket MQTT endpoint:
+
+.. code-block:: properties
+
+    listener.wss.external.mqtt_path = /mqtt
 
 Acceptors size:
 
@@ -1542,23 +1604,23 @@ Maximum number of connections created per second:
 
     listener.wss.external.max_conn_rate = 1000
 
+Specify the {active, N} options for SSL:
+
+.. code-block:: properties
+
+    listener.wss.external.active_n = 100
+
 TCP data receive rate limit:
 
 .. code-block:: properties
 
-    ## listener.wss.external.rate_limit = 1024,4096
+    ## listener.wss.external.rate_limit = 100KB,10s
 
 Zone used by the listener:
 
 .. code-block:: properties
 
     listener.wss.external.zone = external
-
-Mountpoint:
-
-.. code-block:: properties
-
-    ## listener.wss.external.mountpoint = devicebound/
 
 Access control rules:
 
@@ -1643,6 +1705,12 @@ SSL cipher suites:
 .. code-block:: properties
 
     ## listener.wss.external.ciphers = ECDHE-ECDSA-AES256-GCM-SHA384,ECDHE-RSA-AES256-GCM-SHA384,ECDHE-ECDSA-AES256-SHA384,ECDHE-RSA-AES256-SHA384,ECDHE-ECDSA-DES-CBC3-SHA,ECDH-ECDSA-AES256-GCM-SHA384,ECDH-RSA-AES256-GCM-SHA384,ECDH-ECDSA-AES256-SHA384,ECDH-RSA-AES256-SHA384,DHE-DSS-AES256-GCM-SHA384,DHE-DSS-AES256-SHA256,AES256-GCM-SHA384,AES256-SHA256,ECDHE-ECDSA-AES128-GCM-SHA256,ECDHE-RSA-AES128-GCM-SHA256,ECDHE-ECDSA-AES128-SHA256,ECDHE-RSA-AES128-SHA256,ECDH-ECDSA-AES128-GCM-SHA256,ECDH-RSA-AES128-GCM-SHA256,ECDH-ECDSA-AES128-SHA256,ECDH-RSA-AES128-SHA256,DHE-DSS-AES128-GCM-SHA256,DHE-DSS-AES128-SHA256,AES128-GCM-SHA256,AES128-SHA256,ECDHE-ECDSA-AES256-SHA,ECDHE-RSA-AES256-SHA,DHE-DSS-AES256-SHA,ECDH-ECDSA-AES256-SHA,ECDH-RSA-AES256-SHA,AES256-SHA,ECDHE-ECDSA-AES128-SHA,ECDHE-RSA-AES128-SHA,DHE-DSS-AES128-SHA,ECDH-ECDSA-AES128-SHA,ECDH-RSA-AES128-SHA,AES128-SHA
+
+SSL PSK cipher suites:
+
+.. code-block:: properties
+
+    ## listener.wss.external.psk_ciphers = PSK-AES128-CBC-SHA,PSK-AES256-CBC-SHA,PSK-3DES-EDE-CBC-SHA,PSK-RC4-SHA
 
 Whether to enable a more secure renegotiation mechanism:
 
@@ -1734,176 +1802,13 @@ Maximum idle time:
 
 .. code-block:: properties
 
-    ## listener.wss.external.idle_timeout = 2h
+    ## listener.wss.external.idle_timeout = 60s
 
 Maximum packet size, 0 means no limit:
 
 .. code-block:: properties
 
     ## listener.wss.external.max_frame_size = 0
-
---------
-Bridges
---------
-
-Bridges Parameter Setting
--------------------------
-
-Bridge address, use node name for RPC bridging, and use host:port for MQTT connection:
-
-.. code-block:: properties
-
-    bridge.aws.address = 127.0.0.1:1883
-
-Bridged protocol version:
-
-.. code-block:: properties
-
-    bridge.aws.proto_ver = mqttv4
-
-Client's client_id:
-
-.. code-block:: properties
-
-    bridge.aws.client_id = bridge_aws
-
-The clean_start field of the client:
-
-.. code-block:: properties
-
-    bridge.aws.clean_start = true
-
-The username field of the client:
-
-.. code-block:: properties
-
-    bridge.aws.username = user
-
-The password field of the client:
-
-.. code-block:: properties
-
-    bridge.aws.password = passwd
-
-Bridge mount points:
-
-.. code-block:: properties
-
-    bridge.aws.mountpoint = bridge/aws/${node}/
-
-The topic of the message to be forwarded:
-
-.. code-block:: properties
-
-    bridge.aws.forwards = topic1/#,topic2/#
-
-Whether the client uses SSL to connect to the remote server:
-
-.. code-block:: properties
-
-    bridge.aws.ssl = off
-
-SSL certificate for CA connection (PEM format)
-
-.. code-block:: properties
-
-    bridge.aws.cacertfile = etc/certs/cacert.pem
-
-SSL certificate for SSL connection:
-
-.. code-block:: properties
-
-    bridge.aws.certfile = etc/certs/client-cert.pem
-
-Key file for SSL connection:
-
-.. code-block:: properties
-
-    bridge.aws.keyfile = etc/certs/client-key.pem
-
-SSL cipher suites:
-
-.. code-block:: properties
-
-    #bridge.aws.ciphers = ECDHE-ECDSA-AES256-GCM-SHA384,ECDHE-RSA-AES256-GCM-SHA384
-
-TLS PSK Password:
-
-.. code-block:: properties
-
-    #bridge.aws.psk_ciphers = PSK-AES128-CBC-SHA,PSK-AES256-CBC-SHA,PSK-3DES-EDE-CBC-SHA,PSK-RC4-SHA
-
-Client's heartbeat interval:
-
-.. code-block:: properties
-
-    bridge.aws.keepalive = 60s
-
-Supported TLS versions:
-
-.. code-block:: properties
-
-    bridge.aws.tls_versions = tlsv1.2,tlsv1.1,tlsv1
-
-subscription topics of bridge:
-
-.. code-block:: properties
-
-    bridge.aws.subscription.1.topic = cmd/topic1
-
-subscription qos of bridge:
-
-.. code-block:: properties
-
-    bridge.aws.subscription.1.qos = 1
-
-Bridge start type:
-
-.. code-block:: properties
-
-    bridge.aws.start_type = manual
-
-Bridge reconnection interval:
-
-.. code-block:: properties
-
-    bridge.aws.reconnect_interval = 30s
-
-Resending interval for QoS 1/2 messages:
-
-.. code-block:: properties
-
-    bridge.aws.retry_interval = 20s
-
-In-flight window size:
-
-.. code-block:: properties
-
-    bridge.aws.max_inflight_batches = 32
-
-The number of messages used internally by emqx_bridge for batch:
-
-.. code-block:: properties
-
-    bridge.aws.queue.batch_count_limit = 32
-
-The bytes of messages used internally by emqx_bridge for batch:
-
-.. code-block:: properties
-
-    bridge.aws.queue.batch_bytes_limit = 1000MB
-
-The path where the replayq queue is placed. If the item is not specified in the configuration, replayq will run in mem-only mode and the message will not be cached on disk:
-
-.. code-block:: properties
-
-    bridge.aws.queue.replayq_dir = {{ platform_data_dir }}/emqx_aws_bridge/
-
-Replayq data segment size:
-
-.. code-block:: properties
-
-    bridge.aws.queue.replayq_seg_bytes = 10MB
 
 --------
 Modules
@@ -1989,6 +1894,12 @@ System message publishing interval:
 
     broker.sys_interval = 1m
 
+System heartbeat interval of publishing following heart beat message:
+
+.. code-block:: properties
+
+    broker.sys_heartbeat = 30s
+
 Whether to register the session globally:
 
 .. code-block:: properties
@@ -2017,7 +1928,7 @@ Whether to enable route batch cleaning:
 
 .. code-block:: properties
 
-    broker.route_batch_clean = on
+    broker.route_batch_clean = off
 
 --------------------
 Erlang VM Monitoring
