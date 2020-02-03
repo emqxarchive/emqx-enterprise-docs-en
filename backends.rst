@@ -430,6 +430,16 @@ Configure MySQL Persistence Hooks
     ## Store Ack
     backend.mysql.hook.message.acked.1       = {"topic": "#", "action": {"function": "on_message_acked"}, "pool": "pool1"}
 
+    ## Get offline messages
+    ##  "offline_opts": Get configuration for offline messages
+    ##  max_returned_count: Maximum number of offline messages get at a time
+    ##  time_range: Get only messages in the current time range
+    ## backend.mysql.hook.session.subscribed.1  = {"topic": "#", "action": {"function": "on_message_fetch"}, "offline_opts": {"max_returned_count": 500, "time_range": "2h"}, "pool": "pool1"}
+
+    ## If you need to store Qos0 messages, you can enable the following configuration
+    ## Warning: When the following configuration is enabled, 'on_message_fetch' needs to be disabled, otherwise qos1, qos2 messages will be stored twice
+    ## backend.mysql.hook.message.publish.4     = {"topic": "#", "action": {"function": "on_message_store"}, "pool": "pool1"}
+
 Description of MySQL Persistence Hooks
 --------------------------------------
 
@@ -782,6 +792,15 @@ Configure PostgreSQL Persistence Hooks
     ## Store Ack
     backend.pgsql.hook.message.acked.1       = {"topic": "#", "action": {"function": "on_message_acked"}, "pool": "pool1"}
 
+    ## Get offline messages
+    ##  "offline_opts": Get configuration for offline messages
+    ##  max_returned_count: Maximum number of offline messages get at a time
+    ##  time_range: Get only messages in the current time range
+    ## backend.pgsql.hook.session.subscribed.1  = {"topic": "#", "action": {"function": "on_message_fetch"}, "offline_opts": {"max_returned_count": 500, "time_range": "2h"}, "pool": "pool1"}
+
+    ## If you need to store Qos0 messages, you can enable the following configuration
+    ## Warning: When the following configuration is enabled, 'on_message_fetch' needs to be disabled, otherwise qos1, qos2 messages will be stored twice
+    ## backend.pgsql.hook.message.publish.4     = {"topic": "#", "action": {"function": "on_message_store"}, "pool": "pool1"}
 Description of PostgreSQL Persistence Hooks
 -------------------------------------------
 
@@ -1134,6 +1153,15 @@ Configure MongoDB Persistence Hooks
     ## Store Ack
     backend.mongo.hook.message.acked.1       = {"topic": "#", "action": {"function": "on_message_acked"}, "pool": "pool1"}
 
+    ## Get offline messages
+    ##  "offline_opts": Get configuration for offline messages
+    ##  max_returned_count: Maximum number of offline messages get at a time
+    ##  time_range: Get only messages in the current time range
+    ## backend.mongo.hook.session.subscribed.1  = {"topic": "#", "action": {"function": "on_message_fetch"}, "offline_opts": {"max_returned_count": 500, "time_range": "2h"}, "pool": "pool1"}
+
+    ## If you need to store Qos0 messages, you can enable the following configuration
+    ## Warning: When the following configuration is enabled, 'on_message_fetch' needs to be disabled, otherwise qos1, qos2 messages will be stored twice
+    ## backend.mongo.hook.message.publish.4     = {"topic": "#", "action": {"function": "on_message_store"}, "pool": "pool1"}
 Description of MongoDB Persistence Hooks
 ----------------------------------------
 
@@ -1435,6 +1463,16 @@ Configure Cassandra Persistence Hooks
 
     ## Store Ack
     backend.cassa.hook.message.acked.1       = {"topic": "#", "action": {"function": "on_message_acked"}, "pool": "pool1"}
+
+    ## Get offline messages
+    ##  "offline_opts": Get configuration for offline messages
+    ##  max_returned_count: Maximum number of offline messages get at a time
+    ##  time_range: Get only messages in the current time range
+    ## backend.cassa.hook.session.subscribed.1  = {"topic": "#", "action": {"function": "on_message_fetch"}, "offline_opts": {"max_returned_count": 500, "time_range": "2h"}, "pool": "pool1"}
+
+    ## If you need to store Qos0 messages, you can enable the following configuration
+    ## Warning: When the following configuration is enabled, 'on_message_fetch' needs to be disabled, otherwise qos1, qos2 messages will be stored twice
+    ## backend.cassa.hook.message.publish.4     = {"topic": "#", "action": {"function": "on_message_store"}, "pool": "pool1"}
 
 Description of Cassandra Persistence Hooks
 ------------------------------------------
@@ -2027,7 +2065,13 @@ Description of InfluxDB Persistence Hooks
 
 Since MQTT Message cannot be written directly to InfluxDB, InfluxDB Backend provides an `emqx_backend_influxdb.tmpl` template file to convert MQTT Message to DataPoint that can be written to InfluxDB.
 
-tmpl files use Json format, and users can define different templates for different topics, like:
+Template file use Json format:
+
+- ``key`` - MQTT Topic, Json String, support wildcard characters
+
+- ``value`` - Template, Json Object, used to convert MQTT Message into ``measurement,tag_key=tag_value,... field_key=field_value,... timestamp`` and write to InfluxDB。
+
+You can define different templates for different topics or multiple templates for the same topic, likes:
 
 .. code-block:: bash
 
@@ -2041,19 +2085,59 @@ Template format:
 .. code-block:: bash
 
     {
-        "measurement": <Where is value of measurement>,
+        "measurement": <Measurement>,
         "tags": {
-            <Tag Key>: <Where is value of tag>
+            <Tag Key>: <Tag Value>
         },
         "fields": {
-            <Field Key>: <Where is value of field>
+            <Field Key>: <Field Value>
         },
-        "timestamp": <Where is value of timestamp>
+        "timestamp": <Timestamp>
     }
 
-``measurement`` and ``fields`` are required options, ``tags`` and ``timestamp`` are optional. ``< Where is the value of * >`` supports placeholders that first letter is '$' ("$qos", "$from", "$topic", "$timestamp)" and Json Key List that head is "$payload". For example ``["$payload", "data", "temp"]`` will fetch 21.3 from the MQTT Message that payload is ``{"data": {"temp" : 21.3}}``.
+``measurement`` and ``fields`` are required options, ``tags`` and ``timestamp`` are optional.
 
-data/templates/emqx_backend_influxdb.tmpl provides a sample to user for reference:
+All values (such as ``<Measurement>``) can be configured directly in the template as a fixed value that data types supported depending on the table you define. More realistically, of course, you can access the data in the MQTT message through the placeholder we provide.
+
+Currently, we support placeholders as follows:
+
++-----------------+-------------------------------------------------------------------------------------+
+| Placeholder     | Description                                                                         |
++=================+=====================================================================================+
+| $id             | MQTT Message UUID, assigned by EMQ X                                                |
++-----------------+-------------------------------------------------------------------------------------+
+| $clientid       | Client ID used by the Client                                                        |
++-----------------+-------------------------------------------------------------------------------------+
+| $username       | Username used by the Client                                                         |
++-----------------+-------------------------------------------------------------------------------------+
+| $peerhost       | IP of Client                                                                        |
++-----------------+-------------------------------------------------------------------------------------+
+| $qos            | QoS of MQTT Message                                                                 |
++-----------------+-------------------------------------------------------------------------------------+
+| $topic          | Topic of MQTT Message                                                               |
++-----------------+-------------------------------------------------------------------------------------+
+| $payload        | Payload of MQTT Message, must be valid Json data                                    |
++-----------------+-------------------------------------------------------------------------------------+
+| $<Number>       | It must be used with $paylaod to retrieve data from Json Array                      |
++-----------------+-------------------------------------------------------------------------------------+
+| $timestamp      | The timestamp EMQ X sets when preparing to forward messages, precision: Nanoseconds |
++-----------------+-------------------------------------------------------------------------------------+
+
+**$payload and $<Number>:**
+
+You can directly use ``$content`` to obtain the complete message payload, you can use ``["$payload", <Key>, ...]`` to get the data inside the message payload.
+
+For example ``payload`` is ``{"data": {"temperature": 23.9}}``, you can via ``["$payload", "data", "temperature"]`` to get ``23.9``.
+
+In the case of array data type in Json, we introduced ``$0`` and ``$<pos_integer>``, ``$0`` means to get all elements in the array, and ``$<pos_integer>`` means to get the <pos_integer>th element in the array.
+
+A simple example, ``["$payload", "$0", "temp"]`` will get ``[20, 21]`` from ``[{"temp": 20}, {"temp": 21}]``, and ``["$payload", "$1", "temp"]`` will only get ``20``.
+
+It is worth noting that when you use ``$0``, we expect the number of data you get is same. Because we need to convert these arrays into multiple records and write it into InfluxDB, and when you have three pieces of data in one field and two in another, we won't know how to combine the data for you.
+
+**Example**
+
+data/templates directory provides a sample template (emqx_backend_influxdb_example.tmpl, please remove the "_example" suffix from the filename when using it formally) for the user's reference:
 
 .. code-block:: bash
 
@@ -2064,7 +2148,7 @@ data/templates/emqx_backend_influxdb.tmpl provides a sample to user for referenc
                 "host": ["$payload", "data", "$0", "host"],
                 "region": ["$payload", "data", "$0", "region"],
                 "qos": "$qos",
-                "from": "$from"
+                "clientid": "$clientid"
             },
             "fields": {
                 "temperature": ["$payload", "data", "$0", "temp"]
@@ -2100,7 +2184,7 @@ Backend converts MQTT messages to:
         {
             "measurement": "sample",
             "tags": {
-                "from": "mqttjs_ebcc36079a",
+                "clientid": "mqttjs_ebcc36079a",
                 "host": "serverA",
                 "qos": "0",
                 "region": "hangzhou",
@@ -2113,7 +2197,7 @@ Backend converts MQTT messages to:
         {
             "measurement": "sample",
             "tags": {
-                "from": "mqttjs_ebcc36079a",
+                "clientid": "mqttjs_ebcc36079a",
                 "host": "serverB",
                 "qos": "0",
                 "region": "ningbo",
@@ -2129,7 +2213,7 @@ The data was finally encoded and written to InfluxDB as follows:
 
 .. code-block:: bash
 
-    "sample,from=mqttjs_6990f0e886,host=serverA,qos=0,region=hangzhou temperature=\"1\" 1560745505429670000\nsample,from=mqttjs_6990f0e886,host=serverB,qos=0,region=ningbo temperature=\"2\" 1560745505429670000\n"
+    "sample,clientid=mqttjs_6990f0e886,host=serverA,qos=0,region=hangzhou temperature=\"1\" 1560745505429670000\nsample,clientid=mqttjs_6990f0e886,host=serverB,qos=0,region=ningbo temperature=\"2\" 1560745505429670000\n"
 
 Enable InfluxDB Backend
 -----------------------
@@ -2217,7 +2301,13 @@ Description of OpenTSDB Persistence Hooks
 
 Since MQTT Message cannot be written directly to OpenTSDB, OpenTSDB Backend provides an `emqx_backend_opentsdb.tmpl` template file to convert MQTT Message to DataPoint that can be written to OpenTSDB.
 
-tmpl files use Json format, and users can define different templates for different topics, like:
+Template file use Json format:
+
+- ``key`` - MQTT Topic, Json String, support wildcard characters
+
+- ``value`` - Template, Json Object, used to convert MQTT Message into ``measurement,tag_key=tag_value,... field_key=field_value,... timestamp`` and write to InfluxDB。
+
+You can define different templates for different topics or multiple templates for the same topic, likes:
 
 .. code-block:: bash
 
@@ -2231,18 +2321,58 @@ The template format is as follows:
 .. code-block:: bash
 
     {
-        "measurement": <Where is value of measurement>,
+        "measurement": <Measurement>,
         "tags": {
-            <Tag Key>: <Where is value of tag>
+            <Tag Key>: <Tag Value>
         },
-        "value": <Where is value of value>,
-        "timestamp": <Where is value of timestamp>
+        "value": <Value>,
+        "timestamp": <Timestamp>
     }
 
 
-``measurement`` and ``value`` are required options, ``tags`` and ``timestamp`` are optional. ``< Where is the value of * >`` supports placeholders that first letter is '$' ("$qos", "$from", "$topic", "$timestamp)" and Json Key List that head is "$payload". For example ``["$payload", "data", "temp"]`` will fetch 21.3 from the MQTT Message that payload is ``{"data": {"temp" : 21.3}}``.
+``measurement`` and ``value`` are required options, ``tags`` and ``timestamp`` are optional. 
 
-data/templates/emqx_backend_opentsdb.tmpl provides a sample to user for reference:
+All values (such as ``<Measurement>``) can be configured directly in the template as a fixed value that data types supported depending on the table you define. More realistically, of course, you can access the data in the MQTT message through the placeholder we provide.
+
+Currently, we support placeholders as follows:
+
++-----------------+-------------------------------------------------------------------------------------+
+| Placeholder     | Description                                                                         |
++=================+=====================================================================================+
+| $id             | MQTT Message UUID, assigned by EMQ X                                                |
++-----------------+-------------------------------------------------------------------------------------+
+| $clientid       | Client ID used by the Client                                                        |
++-----------------+-------------------------------------------------------------------------------------+
+| $username       | Username used by the Client                                                         |
++-----------------+-------------------------------------------------------------------------------------+
+| $peerhost       | IP of Client                                                                        |
++-----------------+-------------------------------------------------------------------------------------+
+| $qos            | QoS of MQTT Message                                                                 |
++-----------------+-------------------------------------------------------------------------------------+
+| $topic          | Topic of MQTT Message                                                               |
++-----------------+-------------------------------------------------------------------------------------+
+| $payload        | Payload of MQTT Message, must be valid Json data                                    |
++-----------------+-------------------------------------------------------------------------------------+
+| $<Number>       | It must be used with $paylaod to retrieve data from Json Array                      |
++-----------------+-------------------------------------------------------------------------------------+
+| $timestamp      | The timestamp EMQ X sets when preparing to forward messages, precision: Nanoseconds |
++-----------------+-------------------------------------------------------------------------------------+
+
+**$payload and $<Number>:**
+
+You can directly use ``$content`` to obtain the complete message payload, you can use ``["$payload", <Key>, ...]`` to get the data inside the message payload.
+
+For example ``payload`` is ``{"data": {"temperature": 23.9}}``, you can via ``["$payload", "data", "temperature"]`` to get ``23.9``.
+
+In the case of array data type in Json, we introduced ``$0`` and ``$<pos_integer>``, ``$0`` means to get all elements in the array, and ``$<pos_integer>`` means to get the <pos_integer>th element in the array.
+
+A simple example, ``["$payload", "$0", "temp"]`` will get ``[20, 21]`` from ``[{"temp": 20}, {"temp": 21}]``, and ``["$payload", "$1", "temp"]`` will only get ``20``.
+
+It is worth noting that when you use ``$0``, we expect the number of data you get is same. Because we need to convert these arrays into multiple records and write it into OpenTSDB, and when you have three pieces of data in one field and two in another, we won't know how to combine the data for you.
+
+**Example**
+
+data/templates directory provides a sample template (emqx_backend_opentsdb_example.tmpl, please remove the "_example" suffix from the filename when using it formally) for the user's reference:
 
 .. code-block:: bash
 
@@ -2253,7 +2383,7 @@ data/templates/emqx_backend_opentsdb.tmpl provides a sample to user for referenc
                 "host": ["$payload", "data", "$0", "host"],
                 "region": ["$payload", "data", "$0", "region"],
                 "qos": "$qos",
-                "from": "$from"
+                "clientid": "$clientid"
             },
             "value": ["$payload", "data", "$0", "temp"],
             "timestamp": "$timestamp"
@@ -2287,7 +2417,7 @@ Backend converts MQTT messages into the following data and writes it to OpenTSDB
         {
             "measurement": "sample",
             "tags": {
-                "from": "mqttjs_ebcc36079a",
+                "clientid": "mqttjs_ebcc36079a",
                 "host": "serverA",
                 "qos": "0",
                 "region": "hangzhou",
@@ -2298,7 +2428,7 @@ Backend converts MQTT messages into the following data and writes it to OpenTSDB
         {
             "measurement": "sample",
             "tags": {
-                "from": "mqttjs_ebcc36079a",
+                "clientid": "mqttjs_ebcc36079a",
                 "host": "serverB",
                 "qos": "0",
                 "region": "ningbo",
@@ -2390,6 +2520,14 @@ Description of Timescale Persistence Hooks
 
 Timescale Backend provides the template file named ``emqx_backend_timescale.tmpl``, which is used to extract data from MQTT messages with different topics for writing to Timescale.
 
+Template file use Json format:
+
+- ``key`` - MQTT Topic, Json String, support wildcard characters
+
+- ``value`` - Template, Json Object, used to convert MQTT Message into ``measurement,tag_key=tag_value,... field_key=field_value,... timestamp`` and write to InfluxDB。
+
+You can define different templates for different topics or multiple templates for the same topic, likes:
+
 .. code-block:: json
 
     {
@@ -2407,9 +2545,55 @@ The template format is as follows:
       	"param_keys": <Param Keys>
     }
 
-``name``, ``sql`` and ``param_keys`` are required options. ``name`` can be any string, just make sure there are no duplicates. ``sql`` is SQL INSERT INTO statement for Timescale, like ``insert into sensor_data(time, location, temperature, humidity) values (NOW(), $1, $2, $3)``. ``param_keys`` is a array, its first element corresponds to ``$1`` appearing in ``sql`` and so on, it mainly used to extract data from MQTT Mesage to replace placeholders in ``sql``.
+``name``, ``sql`` and ``param_keys`` are required options.
 
-emqx/data/templates/emqx_backend_timescale_example.tmpl provides a sample to user for reference:
+``name`` can be any string, just make sure there are no duplicates.
+
+``sql`` is SQL INSERT INTO statement for Timescale, like ``insert into sensor_data(time, location, temperature, humidity) values (NOW(), $1, $2, $3)``.
+
+``param_keys`` is a array, its first element corresponds to ``$1`` appearing in ``sql`` and so on.
+
+Any element in an array can be a fixed value, and the data type it supports depends on the table you define. More realistically, of course, you can access the data in the MQTT message through the placeholder we provide.
+
+Currently, we support placeholders as follows:
+
++-----------------+-------------------------------------------------------------------------------------+
+| Placeholder     | Description                                                                         |
++=================+=====================================================================================+
+| $id             | MQTT Message UUID, assigned by EMQ X                                                |
++-----------------+-------------------------------------------------------------------------------------+
+| $clientid       | Client ID used by the Client                                                        |
++-----------------+-------------------------------------------------------------------------------------+
+| $username       | Username used by the Client                                                         |
++-----------------+-------------------------------------------------------------------------------------+
+| $peerhost       | IP of Client                                                                        |
++-----------------+-------------------------------------------------------------------------------------+
+| $qos            | QoS of MQTT Message                                                                 |
++-----------------+-------------------------------------------------------------------------------------+
+| $topic          | Topic of MQTT Message                                                               |
++-----------------+-------------------------------------------------------------------------------------+
+| $payload        | Payload of MQTT Message, must be valid Json data                                    |
++-----------------+-------------------------------------------------------------------------------------+
+| $<Number>       | It must be used with $paylaod to retrieve data from Json Array                      |
++-----------------+-------------------------------------------------------------------------------------+
+| $timestamp      | The timestamp EMQ X sets when preparing to forward messages, precision: Nanoseconds |
++-----------------+-------------------------------------------------------------------------------------+
+
+**$payload and $<Number>:**
+
+You can directly use ``$content`` to obtain the complete message payload, you can use ``["$payload", <Key>, ...]`` to get the data inside the message payload.
+
+For example ``payload`` is ``{"data": {"temperature": 23.9}}``, you can via ``["$payload", "data", "temperature"]`` to get ``23.9``.
+
+In the case of array data type in Json, we introduced ``$0`` and ``$<pos_integer>``, ``$0`` means to get all elements in the array, and ``$<pos_integer>`` means to get the <pos_integer>th element in the array.
+
+A simple example, ``["$payload", "$0", "temp"]`` will get ``[20, 21]`` from ``[{"temp": 20}, {"temp": 21}]``, and ``["$payload", "$1", "temp"]`` will only get ``20``.
+
+It is worth noting that when you use ``$0``, we expect the number of data you get is same. Because we need to convert these arrays into multiple records and write it into Timescale, and when you have three pieces of data in one field and two in another, we won't know how to combine the data for you.
+
+**Example**
+
+data/templates directory provides a sample template (emqx_backend_timescale_example.tmpl, please remove the "_example" suffix from the filename when using it formally) for the user's reference:
 
 .. code-block:: json
 
@@ -2465,13 +2649,13 @@ When an MQTT Message whose Topic is "sensor_data" has the following Payload:
         ]
     }
 
-``["$payload", "data", "$0", "location"]`` will extract Payload from MQTT Message first. 
+``["$payload", "data", "$0", "location"]`` will extract Payload from MQTT Message first.
 
-If the format of Payload is json, backend continue to extract ``data`` from Payload. 
+If the format of Payload is json, backend continue to extract ``data`` from Payload.
 
-And the value of ``data`` is an array, we use ``$0`` to gets all elements in the array. 
+And the value of ``data`` is an array, we use ``$0`` to gets all elements in the array.
 
-``["$payload", "data", "$0", "location"]`` will help us get ``["bedroom", "bathroom", "kitchen"]`` finally. 
+``["$payload", "data", "$0", "location"]`` will help us get ``["bedroom", "bathroom", "kitchen"]`` finally.
 
 Accordingly if you replace ``$0`` with ``$1``, you get only ``["bedroom"]``.
 

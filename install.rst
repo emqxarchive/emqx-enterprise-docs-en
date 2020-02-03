@@ -71,13 +71,13 @@ Install via Repository
 
             $ yum list emqx --showduplicates | sort -r
 
-            emqx-ee.x86_64                    3.2.0-1.el7                     emqx-ee-stable
+            emqx-ee.x86_64                    4.0.0-1.el7                     emqx-ee-stable
 
     2.  Install a specific version based on the version string in the second column, such as 3.1.0
 
         .. code-block:: console
 
-            $ sudo yum install emqx-ee-3.2.0
+            $ sudo yum install emqx-ee-4.0.0
 
 6.  Import License file
 
@@ -96,7 +96,7 @@ Install via Repository
 
                 $ emqx_ctl status
                 Node 'emqx@127.0.0.1' is started
-                emqx 3.2.0 is running
+                emqx 4.0.0 is running
 
     +   systemctl start
 
@@ -109,6 +109,14 @@ Install via Repository
         .. code-block:: console
 
                 $ sudo service emqx start
+
+8.  Configuration file path
+
+    + Configuration file path: ``/etc/emqx``
+
+    + Log file path: ``/var/log/emqx``
+
+    + Data file path: ``/var/lib/emqx`
 
 Install via rpm
 >>>>>>>>>>>>>>>>
@@ -138,7 +146,7 @@ Install via rpm
 
                 $ emqx_ctl status
                 Node 'emqx@127.0.0.1' is started
-                emqx 3.2.0 is running
+                emqx 4.0.0 is running
 
     +   systemctl start
 
@@ -151,6 +159,14 @@ Install via rpm
         .. code-block:: console
 
                 $ sudo service emqx start
+
+5.  Configuration file path
+
+    + Configuration file path: ``/etc/emqx``
+
+    + Log file path: ``/var/log/emqx``
+
+    + Data file path: ``/var/lib/emqx`
 
 Install via zip Package
 >>>>>>>>>>>>>>>>>>>>>>>>
@@ -178,7 +194,7 @@ Install via zip Package
 
         $ ./bin/emqx_ctl status
         Node 'emqx@127.0.0.1' is started
-        emqx 3.2.0 is running
+        emqx 4.0.0 is running
 
 Ubuntu
 ------
@@ -256,21 +272,21 @@ Install via Repository
 
             $ sudo apt-cache madison emqx-ee
 
-            emqx-ee |      3.2.0 | https://repos.emqx.io/emqx-ee/deb/ubuntu bionic/stable amd64 Packages
+            emqx-ee |      4.0.0 | https://repos.emqx.io/emqx-ee/deb/ubuntu bionic/stable amd64 Packages
 
-    2.  Install a specific version using the version string from the second column, such as 3.2.0
+    2.  Install a specific version using the version string from the second column, such as 4.0.0
 
         .. code-block:: console
 
-            $ sudo apt install emqx-ee=3.2.0
+            $ sudo apt install emqx-ee=4.0.0
 
-7.  Import License file
+8.  Import License file
 
     .. code-block:: console
 
         $ cp /path/to/emqx.lic /etc/emqx/emqx.lic
 
-8.  Start EMQ X
+9.  Start EMQ X
 
     +   Directly start
 
@@ -281,7 +297,7 @@ Install via Repository
 
                 $ emqx_ctl status
                 Node 'emqx@127.0.0.1' is started
-                emqx 3.2.0 is running
+                emqx 4.0.0 is running
 
     +   systemctl start
 
@@ -294,6 +310,14 @@ Install via Repository
         .. code-block:: console
 
                 $ sudo service emqx start
+
+10.  Configuration file path
+
+    + Configuration file path: ``/etc/emqx``
+
+    + Log file path: ``/var/log/emqx``
+
+    + Data file path: ``/var/lib/emqx`
 
 Install via deb Package
 >>>>>>>>>>>>>>>>>>>>>>>>
@@ -323,7 +347,7 @@ Install via deb Package
 
                 $ emqx_ctl status
                 Node 'emqx@127.0.0.1' is started
-                emqx 3.2.0 is running
+                emqx 4.0.0 is running
 
     +   systemctl start
 
@@ -336,6 +360,14 @@ Install via deb Package
         .. code-block:: console
 
                 $ sudo service emqx start
+
+5.  Configuration file path
+
+    + Configuration file path: ``/etc/emqx``
+
+    + Log file path: ``/var/log/emqx``
+
+    + Data file path: ``/var/lib/emqx`
 
 Install via zip Package
 >>>>>>>>>>>>>>>>>>>>>>>>
@@ -363,7 +395,7 @@ Install via zip Package
 
         $ ./bin/emqx_ctl status
         Node 'emqx@127.0.0.1' is started
-        emqx 3.2.0 is running
+        emqx 4.0.0 is running
 
 Debian
 -------
@@ -416,13 +448,13 @@ Install via Repository
             $(lsb_release -cs) \
             stable"
 
-4.  Update apt package index
+5.  Update apt package index
 
     .. code-block:: console
 
         $ sudo apt update
 
-5.  Install the latest version of EMQ X
+6.  Install the latest version of EMQ X
 
     .. code-block:: console
 
@@ -430,7 +462,7 @@ Install via Repository
 
     .. NOTE:: In the case where multiple EMQ X repositories are enabled, and the apt install and apt update commands is not specified with a version number, the latest version of EMQ X is installed. This is a problem for users with stability needs.
 
-6.  Install a specific version of EMQ X
+7.  Install a specific version of EMQ X
 
     1.  Query available version
 
@@ -438,21 +470,21 @@ Install via Repository
 
             $ sudo apt-cache madison emqx
 
-            emqx-ee |      3.2.0 | https://repos.emqx.io/emqx-ee/deb/ubuntu bionic/stable amd64 Packages
+            emqx-ee |      4.0.0 | https://repos.emqx.io/emqx-ee/deb/ubuntu bionic/stable amd64 Packages
 
-    2.  Install a specific version using the version string from the second column, such as 3.2.0
+    2.  Install a specific version using the version string from the second column, such as 4.0.0
 
         .. code-block:: console
 
-            $ sudo apt install emqx-ee=3.2.0
+            $ sudo apt install emqx-ee=4.0.0
 
-7.  Import License file
+8.  Import License file
 
     .. code-block:: console
 
         $ cp /path/to/emqx.lic /etc/emqx/emqx.lic
 
-8.  Start EMQ X
+9.  Start EMQ X
 
     +   Directly start
 
@@ -463,7 +495,7 @@ Install via Repository
 
                 $ emqx_ctl status
                 Node 'emqx@127.0.0.1' is started
-                emqx 3.2.0 is running
+                emqx 4.0.0 is running
 
     +   systemctl start
 
@@ -476,6 +508,14 @@ Install via Repository
         .. code-block:: console
 
                 $ sudo service emqx start
+
+10.  Configuration file path
+
+    + Configuration file path: ``/etc/emqx``
+
+    + Log file path: ``/var/log/emqx``
+
+    + Data file path: ``/var/lib/emqx`
 
 Install via deb Package
 >>>>>>>>>>>>>>>>>>>>>>>>
@@ -505,7 +545,7 @@ Install via deb Package
 
                 $ emqx_ctl status
                 Node 'emqx@127.0.0.1' is started
-                emqx 3.2.0 is running
+                emqx 4.0.0 is running
 
     +   systemctl start
 
@@ -518,6 +558,14 @@ Install via deb Package
         .. code-block:: console
 
                 $ sudo service emqx start
+
+5.  Configuration file path
+
+    + Configuration file path: ``/etc/emqx``
+
+    + Log file path: ``/var/log/emqx``
+
+    + Data file path: ``/var/lib/emqx`
 
 Install via zip Package
 >>>>>>>>>>>>>>>>>>>>>>>>
@@ -545,7 +593,7 @@ Install via zip Package
 
         $ ./bin/emqx_ctl status
         Node 'emqx@127.0.0.1' is started
-        emqx 3.2.0 is running
+        emqx 4.0.0 is running
 
 macOS
 ------
@@ -576,7 +624,7 @@ Install via zip Package
 
         $ ./bin/emqx_ctl status
         Node 'emqx@127.0.0.1' is started
-        emqx 3.2.0 is running
+        emqx 4.0.0 is running
 
 
 
@@ -645,13 +693,13 @@ Install via Repository
             Reading installed packages...
             S | Repository | Name | Version  | Arch
             --+------------+------+----------+-------
-              | emqx-ee    | emqx-ee | 3.2.0-1 | x86_64
+              | emqx-ee    | emqx-ee | 4.0.0-1 | x86_64
 
     2.  Use Version column to install a specific version, such as 3.1.0
 
         .. code-block:: console
 
-            $ sudo zypper in emqx-ee-3.2.0
+            $ sudo zypper in emqx-ee-4.0.0
 
 6.  Import License file
 
@@ -670,7 +718,7 @@ Install via Repository
 
                 $ emqx_ctl status
                 Node 'emqx@127.0.0.1' is started
-                emqx 3.2.0 is running
+                emqx 4.0.0 is running
 
     +   systemctl start
 
@@ -683,6 +731,14 @@ Install via Repository
         .. code-block:: console
 
                 $ sudo service emqx start
+
+8.  Configuration file path
+
+    + Configuration file path: ``/etc/emqx``
+
+    + Log file path: ``/var/log/emqx``
+
+    + Data file path: ``/var/lib/emqx`
 
 Install via rpm Package
 >>>>>>>>>>>>>>>>>>>>>>>>
@@ -712,7 +768,7 @@ Install via rpm Package
 
                 $ emqx_ctl status
                 Node 'emqx@127.0.0.1' is started
-                emqx 3.2.0 is runnin
+                emqx 4.0.0 is runnin
 
     +   systemctl start
 
@@ -725,6 +781,14 @@ Install via rpm Package
         .. code-block:: console
 
                 $ sudo service emqx start
+
+5.  Configuration file path
+
+    + Configuration file path: ``/etc/emqx``
+
+    + Log file path: ``/var/log/emqx``
+
+    + Data file path: ``/var/lib/emqx`
 
 Install via zip Package
 >>>>>>>>>>>>>>>>>>>>>>>>
@@ -753,7 +817,7 @@ Install via zip Package
 
         $ ./bin/emqx_ctl status
         Node 'emqx@127.0.0.1' is started
-        emqx 3.2.0 is running
+        emqx 4.0.0 is running
 
 FreeBSD
 --------
@@ -786,7 +850,7 @@ Install via zip Package
 
         $ ./bin/emqx_ctl status
         Node 'emqx@127.0.0.1' is started
-        emqx 3.2.0 is running
+        emqx 4.0.0 is running
 
 Docker
 -------

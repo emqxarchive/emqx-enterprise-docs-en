@@ -4,78 +4,6 @@
 User Guide
 ^^^^^^^^^^^
 
-Suppose an EMQ X Cluster with two Linux nodes deployed on a cloud VPC network or a private network:
-
-+---------------------+---------------------+
-| Node name           |    IP               |
-+---------------------+---------------------+
-| emqx1@192.168.0.10  | 192.168.0.10        |
-+---------------------+---------------------+
-| emqx@192.168.0.20   | 192.168.0.20        |
-+---------------------+---------------------+
-
-System Parameters
------------------
-
-Deployed under Linux, EMQ X allows 100k concurrent connections by default. To achieve this, the system Kernel, Networking, the Erlang VM and EMQ X itself must be tuned.
-
-System-Wide File Handles
-------------------------
-
-Maximum file handles:
-
-.. code-block:: console
-
-    # 2 millions system-wide
-    sysctl -w fs.file-max=262144
-    sysctl -w fs.nr_open=262144
-    echo 262144 > /proc/sys/fs/nr_open
-
-Maximum file handles for current session:
-
-.. code-block:: console
-
-    ulimit -n 262144
-
-/etc/sysctl.conf
-----------------
-
-Add 'fs.file-max' to '/etc/sysctl.conf' and make the changes permanent:
-
-.. code-block:: console
-
-    fs.file-max = 262144
-
-/etc/security/limits.conf
--------------------------
-
-Persist the maximum number of opened file handles for users in /etc/security/limits.conf::
-
-    emqx      soft   nofile      262144
-    emqx      hard   nofile      262144
-
-Note: Under Ubuntu, '/etc/systemd/system.conf' is to be modified:
-
-.. code-block:: properties
-
-    DefaultLimitNOFILE=262144
-
-
-EMQ X Node Name
----------------
-
-Set the node name and cookies(required by communication between nodes)
-
-'/etc/emqx/emqx.conf' on emqx1::
-
-    node.name   = emqx1@192.168.0.10
-    node.cookie = secret_dist_cookie
-
-'/etc/emqx/emqx.conf' on emqx2::
-
-    node.name   = emqx2@192.168.0.20
-    node.cookie = secret_dist_cookie
-
 .. _start:
 
 Start EMQ X Broker
@@ -95,30 +23,6 @@ After downloading the package, it can be installed or unzipped directly to start
     # Check running status
     ./bin/emqx_ctl status
 
-Clustering the EMQ X Nodes
---------------------------
-
-Start the two nodes, then on the emqx1@192.168.0.10 run::
-
-    $ ./bin/emqx_ctl cluster join emqx2@192.168.0.20
-
-    Join the cluster successfully.
-    Cluster status: [{running_nodes,['emqx1@192.168.0.10','emqx@192.168.0.20']}]
-
-or, on the emqx1@192.168.0.20 run::
-
-    $ ./bin/emqx_ctl cluster join emqx1@192.168.0.10
-
-    Join the cluster successfully.
-    Cluster status: [{running_nodes,['emqx1@192.168.0.10','emqx@192.168.0.20']}]
-
-Check the cluster status on any node::
-
-    $ ./bin/emqx_ctl cluster status
-
-    Cluster status: [{running_nodes,['emqx1@192.168.0.10','emqx@192.168.0.20']}]
-
-
 The default TCP ports used by the EMQ X message server include:
 
 +-----------+-----------------------------------+
@@ -128,7 +32,7 @@ The default TCP ports used by the EMQ X message server include:
 +-----------+-----------------------------------+
 | 8083      | MQTT/WebSocket port               |
 +-----------+-----------------------------------+
-| 8080      | HTTP API port                     |
+| 8081      | HTTP API port                     |
 +-----------+-----------------------------------+
 | 18083     | Dashboard Management Console Port |
 +-----------+-----------------------------------+
@@ -138,7 +42,7 @@ The default TCP ports used by the EMQ X message server include:
 MQTT publish and subscription
 ------------------------------
 
-EMQ X Broker is a lightweight publish-subscribe message broker designed for the mobile Internet and the IoT, it currently supports MQTT v3.1.1 <http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/mqtt-v3.1.1.html>`_ and `v5.0 <http://docs.oasis-open.org/mqtt/mqtt/v5.0/mqtt-v5.0.html>`_:
+EMQ X Broker is a lightweight publish-subscribe message broker designed for the mobile Internet and the IoT, it currently supports MQTT `v3.1.1 <http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/mqtt-v3.1.1.html>`_ and `v5.0 <http://docs.oasis-open.org/mqtt/mqtt/v5.0/mqtt-v5.0.html>`_:
 
 .. image:: ./_static/images/guide_1.png
 
@@ -254,8 +158,7 @@ The authentication plugins provided by EMQ X include:
 | `emqx_auth_mongo`_         | MongoDB authentication plugin                 |
 +----------------------------+-----------------------------------------------+
 
-For the configuration and usage of each authentication plug-in, please refer to authentication section of the :ref:`plugins`.
-
+For the configuration and usage of each authentication plug-in, please refer to authentication section of the `Plugins <https://docs.emqx.io/broker/v4/en/plugins.html>`_.
 
 .. note:: Multiple auth plug-ins can be started at the same time. The plug-in that starts first checks first.
 
@@ -391,8 +294,8 @@ EMQ X MQTT bridging principle: Create an MQTT client on the EMQ X broker, and co
     ## Enumeration value: mqttv3 | mqttv4 | mqttv5
     bridge.mqtt.aws.proto_ver = mqttv4
 
-    ## mqtt client's client_id
-    bridge.mqtt.aws.client_id = bridge_emq
+    ## mqtt client's clientid
+    bridge.mqtt.aws.clientid = bridge_emq
 
     ## mqtt client's clean_start field
     ## Note: Some MQTT Brokers need to set the clean_start value as `true`
@@ -572,21 +475,21 @@ HTTP Publish API
 
 The EMQ X message server provides an HTTP publish interface through which an application server or web server can publish MQTT messages::
 
-    HTTP POST http://host:8080/api/v3/mqtt/publish
+    HTTP POST http://host:8080/api/v4/mqtt/publish
 
 Web servers such as PHP/Java/Python/NodeJS or Ruby on Rails can publish MQTT messages via HTTP POST requests:
 
 .. code:: bash
 
     curl -v --basic -u user:passwd -H "Content-Type: application/json" -d \
-    '{"qos":1, "retain": false, "topic":"world", "payload":"test" , "client_id": "C_1492145414740"}' \-k http://localhost:8080/api/v3/mqtt/publish
+    '{"qos":1, "retain": false, "topic":"world", "payload":"test" , "clientid": "C_1492145414740"}' \-k http://localhost:8080/api/v4/mqtt/publish
 
 HTTP interface parameters:
 
 +----------+----------------------+
 | parameter| description          |
 +==========+======================+
-| client_id| MQTT client ID       |
+| clientid | MQTT client ID       |
 +----------+----------------------+
 | qos      | QoS: 0 | 1 | 2       |
 +----------+----------------------+
@@ -731,10 +634,6 @@ Session statistics
 +-----------------------------+---------------------------------------------+
 | sessions/max                | maximum number of sessions                  |
 +-----------------------------+---------------------------------------------+
-| sessions/persistent/count   | Total number of persistent sessions         |
-+-----------------------------+---------------------------------------------+
-| sessions/persistent/max     | maximum number of persistent sessions       |
-+-----------------------------+---------------------------------------------+
 
 Subscription statistics
 ::::::::::::::::::::::::
@@ -809,91 +708,115 @@ sent and received MQTT packets statistics
 +-----------------------------+---------------------------------------------------+
 | packets/sent                | Accumulative sent MQTT packets                    |
 +-----------------------------+---------------------------------------------------+
-| packets/connect             | Accumulative received packets of MQTT CONNECT     |
+| packets/connect/received    | Accumulative received packets of CONNECT          |
 +-----------------------------+---------------------------------------------------+
-| packets/connack             | Accumulative sent packets of MQTT CONNACK         |
+| packets/connack/sent        | Accumulative sent packets of CONNACK              |
 +-----------------------------+---------------------------------------------------+
-| packets/publish/received    | Accumulative received packets of MQTT PUBLISH     |
+| packets/publish/received    | Accumulative received packets of PUBLISH          |
 +-----------------------------+---------------------------------------------------+
-| packets/publish/sent        | Accumulative sent packets of MQTT PUBLISH         |
+| packets/publish/sent        | Accumulative sent packets of PUBLISH              |
 +-----------------------------+---------------------------------------------------+
-| packets/puback/received     | Accumulative received packets of MQTT PUBACK      |
+| packets/publish/error       | Accumulative handling packets of PUBLISH error    |
 +-----------------------------+---------------------------------------------------+
-| packets/puback/sent         | Accumulative sent packets of MQTT PUBACK          |
+| packets/publish/auth_error  | Accumulative denied packets of PUBLISH            |
 +-----------------------------+---------------------------------------------------+
-| packets/puback/missed       | Accumulative missed packets of MQTT PUBACK        |
+| packets/publish/dropped     | Accumulative dropped packets of PUBLISH           |
 +-----------------------------+---------------------------------------------------+
-| packets/pubrec/received     | Accumulative received packets of MQTT PUBREC      |
+| packets/puback/received     | Accumulative received packets of PUBACK           |
 +-----------------------------+---------------------------------------------------+
-| packets/pubrec/sent         | Accumulative sent packets of MQTT PUBREC          |
+| packets/puback/sent         | Accumulative sent packets of PUBACK               |
 +-----------------------------+---------------------------------------------------+
-| packets/pubrec/missed       | Accumulative missed packets of MQTT PUBREC        |
+| packets/puback/inuse        | Accumulative dropped packets of PUBACK            |
 +-----------------------------+---------------------------------------------------+
-| packets/pubrel/received     | Accumulative received packets of MQTT PUBREL      |
+| packets/puback/missed       | Accumulative missed packets of PUBACK             |
 +-----------------------------+---------------------------------------------------+
-| packets/pubrel/sent         | Accumulative sent packets of MQTT PUBREL          |
+| packets/pubrec/received     | Accumulative received packets of PUBREC           |
 +-----------------------------+---------------------------------------------------+
-| packets/pubrel/missed       | Accumulative missed packets of MQTT PUBREL        |
+| packets/pubrec/sent         | Accumulative sent packets of PUBREC               |
 +-----------------------------+---------------------------------------------------+
-| packets/pubcomp/received    | Accumulative received packets of MQTT PUBCOMP     |
+| packets/pubrec/inuse        | Accumulative dropped packets of PUBREC            |
 +-----------------------------+---------------------------------------------------+
-| packets/pubcomp/sent        | Accumulative sent packets of MQTT PUBCOMP         |
+| packets/pubrec/missed       | Accumulative missed packets of PUBREC             |
 +-----------------------------+---------------------------------------------------+
-| packets/pubcomp/missed      | Accumulative missed packets of MQTT PUBCOMP       |
+| packets/pubrel/received     | Accumulative received packets of PUBREL           |
 +-----------------------------+---------------------------------------------------+
-| packets/subscribe           | Accumulative received packets of MQTT SUBSCRIBE   |
+| packets/pubrel/sent         | Accumulative sent packets of PUBREL               |
 +-----------------------------+---------------------------------------------------+
-| packets/suback              | Accumulative sent packets of MQTT SUBACK          |
+| packets/pubrel/missed       | Accumulative missed packets of PUBREL             |
 +-----------------------------+---------------------------------------------------+
-| packets/unsubscribe         | Accumulative received packets of MQTT UNSUBSCRIBE |
+| packets/pubcomp/received    | Accumulative received packets of PUBCOMP          |
 +-----------------------------+---------------------------------------------------+
-| packets/unsuback            | Accumulative sent packets of  MQTT UNSUBACK       |
+| packets/pubcomp/sent        | Accumulative sent packets of PUBCOMP              |
 +-----------------------------+---------------------------------------------------+
-| packets/pingreq             | Accumulative received packets of MQTT PINGREQ     |
+| packets/pubcomp/inuse       | Accumulative dropped packets of PUBCOMP           |
 +-----------------------------+---------------------------------------------------+
-| packets/pingresp            | Accumulative sent packets of MQTT PINGRESP        |
+| packets/pubcomp/missed      | Accumulative missed packets of PUBCOMP            |
 +-----------------------------+---------------------------------------------------+
-| packets/disconnect/received | Accumulative received packets of MQTT DISCONNECT  |
+| packets/subscribe/received  | Accumulative received packets of SUBSCRIBE        |
 +-----------------------------+---------------------------------------------------+
-| packets/disconnect/sent     | Accumulative sent packets of MQTT MQTT DISCONNECT |
+| packets/subscribe/error     | Accumulative handling packets of SUBSCRIBE error  |
 +-----------------------------+---------------------------------------------------+
-| packets/auth                | Accumulative received packets of MQTT Auth        |
+| packets/subscribe/auth_error| Accumulative denied packets of SUBSCRIBE          |
++-----------------------------+---------------------------------------------------+
+| packets/suback/sent         | Accumulative sent packets of SUBACK               |
++-----------------------------+---------------------------------------------------+
+| packets/unsubscribe/received| Accumulative received packets of UNSUBSCRIBE      |
++-----------------------------+---------------------------------------------------+
+| packets/unsuback/sent       | Accumulative sent packets of UNSUBACK             |
++-----------------------------+---------------------------------------------------+
+| packets/pingreq/received    | Accumulative received packets of PINGREQ          |
++-----------------------------+---------------------------------------------------+
+| packets/pingresp/sent       | Accumulative sent packets of PINGRESP             |
++-----------------------------+---------------------------------------------------+
+| packets/disconnect/received | Accumulative received packets of DISCONNECT       |
++-----------------------------+---------------------------------------------------+
+| packets/disconnect/sent     | Accumulative sent packets of DISCONNECT           |
++-----------------------------+---------------------------------------------------+
+| packets/auth/received       | Accumulative received packets of AUTH             |
++-----------------------------+---------------------------------------------------+
+| packets/auth/sent           | Accumulative sent packets of AUTH                 |
 +-----------------------------+---------------------------------------------------+
 
 MQTT sent and received messages statistics
 :::::::::::::::::::::::::::::::::::::::::::
 
-+--------------------------+------------------------------------------------+
-| Topic                    | Description                                    |
-+--------------------------+------------------------------------------------+
-| messages/received        | Accumulative received messages                 |
-+--------------------------+------------------------------------------------+
-| messages/sent            | Accumulative sent messages                     |
-+--------------------------+------------------------------------------------+
-| messages/expired         | Accumulative expired   messages                |
-+--------------------------+------------------------------------------------+
-| messages/retained        | Accumulative retained  messages                |
-+--------------------------+------------------------------------------------+
-| messages/dropped         | Total number of dropped messages               |
-+--------------------------+------------------------------------------------+
-| messages/forward         | Total number of messages forwarded by the node |
-+--------------------------+------------------------------------------------+
-| messages/qos0/received   | Accumulative received messages of QoS0         |
-+--------------------------+------------------------------------------------+
-| messages/qos0/sent       | Accumulative sent messages of QoS0             |
-+--------------------------+------------------------------------------------+
-| messages/qos1/received   | Accumulative received messages QoS1            |
-+--------------------------+------------------------------------------------+
-| messages/qos1/sent       | Accumulative sent   messages QoS1              |
-+--------------------------+------------------------------------------------+
-| messages/qos2/received   |  Accumulative received messages of QoS2        |
-+--------------------------+------------------------------------------------+
-| messages/qos2/sent       | Accumulative sent messages of QoS2             |
-+--------------------------+------------------------------------------------+
-| messages/qos2/expired    | Total number of expired messages  of QoS2      |
-+--------------------------+------------------------------------------------+
-| messages/qos2/dropped    | Total number of dropped messages  of QoS2      |
-+--------------------------+------------------------------------------------+
++---------------------------------+--------------------------------------------------+
+| Topic                           | Description                                      |
++---------------------------------+--------------------------------------------------+
+| messages/received               | Accumulative received messages                   |
++---------------------------------+--------------------------------------------------+
+| messages/sent                   | Accumulative sent messages                       |
++---------------------------------+--------------------------------------------------+
+| messages/qos0/received          | Accumulative received messages of QoS0           |
++---------------------------------+--------------------------------------------------+
+| messages/qos0/sent              | Accumulative sent messages of QoS0               |
++---------------------------------+--------------------------------------------------+
+| messages/qos1/received          | Accumulative received messages QoS1              |
++---------------------------------+--------------------------------------------------+
+| messages/qos1/sent              | Accumulative sent   messages QoS1                |
++---------------------------------+--------------------------------------------------+
+| messages/qos2/received          |  Accumulative received messages of QoS2          |
++---------------------------------+--------------------------------------------------+
+| messages/qos2/sent              | Accumulative sent messages of QoS2               |
++---------------------------------+--------------------------------------------------+
+| messages/publish                | Accumulative PUBLISH messages                    |
++---------------------------------+--------------------------------------------------+
+| messages/dropped                | Total number of dropped messages                 |
++---------------------------------+--------------------------------------------------+
+| messages/dropped/expired        | Total number of dropped messages (Expired)       |
++---------------------------------+--------------------------------------------------+
+| messages/dropped/no_subscribers | Total number of dropped messages (No subscriber) |
++---------------------------------+--------------------------------------------------+
+| messages/forward                | Total number of messages forwarded by the node   |
++---------------------------------+--------------------------------------------------+
+| messages/retained               | Accumulative retained messages                   |
++---------------------------------+--------------------------------------------------+
+| messages/delayed                | Accumulative delayed messages                    |
++---------------------------------+--------------------------------------------------+
+| messages/delivered              | Accumulative delivered messages                  |
++---------------------------------+--------------------------------------------------+
+| messages/acked                  | Accumulative acked messages                      |
++---------------------------------+--------------------------------------------------+
 
 .. _sys_alarms:
 
