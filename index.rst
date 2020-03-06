@@ -15,6 +15,7 @@ EMQ X Enterprise Documentation
    install
    guide
    config
+   dashboard
    rule_engine
    rule_tutorial
    auth
